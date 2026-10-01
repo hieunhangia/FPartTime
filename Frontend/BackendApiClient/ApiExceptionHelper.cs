@@ -6,9 +6,9 @@ public static class ApiExceptionHelper
 {
     public static string ToFriendlyErrorMessage(this ApiException ex)
     {
-        if (!string.IsNullOrWhiteSpace(ex.Message))
+        if (ex is ApiSdk.Models.ProblemDetails { Detail: not null } problem)
         {
-            return ex.Message;
+            return problem.Detail;
         }
 
         return ex.ResponseStatusCode switch

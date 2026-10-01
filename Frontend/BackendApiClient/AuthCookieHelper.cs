@@ -17,7 +17,7 @@ public static class AuthCookieHelper
             Secure = true,
             SameSite = SameSiteMode.Strict,
             Path = "/",
-            Expires = JwtHelper.GetExpiry(tokenResponse.AccessToken)
+            Expires = DateTimeOffset.UtcNow.AddDays(400)
         });
         response.Cookies.Append(RefreshTokenCookieName, tokenResponse.RefreshToken, new CookieOptions
         {
@@ -25,7 +25,7 @@ public static class AuthCookieHelper
             Secure = true,
             SameSite = SameSiteMode.Strict,
             Path = "/",
-            Expires = JwtHelper.GetExpiry(tokenResponse.RefreshToken)
+            Expires = DateTimeOffset.UtcNow.AddDays(400)
         });
     }
 

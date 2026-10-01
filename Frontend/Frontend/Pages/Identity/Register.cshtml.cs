@@ -53,8 +53,7 @@ public class RegisterModel(ApiClient apiClient) : PageModel
     {
         if (string.IsNullOrWhiteSpace(RegisterForm.PhoneNumber))
         {
-            ErrorMessage = "Số điện thoại không hợp lệ.";
-            return Page();
+            return new JsonResult(new { success = false, message = "Số điện thoại không hợp lệ." });
         }
 
         try
@@ -64,18 +63,15 @@ public class RegisterModel(ApiClient apiClient) : PageModel
                 PhoneNumber = RegisterForm.PhoneNumber
             });
 
-            SuccessMessage = "Đã gửi mã OTP đến số điện thoại của bạn.";
-            return Page();
+            return new JsonResult(new { success = true, message = "Đã gửi mã OTP đến số điện thoại của bạn." });
         }
         catch (ApiException ex)
         {
-            ErrorMessage = ex.ToFriendlyErrorMessage();
-            return Page();
+            return new JsonResult(new { success = false, message = ex.ToFriendlyErrorMessage() });
         }
         catch
         {
-            ErrorMessage = "Đã xảy ra lỗi khi gửi mã OTP.";
-            return Page();
+            return new JsonResult(new { success = false, message = "Đã xảy ra lỗi khi gửi mã OTP." });
         }
     }
 

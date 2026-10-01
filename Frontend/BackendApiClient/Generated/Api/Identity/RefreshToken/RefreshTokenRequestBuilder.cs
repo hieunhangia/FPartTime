@@ -37,6 +37,9 @@ namespace ApiSdk.Api.Identity.RefreshToken
         /// <param name="body">The request body</param>
         /// <param name="cancellationToken">Cancellation token to use when cancelling requests</param>
         /// <param name="requestConfiguration">Configuration for the request such as headers, query parameters, and middleware options.</param>
+        /// <exception cref="global::ApiSdk.Models.ProblemDetails">When receiving a 400 status code</exception>
+        /// <exception cref="global::ApiSdk.Models.ProblemDetails">When receiving a 401 status code</exception>
+        /// <exception cref="global::ApiSdk.Models.ProblemDetails">When receiving a 500 status code</exception>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
         public async Task<global::ApiSdk.Models.TokenResponseDto?> PostAsync(global::ApiSdk.Models.RefreshTokenRequestDto body, Action<RequestConfiguration<DefaultQueryParameters>>? requestConfiguration = default, CancellationToken cancellationToken = default)
@@ -48,7 +51,13 @@ namespace ApiSdk.Api.Identity.RefreshToken
 #endif
             if(ReferenceEquals(body, null)) throw new ArgumentNullException(nameof(body));
             var requestInfo = ToPostRequestInformation(body, requestConfiguration);
-            return await RequestAdapter.SendAsync<global::ApiSdk.Models.TokenResponseDto>(requestInfo, global::ApiSdk.Models.TokenResponseDto.CreateFromDiscriminatorValue, default, cancellationToken).ConfigureAwait(false);
+            var errorMapping = new Dictionary<string, ParsableFactory<IParsable>>
+            {
+                { "400", global::ApiSdk.Models.ProblemDetails.CreateFromDiscriminatorValue },
+                { "401", global::ApiSdk.Models.ProblemDetails.CreateFromDiscriminatorValue },
+                { "500", global::ApiSdk.Models.ProblemDetails.CreateFromDiscriminatorValue },
+            };
+            return await RequestAdapter.SendAsync<global::ApiSdk.Models.TokenResponseDto>(requestInfo, global::ApiSdk.Models.TokenResponseDto.CreateFromDiscriminatorValue, errorMapping, cancellationToken).ConfigureAwait(false);
         }
         /// <returns>A <see cref="RequestInformation"/></returns>
         /// <param name="body">The request body</param>

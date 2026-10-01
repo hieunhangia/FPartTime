@@ -6,7 +6,7 @@
 
 <div class="auth-container">
     <h2 class="auth-title">Đăng ký tài khoản</h2>
-    <hr class="auth-divider" />
+    <hr class="auth-divider"/>
 
     @if (!string.IsNullOrEmpty(Model.ErrorMessage))
     {
@@ -14,6 +14,7 @@
             @Model.ErrorMessage
         </div>
     }
+    <div id="ajaxAlertContainer"></div>
 
     @if (!string.IsNullOrEmpty(Model.SuccessMessage))
     {
@@ -23,7 +24,7 @@
     }
 
     <form method="post">
-        <input type="hidden" asp-for="@Model.RegisterForm.PhoneNumber" />
+        <input type="hidden" asp-for="@Model.RegisterForm.PhoneNumber"/>
         <div asp-validation-summary="ModelOnly" class="auth-validation-summary"></div>
 
         <p class="phone-display-row">
@@ -33,16 +34,17 @@
 
         <div class="form-group">
             <label asp-for="@Model.RegisterForm.Password" class="form-label"></label>
-            <input asp-for="@Model.RegisterForm.Password" class="form-input" autofocus />
+            <input asp-for="@Model.RegisterForm.Password" class="form-input" autofocus/>
             <span asp-validation-for="@Model.RegisterForm.Password" class="form-text-error"></span>
-            <small class="form-help-text">(Tối thiểu 6 ký tự, gồm ít nhất 1 chữ hoa, 1 chữ thường, 1 số và 1 ký tự đặc biệt)</small>
+            <small class="form-help-text">(Tối thiểu 6 ký tự, gồm ít nhất 1 chữ hoa, 1 chữ thường, 1 số và 1 ký tự đặc
+                biệt)</small>
         </div>
 
         <div class="form-group">
             <label asp-for="@Model.RegisterForm.Otp" class="form-label"></label>
             <div class="otp-group">
-                <input asp-for="@Model.RegisterForm.Otp" maxlength="6" class="otp-input" placeholder="6 chữ số" />
-                <button type="submit" asp-page-handler="SendOtp" formnovalidate class="btn-otp">Gửi OTP</button>
+                <input asp-for="@Model.RegisterForm.Otp" maxlength="6" class="otp-input" placeholder="6 chữ số"/>
+                <button type="button" id="btnSendOtp" class="btn-otp">Gửi OTP</button>
             </div>
             <span asp-validation-for="@Model.RegisterForm.Otp" class="form-text-error"></span>
         </div>
@@ -52,5 +54,53 @@
 </div>
 
 @section Scripts {
-    <partial name="_ValidationScriptsPartial" />
+    <partial name="_ValidationScriptsPartial"/>
+    <script>
+        document.getElementById('btnSendOtp').addEventListener('click', async function () {
+            const btn = this;
+            const form = btn.closest('form');
+            const formData = new FormData(form);
+            const alertContainer = document.getElementById('ajaxAlertContainer');
+            
+            // Clear existing alerts (both server and JS ones)
+            const serverErrorAlert = document.querySelector('.auth-alert-error:not(#ajaxAlertContainer)');
+            const serverSuccessAlert = document.querySelector('.auth-alert-success:not(#ajaxAlertContainer)');
+            if (serverErrorAlert) serverErrorAlert.style.display = 'none';
+            if (serverSuccessAlert) serverSuccessAlert.style.display = 'none';
+            alertContainer.innerHTML = '';
+            alertContainer.className = '';
+
+            btn.disabled = true;
+            const originalText = btn.innerText;
+            btn.innerText = 'Đang gửi...';
+
+            try {
+                const response = await fetch('?handler=SendOtp', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                let result;
+                try {
+                    result = await response.json();
+                } catch(e) {
+                    throw new Error('Invalid response from server');
+                }
+
+                if (result.success) {
+                    alertContainer.className = 'auth-alert-success';
+                } else {
+                    alertContainer.className = 'auth-alert-error';
+                }
+                alertContainer.innerText = result.message;
+
+            } catch (error) {
+                alertContainer.className = 'auth-alert-error';
+                alertContainer.innerText = 'Đã xảy ra lỗi kết nối. Vui lòng thử lại sau.';
+            } finally {
+                btn.disabled = false;
+                btn.innerText = originalText;
+            }
+        });
+    </script>
 }
