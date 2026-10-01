@@ -101,7 +101,7 @@ public class RegisterModel(ApiClient apiClient) : PageModel
 
                 if (loginResponse?.AccessToken is not null && loginResponse.RefreshToken is not null)
                 {
-                    AuthCookieHelper.SetAuthCookies(Response, loginResponse);
+                    await HttpContext.SignInWithApiTokenAsync(loginResponse.AccessToken, loginResponse.RefreshToken);
                     return Redirect("/");
                 }
             }

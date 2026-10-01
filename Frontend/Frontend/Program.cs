@@ -1,7 +1,10 @@
 using ApiSdk;
 using BackendApiClient;
 using Frontend.Filters;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.Kiota.Abstractions.Authentication;
 using Microsoft.Kiota.Http.HttpClientLibrary;
 
@@ -15,6 +18,63 @@ builder.Services.AddRazorPages(options =>
 });
 
 builder.Services.AddHttpContextAccessor();
+
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie(options =>
+    {
+        options.Cookie.HttpOnly = true;
+        options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+        options.Cookie.SameSite = SameSiteMode.Lax;
+        options.LoginPath = "/Identity/LoginOrRegister";
+        options.AccessDeniedPath = "/";
+
+        options.Events = new CookieAuthenticationEvents
+        {
+            OnValidatePrincipal = async context =>
+            {
+                var accessToken = context.Properties.GetTokenValue(HttpContextApiAuthExtensions.AccessTokenName);
+                if (string.IsNullOrEmpty(accessToken))
+                {
+                    context.RejectPrincipal();
+                    return;
+                }
+
+                if (new JsonWebTokenHandler().ReadJsonWebToken(accessToken).ValidTo < DateTime.UtcNow)
+                {
+                    var refreshToken = context.Properties.GetTokenValue(HttpContextApiAuthExtensions.RefreshTokenName);
+                    if (string.IsNullOrEmpty(refreshToken))
+                    {
+                        context.RejectPrincipal();
+                        return;
+                    }
+
+                    try
+                    {
+                        var tokenResponse = await context.HttpContext.RequestServices
+                            .GetRequiredService<RefreshTokenApiClient>().RefreshTokenAsync(refreshToken);
+                        if (tokenResponse is { AccessToken: not null, RefreshToken: not null })
+                        {
+                            context.Properties.UpdateTokenValue(HttpContextApiAuthExtensions.AccessTokenName,
+                                tokenResponse.AccessToken);
+                            context.Properties.UpdateTokenValue(HttpContextApiAuthExtensions.RefreshTokenName,
+                                tokenResponse.RefreshToken);
+                            context.ShouldRenew = true;
+                        }
+                        else
+                        {
+                            context.RejectPrincipal();
+                        }
+                    }
+                    catch
+                    {
+                        context.RejectPrincipal();
+                    }
+                }
+            }
+        };
+    });
+
+builder.Services.AddAuthorization();
 
 builder.Services.AddHttpClient(RefreshTokenApiClient.HttpClientName);
 builder.Services.AddTransient<RefreshTokenApiClient>();
@@ -50,7 +110,11 @@ if (!app.Environment.IsDevelopment())
 
 app.UseRouting();
 
+app.UseAuthentication();
+app.UseAuthorization();
+
 app.MapStaticAssets();
 app.MapRazorPages().WithStaticAssets();
+app.MapControllers();
 
 app.Run();

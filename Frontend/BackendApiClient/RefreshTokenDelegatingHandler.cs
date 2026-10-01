@@ -2,11 +2,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using System.Net;
 using System.Net.Http.Headers;
-using ApiSdk;
 using ApiSdk.Models;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Kiota.Abstractions.Authentication;
-using Microsoft.Kiota.Http.HttpClientLibrary;
 
 namespace BackendApiClient;
 
@@ -28,7 +24,7 @@ public class RefreshTokenDelegatingHandler(
             return response;
         }
 
-        var refreshToken = AuthCookieHelper.GetRefreshToken(httpContext.Request);
+        var refreshToken = await httpContext.GetRefreshTokenAsync();
         if (response.StatusCode != HttpStatusCode.Unauthorized ||
             request.Options.TryGetValue(IsRefreshRequestKey, out var isRefresh) && isRefresh ||
             string.IsNullOrWhiteSpace(refreshToken))
@@ -48,11 +44,11 @@ public class RefreshTokenDelegatingHandler(
 
         if (tokenResponse?.AccessToken is null || tokenResponse.RefreshToken is null)
         {
-            AuthCookieHelper.ClearAuthCookies(httpContext.Response);
+            await httpContext.SignOutApiTokenAsync();
             return response;
         }
 
-        AuthCookieHelper.SetAuthCookies(httpContext.Response, tokenResponse);
+        await httpContext.SignInWithApiTokenAsync(tokenResponse.AccessToken, tokenResponse.RefreshToken);
         response.Dispose();
         var retryRequest = await CloneHttpRequestMessageAsync(request);
         retryRequest.Headers.Authorization = new AuthenticationHeaderValue("Bearer", tokenResponse.AccessToken);
@@ -84,20 +80,5 @@ public class RefreshTokenDelegatingHandler(
         clone.Options.Set(IsRefreshRequestKey, true);
         clone.Version = original.Version;
         return clone;
-    }
-}
-
-public class RefreshTokenApiClient(IHttpClientFactory httpClientFactory, IConfiguration configuration)
-{
-    public const string HttpClientName = "RefreshTokenApiClient";
-
-    public async Task<TokenResponseDto?> RefreshTokenAsync(string refreshToken,
-        CancellationToken cancellationToken = default)
-    {
-        using var adapter = new HttpClientRequestAdapter(new AnonymousAuthenticationProvider(),
-            httpClient: httpClientFactory.CreateClient(HttpClientName));
-        adapter.BaseUrl = configuration["BackendApi:BaseUrl"]!.TrimEnd('/');
-        return await new ApiClient(adapter).Api.Identity.RefreshToken.PostAsync(
-            new RefreshTokenRequestDto { RefreshToken = refreshToken }, cancellationToken: cancellationToken);
     }
 }

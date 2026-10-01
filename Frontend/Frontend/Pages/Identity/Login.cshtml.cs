@@ -68,7 +68,7 @@ public class LoginModel(ApiClient apiClient) : PageModel
                 return Page();
             }
 
-            AuthCookieHelper.SetAuthCookies(Response, tokenResponse);
+            await HttpContext.SignInWithApiTokenAsync(tokenResponse.AccessToken, tokenResponse.RefreshToken);
             return Redirect("/");
         }
         catch (ApiException ex)

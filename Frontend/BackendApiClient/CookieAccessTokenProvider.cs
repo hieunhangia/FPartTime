@@ -11,18 +11,16 @@ public class CookieAccessTokenProvider(IHttpContextAccessor httpContextAccessor,
         new(configuration["BackendApi:AccessTokenAllowedHosts"]!.Split(',',
             StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries));
 
-    public Task<string> GetAuthorizationTokenAsync(Uri uri,
+    public async Task<string> GetAuthorizationTokenAsync(Uri uri,
         Dictionary<string, object>? additionalAuthenticationContext = null,
         CancellationToken cancellationToken = default)
     {
         if (!AllowedHostsValidator.IsUrlHostValid(uri))
         {
-            return Task.FromResult(string.Empty);
+            return string.Empty;
         }
 
-        var httpContext = httpContextAccessor.HttpContext;
-        if (httpContext == null) return Task.FromResult(string.Empty);
-        var accessToken = AuthCookieHelper.GetAccessToken(httpContext.Request);
-        return Task.FromResult(string.IsNullOrEmpty(accessToken) ? string.Empty : accessToken);
+        var accessToken = await httpContextAccessor.HttpContext.GetAccessTokenAsync();
+        return string.IsNullOrEmpty(accessToken) ? string.Empty : accessToken;
     }
 }
