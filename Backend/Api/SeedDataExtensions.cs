@@ -22,57 +22,49 @@ public static class SeedDataExtensions
             await roleManager.CreateAsync(new IdentityRole(roleName));
         }
 
-        var defaultAdmin = new User { UserName = "admin" };
+        var defaultAdmin = new User { UserName = "0000000000" };
         await userManager.CreateAsync(defaultAdmin, "Admin@123");
         await userManager.AddToRolesAsync(defaultAdmin, Role.AllRoles);
 
-        var defaultManager = new User { UserName = "manager" };
+        var defaultManager = new User { UserName = "0123456789" };
         await userManager.CreateAsync(defaultManager, "Manager@123");
         await userManager.AddToRoleAsync(defaultManager, Role.Manager);
 
-        var defaultStaffs = new List<(string Username, string Password, string Role)>();
+        var defaultUsers = new List<(string Username, string Password, string Role)>();
         for (var i = 1; i <= 5; i++)
         {
-            defaultStaffs.Add(new ValueTuple<string, string, string>
+            defaultUsers.Add(new ValueTuple<string, string, string>
             {
-                Item1 = $"censor{i}",
+                Item1 = $"000000000{i}",
+                Item2 = "Student@123",
+                Item3 = Role.Student
+            });
+            defaultUsers.Add(new ValueTuple<string, string, string>
+            {
+                Item1 = $"00000000{i}0",
+                Item2 = "Employer@123",
+                Item3 = Role.Employer
+            });
+
+            defaultUsers.Add(new ValueTuple<string, string, string>
+            {
+                Item1 = $"0000000{i}00",
                 Item2 = "Censor@123",
                 Item3 = Role.Censor
             });
-            defaultStaffs.Add(new ValueTuple<string, string, string>
+
+            defaultUsers.Add(new ValueTuple<string, string, string>
             {
-                Item1 = $"support{i}",
-                Item2 = "Support@123",
+                Item1 = $"000000{i}000",
+                Item2 = "SupportStaff@123",
                 Item3 = Role.SupportStaff
-            });
-        }
-
-        foreach (var staff in defaultStaffs)
-        {
-            var s = new User { UserName = staff.Username };
-            await userManager.CreateAsync(s, staff.Password);
-            await userManager.AddToRoleAsync(s, staff.Role);
-        }
-
-        var defaultUsers = new List<(string PhoneNumber, string Role)>();
-        for (var i = 1; i <= 5; i++)
-        {
-            defaultUsers.Add(new ValueTuple<string, string>
-            {
-                Item1 = $"000000000{i}",
-                Item2 = Role.Student
-            });
-            defaultUsers.Add(new ValueTuple<string, string>
-            {
-                Item1 = $"00000000{i}0",
-                Item2 = Role.Employer
             });
         }
 
         foreach (var user in defaultUsers)
         {
-            var u = new User { UserName = user.PhoneNumber };
-            await userManager.CreateAsync(u);
+            var u = new User { UserName = user.Username };
+            await userManager.CreateAsync(u, user.Password);
             await userManager.AddToRoleAsync(u, user.Role);
         }
 

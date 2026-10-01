@@ -10,5 +10,4 @@ public static class Role
     public const string Student = "Student";
 
     public static readonly string[] AllRoles = [Admin, Manager, Censor, SupportStaff, Employer, Student];
-    public static readonly string[] StaffRoles = [Admin, Manager, Censor, SupportStaff];
 }
