@@ -1,0 +1,56 @@
+@page
+@model RegisterModel
+@{
+    ViewData["Title"] = "Đăng ký tài khoản";
+}
+
+<div class="auth-container">
+    <h2 class="auth-title">Đăng ký tài khoản</h2>
+    <hr class="auth-divider" />
+
+    @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+    {
+        <div class="auth-alert-error">
+            @Model.ErrorMessage
+        </div>
+    }
+
+    @if (!string.IsNullOrEmpty(Model.SuccessMessage))
+    {
+        <div class="auth-alert-success">
+            @Model.SuccessMessage
+        </div>
+    }
+
+    <form method="post">
+        <input type="hidden" asp-for="@Model.RegisterForm.PhoneNumber" />
+        <div asp-validation-summary="ModelOnly" class="auth-validation-summary"></div>
+
+        <p class="phone-display-row">
+            Số điện thoại: <strong>@Model.RegisterForm.PhoneNumber</strong>
+            <a asp-page="LoginOrRegister" class="change-phone-link">[Thay đổi SĐT]</a>
+        </p>
+
+        <div class="form-group">
+            <label asp-for="@Model.RegisterForm.Password" class="form-label"></label>
+            <input asp-for="@Model.RegisterForm.Password" class="form-input" autofocus />
+            <span asp-validation-for="@Model.RegisterForm.Password" class="form-text-error"></span>
+            <small class="form-help-text">(Tối thiểu 6 ký tự, gồm ít nhất 1 chữ hoa, 1 chữ thường, 1 số và 1 ký tự đặc biệt)</small>
+        </div>
+
+        <div class="form-group">
+            <label asp-for="@Model.RegisterForm.Otp" class="form-label"></label>
+            <div class="otp-group">
+                <input asp-for="@Model.RegisterForm.Otp" maxlength="6" class="otp-input" placeholder="6 chữ số" />
+                <button type="submit" asp-page-handler="SendOtp" formnovalidate class="btn-otp">Gửi OTP</button>
+            </div>
+            <span asp-validation-for="@Model.RegisterForm.Otp" class="form-text-error"></span>
+        </div>
+
+        <button type="submit" class="btn-submit">Đăng ký</button>
+    </form>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

@@ -1,0 +1,33 @@
+@page
+@model LoginOrRegisterModel
+@{
+    ViewData["Title"] = "Đăng nhập / Đăng ký";
+}
+
+<div class="auth-container">
+    <h2 class="auth-title">Đăng nhập / Đăng ký</h2>
+    <hr class="auth-divider" />
+
+    @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+    {
+        <div class="auth-alert-error">
+            @Model.ErrorMessage
+        </div>
+    }
+
+    <form method="post">
+        <div asp-validation-summary="ModelOnly" class="auth-validation-summary"></div>
+
+        <div class="form-group">
+            <label asp-for="@Model.PhoneForm.PhoneNumber" class="form-label"></label>
+            <input asp-for="@Model.PhoneForm.PhoneNumber" class="form-input" placeholder="Ví dụ: 0912345678" autofocus />
+            <span asp-validation-for="@Model.PhoneForm.PhoneNumber" class="form-text-error"></span>
+        </div>
+
+        <button type="submit" class="btn-submit">Tiếp tục</button>
+    </form>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

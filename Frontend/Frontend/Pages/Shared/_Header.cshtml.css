@@ -1,0 +1,47 @@
+.site-header {
+    border-bottom: 1px solid #ccc;
+    padding: 12px 24px;
+    min-width: 1024px;
+    background-color: #fff;
+    margin-bottom: 20px;
+}
+
+.header-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+/* Khung logo bên trái */
+.header-logo {
+    border: 2px dashed #666;
+    padding: 8px 20px;
+    font-weight: bold;
+    font-size: 18px;
+    letter-spacing: 1px;
+}
+
+.header-logo a {
+    text-decoration: none;
+    color: inherit;
+}
+
+/* Navbar ở giữa */
+.header-nav {
+    display: flex;
+    gap: 24px;
+    align-items: center;
+}
+
+.header-nav a {
+    text-decoration: none;
+    color: #333;
+    font-weight: 500;
+}
+
+/* Khu vực nút bên phải */
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}

@@ -1,0 +1,99 @@
+using System.ComponentModel.DataAnnotations;
+using ApiSdk;
+using ApiSdk.Models;
+using BackendApiClient;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.Kiota.Abstractions;
+
+namespace Frontend.Pages.Identity;
+
+public class LoginModel(ApiClient apiClient) : PageModel
+{
+    [BindProperty] public LoginFormModel LoginForm { get; set; } = new();
+
+    public string? ErrorMessage { get; set; }
+
+    public async Task<IActionResult> OnGetAsync(string? phoneNumber)
+    {
+        if (string.IsNullOrWhiteSpace(phoneNumber))
+        {
+            return RedirectToPage("LoginOrRegister");
+        }
+
+        try
+        {
+            var response = await apiClient.Api.Identity.AccountExists.PostAsync(new AccountExistRequestDto
+            {
+                PhoneNumber = phoneNumber
+            });
+
+            if (response?.Exists != true)
+            {
+                return RedirectToPage("Register", new { phoneNumber });
+            }
+        }
+        catch (ApiException ex)
+        {
+            ErrorMessage = ex.ToFriendlyErrorMessage();
+            return Page();
+        }
+        catch
+        {
+            ErrorMessage = "Đã xảy ra lỗi. Vui lòng thử lại sau.";
+            return Page();
+        }
+
+        LoginForm.PhoneNumber = phoneNumber;
+        return Page();
+    }
+
+    public async Task<IActionResult> OnPostAsync()
+    {
+        if (!ModelState.IsValid)
+        {
+            return Page();
+        }
+
+        try
+        {
+            var tokenResponse = await apiClient.Api.Identity.Login.PostAsync(new LoginRequestDto
+            {
+                PhoneNumber = LoginForm.PhoneNumber,
+                Password = LoginForm.Password
+            });
+            if (tokenResponse?.AccessToken is null || tokenResponse.RefreshToken is null)
+            {
+                ErrorMessage = "Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin đăng nhập.";
+                return Page();
+            }
+
+            AuthCookieHelper.SetAuthCookies(Response, tokenResponse);
+            return Redirect("/");
+        }
+        catch (ApiException ex)
+        {
+            ErrorMessage = ex.ToFriendlyErrorMessage();
+            return Page();
+        }
+        catch
+        {
+            ErrorMessage = "Đã xảy ra lỗi trong quá trình đăng nhập.";
+            return Page();
+        }
+    }
+
+    public class LoginFormModel
+    {
+        [Required(ErrorMessage = "Số điện thoại là bắt buộc.")]
+        [RegularExpression(BusinessRuleConstants.PhoneNumberRegex, ErrorMessage = "Số điện thoại không hợp lệ.")]
+        public string PhoneNumber { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Mật khẩu là bắt buộc.")]
+        [RegularExpression(BusinessRuleConstants.Identity.PasswordRegex,
+            ErrorMessage = "Mật khẩu phải có ít nhất 6 ký tự, bao gồm chữ hoa, chữ thường, số và ký tự đặc biệt.")]
+        [DataType(DataType.Password)]
+        [Display(Name = "Mật khẩu")]
+        public string Password { get; set; } = string.Empty;
+    }
+}

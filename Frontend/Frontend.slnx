@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="BackendApiClient/BackendApiClient.csproj" />
+  <Project Path="Frontend/Frontend.csproj" />
+</Solution>

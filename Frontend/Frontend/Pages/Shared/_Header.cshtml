@@ -1,0 +1,34 @@
+<header class="site-header">
+    <div class="header-inner">
+        
+        <div class="header-logo">
+            <a href="/">LOGO</a>
+        </div>
+
+        <nav class="header-nav">
+            <a href="#">Trang chủ</a>
+            <a href="#">Tìm việc làm</a>
+            <a href="#">Công ty</a>
+            <a href="#">Tạo CV</a>
+            <a href="#">Cẩm nang</a>
+        </nav>
+
+        <div class="header-actions">
+            <a asp-page="/Identity/LoginOrRegister" class="btn btn-outline-secondary btn-sm">Đăng nhập / Đăng ký</a>
+
+            <div class="dropdown">
+                <button class="btn btn-secondary btn-sm dropdown-toggle" type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                    Người dùng
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                    <li><a class="dropdown-item" href="#">Hồ sơ cá nhân</a></li>
+                    <li><a class="dropdown-item" href="#">Việc làm đã ứng tuyển</a></li>
+                    <li><a class="dropdown-item" href="#">Cài đặt tài khoản</a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item" href="#">Đăng xuất</a></li>
+                </ul>
+            </div>
+        </div>
+
+    </div>
+</header>
