@@ -8,21 +8,6 @@
     <h2 class="auth-title">Đăng ký tài khoản</h2>
     <hr class="auth-divider"/>
 
-    @if (!string.IsNullOrEmpty(Model.ErrorMessage))
-    {
-        <div class="auth-alert-error">
-            @Model.ErrorMessage
-        </div>
-    }
-    <div id="ajaxAlertContainer"></div>
-
-    @if (!string.IsNullOrEmpty(Model.SuccessMessage))
-    {
-        <div class="auth-alert-success">
-            @Model.SuccessMessage
-        </div>
-    }
-
     <form method="post">
         <input type="hidden" asp-for="@Model.RegisterForm.PhoneNumber"/>
         <div asp-validation-summary="ModelOnly" class="auth-validation-summary"></div>
@@ -55,52 +40,14 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial"/>
+    <script src="~/js/otp.js"></script>
     <script>
-        document.getElementById('btnSendOtp').addEventListener('click', async function () {
-            const btn = this;
-            const form = btn.closest('form');
-            const formData = new FormData(form);
-            const alertContainer = document.getElementById('ajaxAlertContainer');
-            
-            // Clear existing alerts (both server and JS ones)
-            const serverErrorAlert = document.querySelector('.auth-alert-error:not(#ajaxAlertContainer)');
-            const serverSuccessAlert = document.querySelector('.auth-alert-success:not(#ajaxAlertContainer)');
-            if (serverErrorAlert) serverErrorAlert.style.display = 'none';
-            if (serverSuccessAlert) serverSuccessAlert.style.display = 'none';
-            alertContainer.innerHTML = '';
-            alertContainer.className = '';
-
-            btn.disabled = true;
-            const originalText = btn.innerText;
-            btn.innerText = 'Đang gửi...';
-
-            try {
-                const response = await fetch('?handler=SendOtp', {
-                    method: 'POST',
-                    body: formData
-                });
-                
-                let result;
-                try {
-                    result = await response.json();
-                } catch(e) {
-                    throw new Error('Invalid response from server');
-                }
-
-                if (result.success) {
-                    alertContainer.className = 'auth-alert-success';
-                } else {
-                    alertContainer.className = 'auth-alert-error';
-                }
-                alertContainer.innerText = result.message;
-
-            } catch (error) {
-                alertContainer.className = 'auth-alert-error';
-                alertContainer.innerText = 'Đã xảy ra lỗi kết nối. Vui lòng thử lại sau.';
-            } finally {
-                btn.disabled = false;
-                btn.innerText = originalText;
-            }
+        document.addEventListener("DOMContentLoaded", function () {
+            initOtpHandler({
+                btnId: 'btnSendOtp',
+                handlerUrl: '?handler=SendOtp',
+                cooldownSeconds: 60
+            });
         });
     </script>
 }

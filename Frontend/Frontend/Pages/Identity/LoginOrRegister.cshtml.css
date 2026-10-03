@@ -14,13 +14,6 @@
     border-top: 1px solid #ccc;
 }
 
-.auth-alert-error {
-    color: #b00020;
-    margin-bottom: 15px;
-    padding: 8px;
-    border: 1px solid #b00020;
-    background: #fff0f0;
-}
 
 .auth-validation-summary {
     color: #b00020;

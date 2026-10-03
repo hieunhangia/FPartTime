@@ -2,7 +2,7 @@ using Microsoft.Kiota.Abstractions;
 
 namespace BackendApiClient;
 
-public static class ApiExceptionHelper
+public static class ApiExceptionExtensions
 {
     public static string ToFriendlyErrorMessage(this ApiException ex)
     {

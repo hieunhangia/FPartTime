@@ -9,28 +9,28 @@ using System.IO;
 using System.Threading.Tasks;
 using System.Threading;
 using System;
-namespace ApiSdk.Api.Identity.Register
+namespace ApiSdk.Api.Identity.OtpLogin
 {
     /// <summary>
-    /// Builds and executes requests for operations under \api\Identity\register
+    /// Builds and executes requests for operations under \api\Identity\otp-login
     /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("Kiota", "1.0.0")]
-    public partial class RegisterRequestBuilder : BaseRequestBuilder
+    public partial class OtpLoginRequestBuilder : BaseRequestBuilder
     {
         /// <summary>
-        /// Instantiates a new <see cref="global::ApiSdk.Api.Identity.Register.RegisterRequestBuilder"/> and sets the default values.
+        /// Instantiates a new <see cref="global::ApiSdk.Api.Identity.OtpLogin.OtpLoginRequestBuilder"/> and sets the default values.
         /// </summary>
         /// <param name="pathParameters">Path parameters for the request</param>
         /// <param name="requestAdapter">The request adapter to use to execute the requests.</param>
-        public RegisterRequestBuilder(Dictionary<string, object> pathParameters, IRequestAdapter requestAdapter) : base(requestAdapter, "{+baseurl}/api/Identity/register", pathParameters)
+        public OtpLoginRequestBuilder(Dictionary<string, object> pathParameters, IRequestAdapter requestAdapter) : base(requestAdapter, "{+baseurl}/api/Identity/otp-login", pathParameters)
         {
         }
         /// <summary>
-        /// Instantiates a new <see cref="global::ApiSdk.Api.Identity.Register.RegisterRequestBuilder"/> and sets the default values.
+        /// Instantiates a new <see cref="global::ApiSdk.Api.Identity.OtpLogin.OtpLoginRequestBuilder"/> and sets the default values.
         /// </summary>
         /// <param name="rawUrl">The raw URL to use for the request builder.</param>
         /// <param name="requestAdapter">The request adapter to use to execute the requests.</param>
-        public RegisterRequestBuilder(string rawUrl, IRequestAdapter requestAdapter) : base(requestAdapter, "{+baseurl}/api/Identity/register", rawUrl)
+        public OtpLoginRequestBuilder(string rawUrl, IRequestAdapter requestAdapter) : base(requestAdapter, "{+baseurl}/api/Identity/otp-login", rawUrl)
         {
         }
         /// <returns>A <see cref="global::ApiSdk.Models.TokenResponseDto"/></returns>
@@ -38,15 +38,15 @@ namespace ApiSdk.Api.Identity.Register
         /// <param name="cancellationToken">Cancellation token to use when cancelling requests</param>
         /// <param name="requestConfiguration">Configuration for the request such as headers, query parameters, and middleware options.</param>
         /// <exception cref="global::ApiSdk.Models.ProblemDetails">When receiving a 400 status code</exception>
-        /// <exception cref="global::ApiSdk.Models.ProblemDetails">When receiving a 409 status code</exception>
+        /// <exception cref="global::ApiSdk.Models.ProblemDetails">When receiving a 401 status code</exception>
         /// <exception cref="global::ApiSdk.Models.ProblemDetails">When receiving a 500 status code</exception>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
-        public async Task<global::ApiSdk.Models.TokenResponseDto?> PostAsync(global::ApiSdk.Models.RegisterRequestDto body, Action<RequestConfiguration<DefaultQueryParameters>>? requestConfiguration = default, CancellationToken cancellationToken = default)
+        public async Task<global::ApiSdk.Models.TokenResponseDto?> PostAsync(global::ApiSdk.Models.OtpLoginRequestDto body, Action<RequestConfiguration<DefaultQueryParameters>>? requestConfiguration = default, CancellationToken cancellationToken = default)
         {
 #nullable restore
 #else
-        public async Task<global::ApiSdk.Models.TokenResponseDto> PostAsync(global::ApiSdk.Models.RegisterRequestDto body, Action<RequestConfiguration<DefaultQueryParameters>> requestConfiguration = default, CancellationToken cancellationToken = default)
+        public async Task<global::ApiSdk.Models.TokenResponseDto> PostAsync(global::ApiSdk.Models.OtpLoginRequestDto body, Action<RequestConfiguration<DefaultQueryParameters>> requestConfiguration = default, CancellationToken cancellationToken = default)
         {
 #endif
             if(ReferenceEquals(body, null)) throw new ArgumentNullException(nameof(body));
@@ -54,7 +54,7 @@ namespace ApiSdk.Api.Identity.Register
             var errorMapping = new Dictionary<string, ParsableFactory<IParsable>>
             {
                 { "400", global::ApiSdk.Models.ProblemDetails.CreateFromDiscriminatorValue },
-                { "409", global::ApiSdk.Models.ProblemDetails.CreateFromDiscriminatorValue },
+                { "401", global::ApiSdk.Models.ProblemDetails.CreateFromDiscriminatorValue },
                 { "500", global::ApiSdk.Models.ProblemDetails.CreateFromDiscriminatorValue },
             };
             return await RequestAdapter.SendAsync<global::ApiSdk.Models.TokenResponseDto>(requestInfo, global::ApiSdk.Models.TokenResponseDto.CreateFromDiscriminatorValue, errorMapping, cancellationToken).ConfigureAwait(false);
@@ -64,11 +64,11 @@ namespace ApiSdk.Api.Identity.Register
         /// <param name="requestConfiguration">Configuration for the request such as headers, query parameters, and middleware options.</param>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
-        public RequestInformation ToPostRequestInformation(global::ApiSdk.Models.RegisterRequestDto body, Action<RequestConfiguration<DefaultQueryParameters>>? requestConfiguration = default)
+        public RequestInformation ToPostRequestInformation(global::ApiSdk.Models.OtpLoginRequestDto body, Action<RequestConfiguration<DefaultQueryParameters>>? requestConfiguration = default)
         {
 #nullable restore
 #else
-        public RequestInformation ToPostRequestInformation(global::ApiSdk.Models.RegisterRequestDto body, Action<RequestConfiguration<DefaultQueryParameters>> requestConfiguration = default)
+        public RequestInformation ToPostRequestInformation(global::ApiSdk.Models.OtpLoginRequestDto body, Action<RequestConfiguration<DefaultQueryParameters>> requestConfiguration = default)
         {
 #endif
             if(ReferenceEquals(body, null)) throw new ArgumentNullException(nameof(body));
@@ -81,11 +81,11 @@ namespace ApiSdk.Api.Identity.Register
         /// <summary>
         /// Returns a request builder with the provided arbitrary URL. Using this method means any other path or query parameters are ignored.
         /// </summary>
-        /// <returns>A <see cref="global::ApiSdk.Api.Identity.Register.RegisterRequestBuilder"/></returns>
+        /// <returns>A <see cref="global::ApiSdk.Api.Identity.OtpLogin.OtpLoginRequestBuilder"/></returns>
         /// <param name="rawUrl">The raw URL to use for the request builder.</param>
-        public global::ApiSdk.Api.Identity.Register.RegisterRequestBuilder WithUrl(string rawUrl)
+        public global::ApiSdk.Api.Identity.OtpLogin.OtpLoginRequestBuilder WithUrl(string rawUrl)
         {
-            return new global::ApiSdk.Api.Identity.Register.RegisterRequestBuilder(rawUrl, RequestAdapter);
+            return new global::ApiSdk.Api.Identity.OtpLogin.OtpLoginRequestBuilder(rawUrl, RequestAdapter);
         }
     }
 }

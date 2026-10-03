@@ -36,8 +36,8 @@ public static class SeedDataExtensions
             defaultUsers.Add(new ValueTuple<string, string, string>
             {
                 Item1 = $"000000000{i}",
-                Item2 = "Student@123",
-                Item3 = Role.Student
+                Item2 = "Candidate@123",
+                Item3 = Role.Candidate
             });
             defaultUsers.Add(new ValueTuple<string, string, string>
             {

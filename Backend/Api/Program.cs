@@ -19,10 +19,16 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 
 builder.Services.AddIdentity<User, IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>()
-    .AddDefaultTokenProviders();
+    .AddDefaultTokenProviders()
+    .AddErrorDescriber<VietnameseIdentityErrorDescriber>();
 
 var jwtSettings = builder.Configuration.GetSection("JwtSettings");
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+builder.Services.AddAuthentication(options =>
+    {
+        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+        options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+    })
     .AddJwtBearer(options =>
     {
         options.RequireHttpsMetadata = !builder.Environment.IsDevelopment();

@@ -6,6 +6,7 @@
     <title>@ViewData["Title"] - Frontend</title>
     <script type="importmap"></script>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true"/>
     <link rel="stylesheet" href="~/Frontend.styles.css" asp-append-version="true"/>
 </head>
@@ -25,7 +26,66 @@
 
 <script src="~/lib/jquery/dist/jquery.min.js"></script>
 <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
 <script src="~/js/site.js" asp-append-version="true"></script>
+
+@if (TempData["InfoMessage"] != null)
+{
+    <script>
+        $(document).ready(function () {
+            toastr.options = {
+                "closeButton": true,
+                "progressBar": true,
+                "positionClass": "toast-top-right",
+                "timeOut": "5000"
+            };
+            toastr.info('@TempData["InfoMessage"]');
+        });
+    </script>
+}
+@if (TempData["SuccessMessage"] != null)
+{
+    <script>
+        $(document).ready(function () {
+            toastr.options = {
+                "closeButton": true,
+                "progressBar": true,
+                "positionClass": "toast-top-right",
+                "timeOut": "5000"
+            };
+            toastr.success('@TempData["SuccessMessage"]');
+        });
+    </script>
+}
+@if (TempData["WarningMessage"] != null)
+{
+    <script>
+        $(document).ready(function () {
+            toastr.options = {
+                "closeButton": true,
+                "progressBar": true,
+                "positionClass": "toast-top-right",
+                "timeOut": "5000"
+            };
+            toastr.warning('@TempData["WarningMessage"]');
+        });
+    </script>
+}
+@if (TempData["ErrorMessage"] != null)
+{
+    <script>
+        $(document).ready(function () {
+            toastr.options = {
+                "closeButton": true,
+                "progressBar": true,
+                "positionClass": "toast-top-right",
+                "timeOut": "5000"
+            };
+            toastr.error('@TempData["ErrorMessage"]');
+        });
+    </script>
+}
+
 
 @await RenderSectionAsync("Scripts", required: false)
 </body>

@@ -9,11 +9,27 @@ namespace ApiSdk.Models
 {
     [global::System.CodeDom.Compiler.GeneratedCode("Kiota", "1.0.0")]
     #pragma warning disable CS1591
-    public partial class RequestOtpForRegisterRequestDto : IAdditionalDataHolder, IParsable
+    public partial class ResetPasswordRequestDto : IAdditionalDataHolder, IParsable
     #pragma warning restore CS1591
     {
         /// <summary>Stores additional data not described in the OpenAPI description found when deserializing. Can be used for serialization as well.</summary>
         public IDictionary<string, object> AdditionalData { get; set; }
+        /// <summary>The newPassword property</summary>
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
+#nullable enable
+        public string? NewPassword { get; set; }
+#nullable restore
+#else
+        public string NewPassword { get; set; }
+#endif
+        /// <summary>The otp property</summary>
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
+#nullable enable
+        public string? Otp { get; set; }
+#nullable restore
+#else
+        public string Otp { get; set; }
+#endif
         /// <summary>The phoneNumber property</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
@@ -23,21 +39,21 @@ namespace ApiSdk.Models
         public string PhoneNumber { get; set; }
 #endif
         /// <summary>
-        /// Instantiates a new <see cref="global::ApiSdk.Models.RequestOtpForRegisterRequestDto"/> and sets the default values.
+        /// Instantiates a new <see cref="global::ApiSdk.Models.ResetPasswordRequestDto"/> and sets the default values.
         /// </summary>
-        public RequestOtpForRegisterRequestDto()
+        public ResetPasswordRequestDto()
         {
             AdditionalData = new Dictionary<string, object>();
         }
         /// <summary>
         /// Creates a new instance of the appropriate class based on discriminator value
         /// </summary>
-        /// <returns>A <see cref="global::ApiSdk.Models.RequestOtpForRegisterRequestDto"/></returns>
+        /// <returns>A <see cref="global::ApiSdk.Models.ResetPasswordRequestDto"/></returns>
         /// <param name="parseNode">The parse node to use to read the discriminator value and create the object</param>
-        public static global::ApiSdk.Models.RequestOtpForRegisterRequestDto CreateFromDiscriminatorValue(IParseNode parseNode)
+        public static global::ApiSdk.Models.ResetPasswordRequestDto CreateFromDiscriminatorValue(IParseNode parseNode)
         {
             if(ReferenceEquals(parseNode, null)) throw new ArgumentNullException(nameof(parseNode));
-            return new global::ApiSdk.Models.RequestOtpForRegisterRequestDto();
+            return new global::ApiSdk.Models.ResetPasswordRequestDto();
         }
         /// <summary>
         /// The deserialization information for the current model
@@ -47,6 +63,8 @@ namespace ApiSdk.Models
         {
             return new Dictionary<string, Action<IParseNode>>
             {
+                { "newPassword", n => { NewPassword = n.GetStringValue(); } },
+                { "otp", n => { Otp = n.GetStringValue(); } },
                 { "phoneNumber", n => { PhoneNumber = n.GetStringValue(); } },
             };
         }
@@ -57,6 +75,8 @@ namespace ApiSdk.Models
         public virtual void Serialize(ISerializationWriter writer)
         {
             if(ReferenceEquals(writer, null)) throw new ArgumentNullException(nameof(writer));
+            writer.WriteStringValue("newPassword", NewPassword);
+            writer.WriteStringValue("otp", Otp);
             writer.WriteStringValue("phoneNumber", PhoneNumber);
             writer.WriteAdditionalData(AdditionalData);
         }

@@ -1,0 +1,50 @@
+@page
+@model OtpLoginModel
+@{
+    ViewData["Title"] = "Đăng nhập bằng OTP";
+}
+
+<div class="auth-container">
+    <h2 class="auth-title">Đăng nhập</h2>
+    <hr class="auth-divider"/>
+
+    <div class="auth-toggle">
+        <a asp-page="PasswordLogin" asp-route-phoneNumber="@Model.LoginForm.PhoneNumber" class="toggle-btn">Đăng nhập bằng mật khẩu</a>
+    </div>
+
+    <form method="post">
+        <input type="hidden" asp-for="@Model.LoginForm.PhoneNumber"/>
+        <div asp-validation-summary="ModelOnly" class="auth-validation-summary"></div>
+
+        <p class="phone-display-row">
+            Số điện thoại: <strong>@Model.LoginForm.PhoneNumber</strong>
+            <a asp-page="LoginOrRegister" class="change-phone-link">[Thay đổi SĐT]</a>
+        </p>
+
+        <div class="form-group">
+            <label asp-for="@Model.LoginForm.Otp" class="form-label"></label>
+            <div class="otp-input-group">
+                <input asp-for="@Model.LoginForm.Otp" maxlength="6" class="form-input otp-input"
+                       placeholder="6 chữ số"/>
+                <button type="button" id="btnSendOtp" class="btn-otp">Gửi OTP</button>
+            </div>
+            <span asp-validation-for="@Model.LoginForm.Otp" class="form-text-error"></span>
+        </div>
+
+        <button type="submit" class="btn-submit">Đăng nhập bằng OTP</button>
+    </form>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial"/>
+    <script src="~/js/otp.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            initOtpHandler({
+                btnId: 'btnSendOtp',
+                handlerUrl: '?handler=SendOtp',
+                cooldownSeconds: 60
+            });
+        });
+    </script>
+}

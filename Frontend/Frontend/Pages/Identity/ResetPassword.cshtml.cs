@@ -10,11 +10,11 @@ using Microsoft.Kiota.Abstractions;
 
 namespace Frontend.Pages.Identity;
 
-public class RegisterModel(ApiClient apiClient) : PageModel
+public class ResetPasswordModel(ApiClient apiClient) : PageModel
 {
-    [BindProperty] public RegisterFormModel RegisterForm { get; set; } = new();
+    [BindProperty] public ResetPasswordFormModel ResetPasswordForm { get; set; } = new();
 
-    public async Task<IActionResult> OnGetAsync(string? phoneNumber)
+    public async Task<IActionResult> OnGet(string? phoneNumber)
     {
         if (string.IsNullOrWhiteSpace(phoneNumber))
         {
@@ -28,9 +28,9 @@ public class RegisterModel(ApiClient apiClient) : PageModel
                 PhoneNumber = phoneNumber
             });
 
-            if (response?.Exists == true)
+            if (response?.Exists != true)
             {
-                return RedirectToPage("PasswordLogin", new { phoneNumber });
+                return RedirectToPage("Register", new { phoneNumber });
             }
         }
         catch
@@ -38,22 +38,22 @@ public class RegisterModel(ApiClient apiClient) : PageModel
             return RedirectToPage("LoginOrRegister");
         }
 
-        RegisterForm.PhoneNumber = phoneNumber;
+        ResetPasswordForm.PhoneNumber = phoneNumber;
         return Page();
     }
 
     public async Task<IActionResult> OnPostSendOtpAsync()
     {
-        if (string.IsNullOrWhiteSpace(RegisterForm.PhoneNumber))
+        if (string.IsNullOrWhiteSpace(ResetPasswordForm.PhoneNumber))
         {
             return new JsonResult(new { success = false, message = "Số điện thoại không hợp lệ." });
         }
 
         try
         {
-            await apiClient.Api.Identity.RequestOtpForRegister.PostAsync(new RequestOtpRequestDto
+            await apiClient.Api.Identity.RequestOtpForResetPassword.PostAsync(new RequestOtpRequestDto
             {
-                PhoneNumber = RegisterForm.PhoneNumber
+                PhoneNumber = ResetPasswordForm.PhoneNumber
             });
 
             return new JsonResult(new { success = true, message = "Đã gửi mã OTP đến số điện thoại của bạn." });
@@ -77,21 +77,15 @@ public class RegisterModel(ApiClient apiClient) : PageModel
 
         try
         {
-            var response = await apiClient.Api.Identity.Register.PostAsync(new RegisterRequestDto
+            await apiClient.Api.Identity.ResetPassword.PostAsync(new ResetPasswordRequestDto
             {
-                PhoneNumber = RegisterForm.PhoneNumber,
-                Password = RegisterForm.Password,
-                Otp = RegisterForm.Otp
+                PhoneNumber = ResetPasswordForm.PhoneNumber,
+                NewPassword = ResetPasswordForm.NewPassword,
+                Otp = ResetPasswordForm.Otp
             });
-            if (response?.AccessToken is null || response.RefreshToken is null)
-            {
-                TempData.SetErrorMessage("Đăng ký thất bại. Vui lòng kiểm tra lại thông tin đăng ký.");
-                return Page();
-            }
 
-            await HttpContext.SignInWithApiTokenAsync(response.AccessToken, response.RefreshToken);
-            TempData.SetSuccessMessage("Đăng ký tài khoản thành công.");
-            return Redirect("/");
+            TempData.SetSuccessMessage("Đổi mật khẩu thành công. Vui lòng đăng nhập bằng mật khẩu mới.");
+            return RedirectToPage("PasswordLogin", new { phoneNumber = ResetPasswordForm.PhoneNumber });
         }
         catch (ApiException ex)
         {
@@ -100,23 +94,29 @@ public class RegisterModel(ApiClient apiClient) : PageModel
         }
         catch
         {
-            TempData.SetErrorMessage("Đã xảy ra lỗi trong quá trình đăng ký tài khoản.");
+            TempData.SetErrorMessage("Đã xảy ra lỗi trong quá trình đặt lại mật khẩu.");
             return Page();
         }
     }
 
-    public class RegisterFormModel
+    public class ResetPasswordFormModel
     {
         [Required(ErrorMessage = "Số điện thoại là bắt buộc.")]
         [RegularExpression(BusinessRuleConstants.PhoneNumberRegex, ErrorMessage = "Số điện thoại không hợp lệ.")]
         public string PhoneNumber { get; set; } = string.Empty;
 
-        [Required(ErrorMessage = "Mật khẩu là bắt buộc.")]
+        [Required(ErrorMessage = "Mật khẩu mới là bắt buộc.")]
         [RegularExpression(BusinessRuleConstants.Identity.PasswordRegex,
             ErrorMessage = "Mật khẩu phải có ít nhất 6 ký tự, bao gồm chữ hoa, chữ thường, số và ký tự đặc biệt.")]
         [DataType(DataType.Password)]
-        [Display(Name = "Mật khẩu")]
-        public string Password { get; set; } = string.Empty;
+        [Display(Name = "Mật khẩu mới")]
+        public string NewPassword { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Vui lòng xác nhận mật khẩu mới.")]
+        [Compare("NewPassword", ErrorMessage = "Mật khẩu xác nhận không khớp.")]
+        [DataType(DataType.Password)]
+        [Display(Name = "Xác nhận mật khẩu mới")]
+        public string ConfirmPassword { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "Mã OTP là bắt buộc.")]
         [RegularExpression(BusinessRuleConstants.Identity.OtpRegex, ErrorMessage = "Mã OTP phải gồm đúng 6 chữ số.")]

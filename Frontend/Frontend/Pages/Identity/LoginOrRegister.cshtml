@@ -8,13 +8,6 @@
     <h2 class="auth-title">Đăng nhập / Đăng ký</h2>
     <hr class="auth-divider" />
 
-    @if (!string.IsNullOrEmpty(Model.ErrorMessage))
-    {
-        <div class="auth-alert-error">
-            @Model.ErrorMessage
-        </div>
-    }
-
     <form method="post">
         <div asp-validation-summary="ModelOnly" class="auth-validation-summary"></div>
 

@@ -1,4 +1,4 @@
-namespace Frontend;
+namespace Frontend.Constants;
 
 public static class BusinessRuleConstants
 {

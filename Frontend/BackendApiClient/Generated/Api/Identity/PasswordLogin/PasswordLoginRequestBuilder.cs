@@ -9,28 +9,28 @@ using System.IO;
 using System.Threading.Tasks;
 using System.Threading;
 using System;
-namespace ApiSdk.Api.Identity.Login
+namespace ApiSdk.Api.Identity.PasswordLogin
 {
     /// <summary>
-    /// Builds and executes requests for operations under \api\Identity\login
+    /// Builds and executes requests for operations under \api\Identity\password-login
     /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("Kiota", "1.0.0")]
-    public partial class LoginRequestBuilder : BaseRequestBuilder
+    public partial class PasswordLoginRequestBuilder : BaseRequestBuilder
     {
         /// <summary>
-        /// Instantiates a new <see cref="global::ApiSdk.Api.Identity.Login.LoginRequestBuilder"/> and sets the default values.
+        /// Instantiates a new <see cref="global::ApiSdk.Api.Identity.PasswordLogin.PasswordLoginRequestBuilder"/> and sets the default values.
         /// </summary>
         /// <param name="pathParameters">Path parameters for the request</param>
         /// <param name="requestAdapter">The request adapter to use to execute the requests.</param>
-        public LoginRequestBuilder(Dictionary<string, object> pathParameters, IRequestAdapter requestAdapter) : base(requestAdapter, "{+baseurl}/api/Identity/login", pathParameters)
+        public PasswordLoginRequestBuilder(Dictionary<string, object> pathParameters, IRequestAdapter requestAdapter) : base(requestAdapter, "{+baseurl}/api/Identity/password-login", pathParameters)
         {
         }
         /// <summary>
-        /// Instantiates a new <see cref="global::ApiSdk.Api.Identity.Login.LoginRequestBuilder"/> and sets the default values.
+        /// Instantiates a new <see cref="global::ApiSdk.Api.Identity.PasswordLogin.PasswordLoginRequestBuilder"/> and sets the default values.
         /// </summary>
         /// <param name="rawUrl">The raw URL to use for the request builder.</param>
         /// <param name="requestAdapter">The request adapter to use to execute the requests.</param>
-        public LoginRequestBuilder(string rawUrl, IRequestAdapter requestAdapter) : base(requestAdapter, "{+baseurl}/api/Identity/login", rawUrl)
+        public PasswordLoginRequestBuilder(string rawUrl, IRequestAdapter requestAdapter) : base(requestAdapter, "{+baseurl}/api/Identity/password-login", rawUrl)
         {
         }
         /// <returns>A <see cref="global::ApiSdk.Models.TokenResponseDto"/></returns>
@@ -42,11 +42,11 @@ namespace ApiSdk.Api.Identity.Login
         /// <exception cref="global::ApiSdk.Models.ProblemDetails">When receiving a 500 status code</exception>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
-        public async Task<global::ApiSdk.Models.TokenResponseDto?> PostAsync(global::ApiSdk.Models.LoginRequestDto body, Action<RequestConfiguration<DefaultQueryParameters>>? requestConfiguration = default, CancellationToken cancellationToken = default)
+        public async Task<global::ApiSdk.Models.TokenResponseDto?> PostAsync(global::ApiSdk.Models.PasswordLoginRequestDto body, Action<RequestConfiguration<DefaultQueryParameters>>? requestConfiguration = default, CancellationToken cancellationToken = default)
         {
 #nullable restore
 #else
-        public async Task<global::ApiSdk.Models.TokenResponseDto> PostAsync(global::ApiSdk.Models.LoginRequestDto body, Action<RequestConfiguration<DefaultQueryParameters>> requestConfiguration = default, CancellationToken cancellationToken = default)
+        public async Task<global::ApiSdk.Models.TokenResponseDto> PostAsync(global::ApiSdk.Models.PasswordLoginRequestDto body, Action<RequestConfiguration<DefaultQueryParameters>> requestConfiguration = default, CancellationToken cancellationToken = default)
         {
 #endif
             if(ReferenceEquals(body, null)) throw new ArgumentNullException(nameof(body));
@@ -64,11 +64,11 @@ namespace ApiSdk.Api.Identity.Login
         /// <param name="requestConfiguration">Configuration for the request such as headers, query parameters, and middleware options.</param>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
-        public RequestInformation ToPostRequestInformation(global::ApiSdk.Models.LoginRequestDto body, Action<RequestConfiguration<DefaultQueryParameters>>? requestConfiguration = default)
+        public RequestInformation ToPostRequestInformation(global::ApiSdk.Models.PasswordLoginRequestDto body, Action<RequestConfiguration<DefaultQueryParameters>>? requestConfiguration = default)
         {
 #nullable restore
 #else
-        public RequestInformation ToPostRequestInformation(global::ApiSdk.Models.LoginRequestDto body, Action<RequestConfiguration<DefaultQueryParameters>> requestConfiguration = default)
+        public RequestInformation ToPostRequestInformation(global::ApiSdk.Models.PasswordLoginRequestDto body, Action<RequestConfiguration<DefaultQueryParameters>> requestConfiguration = default)
         {
 #endif
             if(ReferenceEquals(body, null)) throw new ArgumentNullException(nameof(body));
@@ -81,11 +81,11 @@ namespace ApiSdk.Api.Identity.Login
         /// <summary>
         /// Returns a request builder with the provided arbitrary URL. Using this method means any other path or query parameters are ignored.
         /// </summary>
-        /// <returns>A <see cref="global::ApiSdk.Api.Identity.Login.LoginRequestBuilder"/></returns>
+        /// <returns>A <see cref="global::ApiSdk.Api.Identity.PasswordLogin.PasswordLoginRequestBuilder"/></returns>
         /// <param name="rawUrl">The raw URL to use for the request builder.</param>
-        public global::ApiSdk.Api.Identity.Login.LoginRequestBuilder WithUrl(string rawUrl)
+        public global::ApiSdk.Api.Identity.PasswordLogin.PasswordLoginRequestBuilder WithUrl(string rawUrl)
         {
-            return new global::ApiSdk.Api.Identity.Login.LoginRequestBuilder(rawUrl, RequestAdapter);
+            return new global::ApiSdk.Api.Identity.PasswordLogin.PasswordLoginRequestBuilder(rawUrl, RequestAdapter);
         }
     }
 }

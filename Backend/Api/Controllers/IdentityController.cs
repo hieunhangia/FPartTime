@@ -24,11 +24,11 @@ public class IdentityController(IdentityService identityService) : ControllerBas
         await identityService.RequestOtpForRegisterAsync(dto);
 
     [HttpPost("register")]
-    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(TokenResponseDto), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest, "application/problem+json")]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status409Conflict, "application/problem+json")]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError, "application/problem+json")]
-    public async Task Register([FromBody] RegisterRequestDto dto) =>
+    public async Task<ActionResult<TokenResponseDto>> Register([FromBody] RegisterRequestDto dto) =>
         await identityService.RegisterAsync(dto);
 
     [HttpPost("password-login")]

@@ -2,17 +2,17 @@ using System.ComponentModel.DataAnnotations;
 using ApiSdk;
 using ApiSdk.Models;
 using BackendApiClient;
+using Frontend.Constants;
+using Frontend.Extensions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Kiota.Abstractions;
 
 namespace Frontend.Pages.Identity;
 
-public class LoginModel(ApiClient apiClient) : PageModel
+public class OtpLoginModel(ApiClient apiClient) : PageModel
 {
     [BindProperty] public LoginFormModel LoginForm { get; set; } = new();
-
-    public string? ErrorMessage { get; set; }
 
     public async Task<IActionResult> OnGetAsync(string? phoneNumber)
     {
@@ -33,15 +33,9 @@ public class LoginModel(ApiClient apiClient) : PageModel
                 return RedirectToPage("Register", new { phoneNumber });
             }
         }
-        catch (ApiException ex)
-        {
-            ErrorMessage = ex.ToFriendlyErrorMessage();
-            return Page();
-        }
         catch
         {
-            ErrorMessage = "Đã xảy ra lỗi. Vui lòng thử lại sau.";
-            return Page();
+            return RedirectToPage("LoginOrRegister");
         }
 
         LoginForm.PhoneNumber = phoneNumber;
@@ -57,29 +51,57 @@ public class LoginModel(ApiClient apiClient) : PageModel
 
         try
         {
-            var tokenResponse = await apiClient.Api.Identity.Login.PostAsync(new LoginRequestDto
+            var tokenResponse = await apiClient.Api.Identity.OtpLogin.PostAsync(new OtpLoginRequestDto
             {
                 PhoneNumber = LoginForm.PhoneNumber,
-                Password = LoginForm.Password
+                Otp = LoginForm.Otp
             });
+
             if (tokenResponse?.AccessToken is null || tokenResponse.RefreshToken is null)
             {
-                ErrorMessage = "Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin đăng nhập.";
+                TempData.SetErrorMessage("Đăng nhập thất bại. Vui lòng kiểm tra lại mã OTP.");
                 return Page();
             }
 
             await HttpContext.SignInWithApiTokenAsync(tokenResponse.AccessToken, tokenResponse.RefreshToken);
+            TempData.SetSuccessMessage("Đăng nhập thành công.");
             return Redirect("/");
         }
         catch (ApiException ex)
         {
-            ErrorMessage = ex.ToFriendlyErrorMessage();
+            TempData.SetErrorMessage(ex.ToFriendlyErrorMessage());
             return Page();
         }
         catch
         {
-            ErrorMessage = "Đã xảy ra lỗi trong quá trình đăng nhập.";
+            TempData.SetErrorMessage("Đã xảy ra lỗi trong quá trình đăng nhập bằng OTP.");
             return Page();
+        }
+    }
+
+    public async Task<IActionResult> OnPostSendOtpAsync()
+    {
+        if (string.IsNullOrWhiteSpace(LoginForm.PhoneNumber))
+        {
+            return new JsonResult(new { success = false, message = "Số điện thoại không hợp lệ." });
+        }
+
+        try
+        {
+            await apiClient.Api.Identity.RequestOtpForLogin.PostAsync(new RequestOtpRequestDto
+            {
+                PhoneNumber = LoginForm.PhoneNumber
+            });
+
+            return new JsonResult(new { success = true, message = "Đã gửi mã OTP đến số điện thoại của bạn." });
+        }
+        catch (ApiException ex)
+        {
+            return new JsonResult(new { success = false, message = ex.ToFriendlyErrorMessage() });
+        }
+        catch
+        {
+            return new JsonResult(new { success = false, message = "Đã xảy ra lỗi khi gửi mã OTP." });
         }
     }
 
@@ -89,11 +111,9 @@ public class LoginModel(ApiClient apiClient) : PageModel
         [RegularExpression(BusinessRuleConstants.PhoneNumberRegex, ErrorMessage = "Số điện thoại không hợp lệ.")]
         public string PhoneNumber { get; set; } = string.Empty;
 
-        [Required(ErrorMessage = "Mật khẩu là bắt buộc.")]
-        [RegularExpression(BusinessRuleConstants.Identity.PasswordRegex,
-            ErrorMessage = "Mật khẩu phải có ít nhất 6 ký tự, bao gồm chữ hoa, chữ thường, số và ký tự đặc biệt.")]
-        [DataType(DataType.Password)]
-        [Display(Name = "Mật khẩu")]
-        public string Password { get; set; } = string.Empty;
+        [Required(ErrorMessage = "Mã OTP là bắt buộc.")]
+        [RegularExpression(BusinessRuleConstants.Identity.OtpRegex, ErrorMessage = "Mã OTP phải gồm đúng 6 chữ số.")]
+        [Display(Name = "Mã OTP")]
+        public string Otp { get; set; } = string.Empty;
     }
 }

@@ -9,6 +9,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
 using Repository;
+using Repository.Constants;
 using Repository.Models.Users;
 using Service.ExternalServices;
 using Service.HttpErrorExceptions;
@@ -18,6 +19,7 @@ namespace Service.ApplicationServices;
 public class IdentityService(
     ApplicationDbContext dbContext,
     UserManager<User> userManager,
+    SignInManager<User> signInManager,
     SmsSenderService smsSenderService,
     IConfiguration configuration,
     IMemoryCache cache,
@@ -47,7 +49,7 @@ public class IdentityService(
     public async Task RequestOtpForRegisterAsync(RequestOtpRequestDto dto) =>
         await RequestOtpAsync(dto.PhoneNumber, RequestOtpPurpose.Register);
 
-    public async Task RegisterAsync(RegisterRequestDto dto)
+    public async Task<TokenResponseDto> RegisterAsync(RegisterRequestDto dto)
     {
         if (await userManager.FindByNameAsync(dto.PhoneNumber) != null)
         {
@@ -71,12 +73,12 @@ public class IdentityService(
             throw new BadRequestException("Mã OTP không hợp lệ hoặc đã hết hạn.");
         }
 
-        if (!(await userManager.CreateAsync(new User { UserName = dto.PhoneNumber }, dto.Password)).Succeeded)
-        {
-            throw new InternalServerErrorException("Đã xảy ra lỗi khi tạo tài khoản người dùng mới.");
-        }
+        var user = new User { UserName = dto.PhoneNumber };
+        ThrowIfIdentityResultFailed(await userManager.CreateAsync(user, dto.Password));
 
         cache.Remove(cacheKey);
+        await userManager.AddToRoleAsync(user, Role.Candidate);
+        return await GenerateTokensAsync(user);
     }
 
     public async Task<TokenResponseDto> PasswordLoginAsync(PasswordLoginRequestDto dto)
@@ -173,12 +175,8 @@ public class IdentityService(
             throw new BadRequestException("Mã OTP không hợp lệ hoặc đã hết hạn.");
         }
 
-        var result = await userManager.ResetPasswordAsync(user, await userManager.GeneratePasswordResetTokenAsync(user),
-            dto.NewPassword);
-        if (!result.Succeeded)
-        {
-            throw new InternalServerErrorException("Đã xảy ra lỗi khi đặt lại mật khẩu.");
-        }
+        ThrowIfIdentityResultFailed(await userManager.ResetPasswordAsync(user,
+            await userManager.GeneratePasswordResetTokenAsync(user), dto.NewPassword));
 
         cache.Remove(cacheKey);
         await userManager.ResetAccessFailedCountAsync(user);
@@ -197,11 +195,8 @@ public class IdentityService(
             throw new UnauthorizedException("Tài khoản đã bị khóa.");
         }
 
-        var result = await userManager.ChangePasswordAsync(authenticatedUser, dto.CurrentPassword, dto.NewPassword);
-        if (!result.Succeeded)
-        {
-            throw new InternalServerErrorException("Đã xảy ra lỗi khi thay đổi mật khẩu.");
-        }
+        ThrowIfIdentityResultFailed(
+            await userManager.ChangePasswordAsync(authenticatedUser, dto.CurrentPassword, dto.NewPassword));
     }
 
     public async Task<TokenResponseDto> RefreshTokenAsync(RefreshTokenRequestDto dto)
@@ -308,12 +303,10 @@ public class IdentityService(
 
     private async Task<TokenResponseDto> GenerateTokensAsync(User user)
     {
-        var claims = new List<Claim> { new(ClaimTypes.NameIdentifier, user.Id) };
-        claims.AddRange((await userManager.GetRolesAsync(user)).Select(role => new Claim(ClaimTypes.Role, role)));
         var jwtSettings = configuration.GetSection("JwtSettings");
         var accessToken = jsonWebTokenHandler.CreateToken(new SecurityTokenDescriptor
         {
-            Subject = new ClaimsIdentity(claims),
+            Subject = new ClaimsIdentity((await signInManager.ClaimsFactory.CreateAsync(user)).Claims),
             Expires = DateTime.UtcNow.AddMinutes(jwtSettings.GetValue<double>("AccessTokenExpirationInMinutes")),
             Issuer = jwtSettings["Issuer"],
             Audience = jwtSettings["Audience"],
@@ -332,6 +325,14 @@ public class IdentityService(
         });
         await dbContext.SaveChangesAsync();
         return new TokenResponseDto { AccessToken = accessToken, RefreshToken = refreshToken };
+    }
+
+    private static void ThrowIfIdentityResultFailed(IdentityResult identityResult)
+    {
+        if (!identityResult.Succeeded && identityResult.Errors.Any())
+        {
+            throw new BadRequestException(string.Join(". ", identityResult.Errors.Select(e => e.Description)));
+        }
     }
 }
 

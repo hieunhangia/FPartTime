@@ -1,4 +1,4 @@
-namespace Repository.Constants;
+namespace Frontend.Constants;
 
 public static class Role
 {
