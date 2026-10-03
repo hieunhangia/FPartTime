@@ -3,6 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Repository;
+using Repository.Constants;
 
 namespace Service.BackgroundServices;
 
@@ -15,14 +16,14 @@ public class RefreshTokenCleanupService(IServiceProvider serviceProvider, ILogge
         {
             if (logger.IsEnabled(LogLevel.Information))
             {
-                logger.LogInformation("RefreshTokenCleanupService đang dọn dẹp các token hết hạn...");
+                logger.LogInformation($"{nameof(RefreshTokenCleanupService)} đang dọn dẹp các token hết hạn...");
             }
 
             try
             {
                 using var scope = serviceProvider.CreateScope();
                 var deletedCount = await scope.ServiceProvider.GetRequiredService<ApplicationDbContext>().RefreshTokens
-                    .Where(x => x.ExpiryDate < DateTime.UtcNow)
+                    .Where(x => x.ExpiryAt < DateTime.UtcNow)
                     .ExecuteDeleteAsync(stoppingToken);
                 if (logger.IsEnabled(LogLevel.Information))
                 {

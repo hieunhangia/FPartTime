@@ -17,7 +17,7 @@ builder.Configuration.AddJsonFile("appsettings.secret.json", optional: true, rel
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-builder.Services.AddIdentity<User, IdentityRole>()
+builder.Services.AddIdentity<User, IdentityRole<Guid>>()
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddDefaultTokenProviders()
     .AddErrorDescriber<VietnameseIdentityErrorDescriber>();
@@ -64,7 +64,7 @@ if (app.Environment.IsDevelopment())
     app.MapScalarApiReference();
 }
 
-//await app.SeedDataAsync();
+await app.SeedDataAsync();
 
 app.UseAuthentication();
 app.UseAuthorization();

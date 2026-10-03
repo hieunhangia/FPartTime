@@ -202,7 +202,7 @@ public class IdentityService(
     public async Task<TokenResponseDto> RefreshTokenAsync(RefreshTokenRequestDto dto)
     {
         var storedRefreshToken = await dbContext.RefreshTokens.FirstOrDefaultAsync(x => x.Token == dto.RefreshToken);
-        if (storedRefreshToken == null || storedRefreshToken.ExpiryDate < DateTime.UtcNow)
+        if (storedRefreshToken == null || storedRefreshToken.ExpiryAt < DateTime.UtcNow)
         {
             throw new UnauthorizedException("Phiên đăng nhập không hợp lệ hoặc đã hết hạn. Vui lòng đăng nhập lại.");
         }
@@ -222,10 +222,9 @@ public class IdentityService(
         }
 
         storedRefreshToken.IsUsed = true;
-        storedRefreshToken.UsedDate = DateTime.UtcNow;
         await dbContext.SaveChangesAsync();
 
-        var user = await userManager.FindByIdAsync(storedRefreshToken.UserId);
+        var user = await userManager.FindByIdAsync(storedRefreshToken.UserId.ToString());
         if (user == null || await userManager.IsLockedOutAsync(user))
         {
             throw new UnauthorizedException("Tài khoản người dùng không tồn tại hoặc đã bị khóa.");
@@ -319,7 +318,7 @@ public class IdentityService(
         {
             Token = refreshToken,
             UserId = user.Id,
-            ExpiryDate = DateTime.UtcNow.AddDays(jwtSettings.GetValue<double>("RefreshTokenExpirationInDays")),
+            ExpiryAt = DateTime.UtcNow.AddDays(jwtSettings.GetValue<double>("RefreshTokenExpirationInDays")),
             IsUsed = false,
             IsRevoked = false
         });

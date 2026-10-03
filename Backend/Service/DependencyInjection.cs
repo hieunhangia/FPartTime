@@ -24,5 +24,6 @@ public static class DependencyInjection
         services.AddSingleton<CloudflareR2StorageService>();
 
         services.AddHostedService<RefreshTokenCleanupService>();
+        services.AddHostedService<ExpiredJobCleanupService>();
     }
 }

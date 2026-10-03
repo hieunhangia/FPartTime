@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Repository;
 using Repository.Constants;
 using Repository.Models.Users;
@@ -15,11 +16,11 @@ public static class SeedDataExtensions
         await dbContext.Database.EnsureCreatedAsync();
 
         var userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
-        var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+        var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole<Guid>>>();
 
         foreach (var roleName in Role.AllRoles)
         {
-            await roleManager.CreateAsync(new IdentityRole(roleName));
+            await roleManager.CreateAsync(new IdentityRole<Guid>(roleName));
         }
 
         var defaultAdmin = new User { UserName = "0000000000" };
@@ -67,6 +68,8 @@ public static class SeedDataExtensions
             await userManager.CreateAsync(u, user.Password);
             await userManager.AddToRoleAsync(u, user.Role);
         }
+
+        await dbContext.Database.ExecuteSqlRawAsync(await File.ReadAllTextAsync("Sample Data/address.sql"));
 
         await dbContext.SaveChangesAsync();
     }
