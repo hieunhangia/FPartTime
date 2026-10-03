@@ -24,6 +24,8 @@ public class IdentityService(
     JsonWebTokenHandler jsonWebTokenHandler)
 {
     private const string OtpForRegisterCachePrefix = "Otp_For_Register_";
+    private const string OtpForLoginCachePrefix = "Otp_For_Login_";
+    private const string OtpForResetPasswordCachePrefix = "Otp_For_Reset_Password_";
 
     private class OtpCacheItem(string otp)
     {
@@ -32,27 +34,26 @@ public class IdentityService(
         public int IncrementFailedAttempts() => Interlocked.Increment(ref _failedAttempts);
     }
 
+    private enum RequestOtpPurpose
+    {
+        Register,
+        Login,
+        ResetPassword
+    }
+
     public async Task<AccountExistResponseDto> AccountExistsAsync(AccountExistRequestDto dto) =>
         new() { Exists = await userManager.FindByNameAsync(dto.PhoneNumber) != null };
 
-    public async Task RequestOtpForRegisterAsync(RequestOtpForRegisterRequestDto dto)
+    public async Task RequestOtpForRegisterAsync(RequestOtpRequestDto dto) =>
+        await RequestOtpAsync(dto.PhoneNumber, RequestOtpPurpose.Register);
+
+    public async Task RegisterAsync(RegisterRequestDto dto)
     {
         if (await userManager.FindByNameAsync(dto.PhoneNumber) != null)
         {
             throw new ConflictException("Số điện thoại đã đăng ký tài khoản từ trước.");
         }
 
-        var otp = RandomNumberGenerator.GetInt32(1000000).ToString("D6");
-        cache.Set($"{OtpForRegisterCachePrefix}{dto.PhoneNumber}", new OtpCacheItem(otp), new MemoryCacheEntryOptions
-        {
-            AbsoluteExpiration = DateTimeOffset.UtcNow.AddMinutes(BusinessRuleConstants.Identity.OtpExpiresInMinutes)
-        });
-        await smsSenderService.SendSmsAsync(dto.PhoneNumber,
-            $"FPartTime - Mã OTP của bạn là: {otp}. Mã này sẽ hết hạn sau {BusinessRuleConstants.Identity.OtpExpiresInMinutes} phút.");
-    }
-
-    public async Task RegisterAsync(RegisterRequestDto dto)
-    {
         var cacheKey = $"{OtpForRegisterCachePrefix}{dto.PhoneNumber}";
         if (!cache.TryGetValue<OtpCacheItem>(cacheKey, out var cacheItem) || cacheItem == null)
         {
@@ -70,11 +71,6 @@ public class IdentityService(
             throw new BadRequestException("Mã OTP không hợp lệ hoặc đã hết hạn.");
         }
 
-        if (await userManager.FindByNameAsync(dto.PhoneNumber) != null)
-        {
-            throw new ConflictException("Số điện thoại đã đăng ký tài khoản từ trước.");
-        }
-
         if (!(await userManager.CreateAsync(new User { UserName = dto.PhoneNumber }, dto.Password)).Succeeded)
         {
             throw new InternalServerErrorException("Đã xảy ra lỗi khi tạo tài khoản người dùng mới.");
@@ -83,7 +79,7 @@ public class IdentityService(
         cache.Remove(cacheKey);
     }
 
-    public async Task<TokenResponseDto> LoginAsync(LoginRequestDto dto)
+    public async Task<TokenResponseDto> PasswordLoginAsync(PasswordLoginRequestDto dto)
     {
         var user = await userManager.FindByNameAsync(dto.PhoneNumber);
         if (user == null)
@@ -104,6 +100,108 @@ public class IdentityService(
 
         await userManager.ResetAccessFailedCountAsync(user);
         return await GenerateTokensAsync(user);
+    }
+
+    public async Task RequestOtpForLoginAsync(RequestOtpRequestDto dto) =>
+        await RequestOtpAsync(dto.PhoneNumber, RequestOtpPurpose.Login);
+
+    public async Task<TokenResponseDto> OtpLoginAsync(OtpLoginRequestDto dto)
+    {
+        var user = await userManager.FindByNameAsync(dto.PhoneNumber);
+        if (user == null)
+        {
+            throw new BadRequestException("Mã OTP không hợp lệ hoặc đã hết hạn.");
+        }
+
+        if (await userManager.IsLockedOutAsync(user))
+        {
+            throw new UnauthorizedException("Tài khoản đã bị khóa.");
+        }
+
+        var cacheKey = $"{OtpForLoginCachePrefix}{dto.PhoneNumber}";
+        if (!cache.TryGetValue<OtpCacheItem>(cacheKey, out var cacheItem) || cacheItem == null)
+        {
+            throw new BadRequestException("Mã OTP không hợp lệ hoặc đã hết hạn.");
+        }
+
+        if (cacheItem.Otp != dto.Otp)
+        {
+            var attempts = cacheItem.IncrementFailedAttempts();
+            if (attempts >= BusinessRuleConstants.Identity.MaxOtpFailedAttempts)
+            {
+                cache.Remove(cacheKey);
+            }
+
+            throw new BadRequestException("Mã OTP không hợp lệ hoặc đã hết hạn.");
+        }
+
+        cache.Remove(cacheKey);
+        await userManager.ResetAccessFailedCountAsync(user);
+        return await GenerateTokensAsync(user);
+    }
+
+    public async Task RequestOtpForResetPasswordAsync(RequestOtpRequestDto dto) =>
+        await RequestOtpAsync(dto.PhoneNumber, RequestOtpPurpose.ResetPassword);
+
+    public async Task ResetPasswordAsync(ResetPasswordRequestDto dto)
+    {
+        var user = await userManager.FindByNameAsync(dto.PhoneNumber);
+        if (user == null)
+        {
+            throw new BadRequestException("Mã OTP không hợp lệ hoặc đã hết hạn.");
+        }
+
+        if (await userManager.IsLockedOutAsync(user))
+        {
+            throw new UnauthorizedException("Tài khoản đã bị khóa.");
+        }
+
+        var cacheKey = $"{OtpForResetPasswordCachePrefix}{dto.PhoneNumber}";
+        if (!cache.TryGetValue<OtpCacheItem>(cacheKey, out var cacheItem) || cacheItem == null)
+        {
+            throw new BadRequestException("Mã OTP không hợp lệ hoặc đã hết hạn.");
+        }
+
+        if (cacheItem.Otp != dto.Otp)
+        {
+            var attempts = cacheItem.IncrementFailedAttempts();
+            if (attempts >= BusinessRuleConstants.Identity.MaxOtpFailedAttempts)
+            {
+                cache.Remove(cacheKey);
+            }
+
+            throw new BadRequestException("Mã OTP không hợp lệ hoặc đã hết hạn.");
+        }
+
+        var result = await userManager.ResetPasswordAsync(user, await userManager.GeneratePasswordResetTokenAsync(user),
+            dto.NewPassword);
+        if (!result.Succeeded)
+        {
+            throw new InternalServerErrorException("Đã xảy ra lỗi khi đặt lại mật khẩu.");
+        }
+
+        cache.Remove(cacheKey);
+        await userManager.ResetAccessFailedCountAsync(user);
+    }
+
+    public async Task ChangePasswordAsync(ClaimsPrincipal user, ChangePasswordRequestDto dto)
+    {
+        var authenticatedUser = await userManager.GetUserAsync(user);
+        if (authenticatedUser?.UserName == null)
+        {
+            throw new UnauthorizedException("Người dùng chưa đăng nhập hoặc không hợp lệ.");
+        }
+
+        if (await userManager.IsLockedOutAsync(authenticatedUser))
+        {
+            throw new UnauthorizedException("Tài khoản đã bị khóa.");
+        }
+
+        var result = await userManager.ChangePasswordAsync(authenticatedUser, dto.CurrentPassword, dto.NewPassword);
+        if (!result.Succeeded)
+        {
+            throw new InternalServerErrorException("Đã xảy ra lỗi khi thay đổi mật khẩu.");
+        }
     }
 
     public async Task<TokenResponseDto> RefreshTokenAsync(RefreshTokenRequestDto dto)
@@ -154,6 +252,60 @@ public class IdentityService(
         await dbContext.SaveChangesAsync();
     }
 
+    private async Task RequestOtpAsync(string phoneNumber, RequestOtpPurpose purpose)
+    {
+        var user = await userManager.FindByNameAsync(phoneNumber);
+        string cacheKeyPrefix;
+        switch (purpose)
+        {
+            case RequestOtpPurpose.Register:
+                if (user != null)
+                {
+                    throw new ConflictException("Số điện thoại đã đăng ký tài khoản từ trước.");
+                }
+
+                cacheKeyPrefix = OtpForRegisterCachePrefix;
+
+                break;
+            case RequestOtpPurpose.Login:
+                if (user == null)
+                {
+                    throw new BadRequestException("Số điện thoại chưa được đăng ký tài khoản.");
+                }
+
+                if (await userManager.IsLockedOutAsync(user))
+                {
+                    throw new UnauthorizedException("Tài khoản người dùng đã bị khóa.");
+                }
+
+                cacheKeyPrefix = OtpForLoginCachePrefix;
+                break;
+            case RequestOtpPurpose.ResetPassword:
+                if (user == null)
+                {
+                    throw new BadRequestException("Số điện thoại chưa được đăng ký tài khoản.");
+                }
+
+                if (await userManager.IsLockedOutAsync(user))
+                {
+                    throw new UnauthorizedException("Tài khoản người dùng đã bị khóa.");
+                }
+
+                cacheKeyPrefix = OtpForResetPasswordCachePrefix;
+                break;
+            default:
+                throw new BadRequestException("Mục đích yêu cầu OTP không hợp lệ.");
+        }
+
+        var otp = RandomNumberGenerator.GetInt32(1000000).ToString("D6");
+        cache.Set($"{cacheKeyPrefix}{phoneNumber}", new OtpCacheItem(otp), new MemoryCacheEntryOptions
+        {
+            AbsoluteExpiration = DateTimeOffset.UtcNow.AddMinutes(BusinessRuleConstants.Identity.OtpExpiresInMinutes)
+        });
+        await smsSenderService.SendAsync(phoneNumber,
+            $"FPartTime - Mã OTP của bạn là: {otp}. Mã này sẽ hết hạn sau {BusinessRuleConstants.Identity.OtpExpiresInMinutes} phút.");
+    }
+
     private async Task<TokenResponseDto> GenerateTokensAsync(User user)
     {
         var claims = new List<Claim> { new(ClaimTypes.NameIdentifier, user.Id) };
@@ -195,7 +347,7 @@ public class AccountExistResponseDto
     public required bool Exists { get; set; }
 }
 
-public class RequestOtpForRegisterRequestDto
+public class RequestOtpRequestDto
 {
     [Required(ErrorMessage = "Số điện thoại là bắt buộc.")]
     [RegularExpression(BusinessRuleConstants.PhoneNumberRegex, ErrorMessage = "Số điện thoại không hợp lệ.")]
@@ -218,7 +370,7 @@ public class RegisterRequestDto
     public string Otp { get; set; } = string.Empty;
 }
 
-public class LoginRequestDto
+public class PasswordLoginRequestDto
 {
     [Required(ErrorMessage = "Số điện thoại là bắt buộc.")]
     [RegularExpression(BusinessRuleConstants.PhoneNumberRegex, ErrorMessage = "Số điện thoại không hợp lệ.")]
@@ -228,6 +380,46 @@ public class LoginRequestDto
     [RegularExpression(BusinessRuleConstants.Identity.PasswordRegex,
         ErrorMessage = "Mật khẩu phải có ít nhất 6 ký tự, bao gồm chữ hoa, chữ thường, số và ký tự đặc biệt.")]
     public string Password { get; set; } = string.Empty;
+}
+
+public class OtpLoginRequestDto
+{
+    [Required(ErrorMessage = "Số điện thoại là bắt buộc.")]
+    [RegularExpression(BusinessRuleConstants.PhoneNumberRegex, ErrorMessage = "Số điện thoại không hợp lệ.")]
+    public string PhoneNumber { get; set; } = string.Empty;
+
+    [Required(ErrorMessage = "Mã OTP là bắt buộc.")]
+    [RegularExpression(BusinessRuleConstants.Identity.OtpRegex, ErrorMessage = "Mã OTP phải gồm đúng 6 chữ số.")]
+    public string Otp { get; set; } = string.Empty;
+}
+
+public class ResetPasswordRequestDto
+{
+    [Required(ErrorMessage = "Số điện thoại là bắt buộc.")]
+    [RegularExpression(BusinessRuleConstants.PhoneNumberRegex, ErrorMessage = "Số điện thoại không hợp lệ.")]
+    public string PhoneNumber { get; set; } = string.Empty;
+
+    [Required(ErrorMessage = "Mã OTP là bắt buộc.")]
+    [RegularExpression(BusinessRuleConstants.Identity.OtpRegex, ErrorMessage = "Mã OTP phải gồm đúng 6 chữ số.")]
+    public string Otp { get; set; } = string.Empty;
+
+    [Required(ErrorMessage = "Mật khẩu mới là bắt buộc.")]
+    [RegularExpression(BusinessRuleConstants.Identity.PasswordRegex,
+        ErrorMessage = "Mật khẩu mới phải có ít nhất 6 ký tự, bao gồm chữ hoa, chữ thường, số và ký tự đặc biệt.")]
+    public string NewPassword { get; set; } = string.Empty;
+}
+
+public class ChangePasswordRequestDto
+{
+    [Required(ErrorMessage = "Mật khẩu cũ là bắt buộc.")]
+    [RegularExpression(BusinessRuleConstants.Identity.PasswordRegex,
+        ErrorMessage = "Mật khẩu cũ phải có ít nhất 6 ký tự, bao gồm chữ hoa, chữ thường, số và ký tự đặc biệt.")]
+    public string CurrentPassword { get; set; } = string.Empty;
+
+    [Required(ErrorMessage = "Mật khẩu mới là bắt buộc.")]
+    [RegularExpression(BusinessRuleConstants.Identity.PasswordRegex,
+        ErrorMessage = "Mật khẩu mới phải có ít nhất 6 ký tự, bao gồm chữ hoa, chữ thường, số và ký tự đặc biệt.")]
+    public string NewPassword { get; set; } = string.Empty;
 }
 
 public class RefreshTokenRequestDto

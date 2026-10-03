@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Service.ApplicationServices;
 
@@ -19,7 +20,7 @@ public class IdentityController(IdentityService identityService) : ControllerBas
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest, "application/problem+json")]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status409Conflict, "application/problem+json")]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError, "application/problem+json")]
-    public async Task RequestOtpForRegister([FromBody] RequestOtpForRegisterRequestDto dto) =>
+    public async Task RequestOtpForRegister([FromBody] RequestOtpRequestDto dto) =>
         await identityService.RequestOtpForRegisterAsync(dto);
 
     [HttpPost("register")]
@@ -30,13 +31,54 @@ public class IdentityController(IdentityService identityService) : ControllerBas
     public async Task Register([FromBody] RegisterRequestDto dto) =>
         await identityService.RegisterAsync(dto);
 
-    [HttpPost("login")]
+    [HttpPost("password-login")]
     [ProducesResponseType(typeof(TokenResponseDto), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest, "application/problem+json")]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized, "application/problem+json")]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError, "application/problem+json")]
-    public async Task<ActionResult<TokenResponseDto>> Login([FromBody] LoginRequestDto dto) =>
-        Ok(await identityService.LoginAsync(dto));
+    public async Task<ActionResult<TokenResponseDto>> PasswordLogin([FromBody] PasswordLoginRequestDto dto) =>
+        Ok(await identityService.PasswordLoginAsync(dto));
+
+    [HttpPost("request-otp-for-login")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest, "application/problem+json")]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized, "application/problem+json")]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError, "application/problem+json")]
+    public async Task RequestOtpForLogin([FromBody] RequestOtpRequestDto dto) =>
+        await identityService.RequestOtpForLoginAsync(dto);
+
+    [HttpPost("otp-login")]
+    [ProducesResponseType(typeof(TokenResponseDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest, "application/problem+json")]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized, "application/problem+json")]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError, "application/problem+json")]
+    public async Task<ActionResult<TokenResponseDto>> OtpLogin([FromBody] OtpLoginRequestDto dto) =>
+        Ok(await identityService.OtpLoginAsync(dto));
+
+    [HttpPost("request-otp-for-reset-password")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest, "application/problem+json")]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized, "application/problem+json")]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError, "application/problem+json")]
+    public async Task RequestOtpForResetPassword([FromBody] RequestOtpRequestDto dto) =>
+        await identityService.RequestOtpForResetPasswordAsync(dto);
+
+    [HttpPost("reset-password")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest, "application/problem+json")]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized, "application/problem+json")]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError, "application/problem+json")]
+    public async Task ResetPassword([FromBody] ResetPasswordRequestDto dto) =>
+        await identityService.ResetPasswordAsync(dto);
+    
+    [HttpPost("change-password")]
+    [Authorize]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest, "application/problem+json")]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized, "application/problem+json")]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError, "application/problem+json")]
+    public async Task ChangePassword([FromBody] ChangePasswordRequestDto dto) =>
+        await identityService.ChangePasswordAsync(HttpContext.User, dto);
 
     [HttpPost("refresh-token")]
     [ProducesResponseType(typeof(TokenResponseDto), StatusCodes.Status200OK)]
