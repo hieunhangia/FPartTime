@@ -1,6 +1,6 @@
-namespace Service;
+namespace Service.DTOs;
 
-public class PagedAndSortedResponse<T>(List<T> items, int totalCount)
+public class PagedResponse<T>(List<T> items, int totalCount)
 {
     public List<T> Items { get; set; } = items;
     public int TotalCount { get; set; } = totalCount;

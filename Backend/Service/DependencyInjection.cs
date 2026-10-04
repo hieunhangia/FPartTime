@@ -14,6 +14,7 @@ public static class DependencyInjection
     {
         services.AddSingleton<JsonWebTokenHandler>();
         services.AddScoped<IdentityService>();
+        services.AddScoped<NotificationsService>();
 
         services.AddScoped<SmsSenderService>();
 

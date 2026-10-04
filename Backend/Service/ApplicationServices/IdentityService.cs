@@ -185,7 +185,7 @@ public class IdentityService(
     public async Task ChangePasswordAsync(ClaimsPrincipal user, ChangePasswordRequestDto dto)
     {
         var authenticatedUser = await userManager.GetUserAsync(user);
-        if (authenticatedUser?.UserName == null)
+        if (authenticatedUser == null)
         {
             throw new UnauthorizedException("Người dùng chưa đăng nhập hoặc không hợp lệ.");
         }
