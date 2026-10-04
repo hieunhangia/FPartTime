@@ -17,26 +17,19 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<Province> Provinces { get; set; }
     public DbSet<CandidateProfile> Candidates { get; set; }
     public DbSet<EmployerRegistrationRequest> EmployerRegistrationRequests { get; set; }
+    public DbSet<CandidateSchedule> CandidateSchedules { get; set; }
     public DbSet<EmployerProfile> Employers { get; set; }
     public DbSet<Industry> Industries { get; set; }
     public DbSet<Job> Jobs { get; set; }
     public DbSet<JobApplication> JobApplications { get; set; }
+    public DbSet<JobSchedule> JobSchedules { get; set; }
+    public DbSet<JobSalary> JobSalaries { get; set; }
     public DbSet<JobReport> JobReports { get; set; }
+    public DbSet<Notification> Notifications { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
-
-        foreach (var entityType in builder.Model.GetEntityTypes())
-        {
-            foreach (var property in entityType.GetProperties())
-            {
-                if (property.ClrType.IsEnum || Nullable.GetUnderlyingType(property.ClrType)?.IsEnum == true)
-                {
-                    property.SetProviderClrType(typeof(string));
-                }
-            }
-        }
 
         builder.Entity<RefreshToken>(entity =>
         {
@@ -220,5 +213,16 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
                 .HasForeignKey(e => e.UserId)
                 .OnDelete(DeleteBehavior.Restrict);
         });
+
+        foreach (var entityType in builder.Model.GetEntityTypes())
+        {
+            foreach (var property in entityType.GetProperties())
+            {
+                if (property.ClrType.IsEnum || Nullable.GetUnderlyingType(property.ClrType)?.IsEnum == true)
+                {
+                    property.SetProviderClrType(typeof(string));
+                }
+            }
+        }
     }
 }

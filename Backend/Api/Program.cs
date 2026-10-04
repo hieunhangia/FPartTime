@@ -1,11 +1,8 @@
 using System.Text;
 using Api;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Repository;
-using Repository.Models.Users;
 using Scalar.AspNetCore;
 using Service;
 
@@ -14,13 +11,6 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Configuration.AddJsonFile("appsettings.secret.json", optional: true, reloadOnChange: true);
 
 // Add services to the container.
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
-
-builder.Services.AddIdentity<User, IdentityRole<Guid>>()
-    .AddEntityFrameworkStores<ApplicationDbContext>()
-    .AddDefaultTokenProviders()
-    .AddErrorDescriber<VietnameseIdentityErrorDescriber>();
 
 var jwtSettings = builder.Configuration.GetSection("JwtSettings");
 builder.Services.AddAuthentication(options =>
@@ -42,9 +32,11 @@ builder.Services.AddAuthentication(options =>
         };
     });
 
-builder.Services.AddControllers();
+builder.Services.AddRepositoryLevelServices(builder.Configuration);
 
-builder.Services.AddServices(builder.Configuration);
+builder.Services.AddServiceLevelServices(builder.Configuration);
+
+builder.Services.AddControllers();
 
 builder.Services.AddMemoryCache();
 
@@ -64,7 +56,7 @@ if (app.Environment.IsDevelopment())
     app.MapScalarApiReference();
 }
 
-await app.SeedDataAsync();
+//await app.SeedDataAsync();
 
 app.UseAuthentication();
 app.UseAuthorization();

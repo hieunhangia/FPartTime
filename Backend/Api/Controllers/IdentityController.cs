@@ -78,7 +78,7 @@ public class IdentityController(IdentityService identityService) : ControllerBas
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized, "application/problem+json")]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError, "application/problem+json")]
     public async Task ChangePassword([FromBody] ChangePasswordRequestDto dto) =>
-        await identityService.ChangePasswordAsync(HttpContext.User, dto);
+        await identityService.ChangePasswordAsync(User, dto);
 
     [HttpPost("refresh-token")]
     [ProducesResponseType(typeof(TokenResponseDto), StatusCodes.Status200OK)]

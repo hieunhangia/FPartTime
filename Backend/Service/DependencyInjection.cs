@@ -10,7 +10,7 @@ namespace Service;
 
 public static class DependencyInjection
 {
-    public static void AddServices(this IServiceCollection services, IConfiguration configuration)
+    public static void AddServiceLevelServices(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddSingleton<JsonWebTokenHandler>();
         services.AddScoped<IdentityService>();

@@ -11,8 +11,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <PackageReference Include="AWSSDK.S3" Version="4.0.103.4" />
-      <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="10.0.12" />
+      <PackageReference Include="AWSSDK.S3" Version="4.0.104.1" />
       <PackageReference Include="Riok.Mapperly" Version="4.3.1" />
       <FrameworkReference Include="Microsoft.AspNetCore.App" />
     </ItemGroup>
