@@ -1,5 +1,33 @@
-**Xây dựng WebAPI và WebApp cuối môn học PRN232**
+# Dự án: Quản lý sàn việc làm bán thời gian cho sinh viên
+**Public**
+- Auth
+- Query danh sách job
 
+**Candidate**
+- Quản lý profile
+- Đăng kí làm Employer
+- Ứng tuyển job
+- Report job
+
+**Employer**
+- Quản lý profile
+- CRUD job
+- Duyệt đơn Candidate
+- Tính năng trả phí: Đẩy tin, chủ động tìm Candidate phù hợp
+
+**Censor**
+- Duyệt đơn đăng kí làm Employer
+- Duyệt đơn report job
+
+**Admin**
+- Health check hệ thống
+- Quản lý exception
+
+**Manager**
+- Quản lý user/role
+- Thống kê ...
+
+---
 **1. Web API Services đáp ứng yêu cầu**
 * 1.1. Mô tả đầy đủ các tác nhân sử dụng API
 * 1.2. Mô tả đầy đủ chức năng nghiệp vụ của các Endpoints
@@ -29,33 +57,3 @@
 * Mã nguồn ứng dụng
 * Tài liệu thiết kế và báo cáo phân tích.
 * Hình ảnh giao diện và chức năng của ứng dụng
-
-
-# Dự án: Quản lý sàn việc làm bán thời gian cho sinh viên
-**Public**
-- Auth
-- Query danh sách job
-
-**Candidate**
-- Quản lý profile
-- Đăng kí làm Employer
-- Ứng tuyển job
-- Report job
-
-**Employer**
-- Quản lý profile
-- CRUD job
-- Duyệt đơn Candidate
-- Tính năng trả phí: Đẩy tin, chủ động tìm Candidate phù hợp
-
-**Censor**
-- Duyệt đơn đăng kí làm Employer
-- Duyệt đơn report job
-
-**Admin**
-- Health check hệ thống
-- Quản lý exception
-
-**Manager**
-- Quản lý user/role
-- Thống kê ...
