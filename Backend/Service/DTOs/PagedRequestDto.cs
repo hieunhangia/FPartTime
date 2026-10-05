@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Service.DTOs;
 
-public class PagedRequest
+public class PagedRequestDto
 {
     [Required(ErrorMessage = "Số trang không được để trống.")]
     [Range(1, int.MaxValue, ErrorMessage = "Số trang phải lớn hơn hoặc bằng 1.")]
@@ -13,7 +13,7 @@ public class PagedRequest
     public int PageSize { get; set; }
 }
 
-public class PagedRequest<TFilter> : PagedRequest where TFilter : new()
+public class PagedRequestDto<TFilter> : PagedRequestDto where TFilter : new()
 {
     public TFilter Filter { get; set; } = new();
 }
