@@ -1,4 +1,4 @@
-using BackendApiClient;
+using BackendApiClient.Extensions;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Frontend.Controllers;

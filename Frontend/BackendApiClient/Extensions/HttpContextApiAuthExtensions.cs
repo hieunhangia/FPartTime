@@ -1,10 +1,10 @@
-using Microsoft.AspNetCore.Http;
+using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
-using System.Security.Claims;
+using Microsoft.AspNetCore.Http;
 using Microsoft.IdentityModel.JsonWebTokens;
 
-namespace BackendApiClient;
+namespace BackendApiClient.Extensions;
 
 public static class HttpContextApiAuthExtensions
 {

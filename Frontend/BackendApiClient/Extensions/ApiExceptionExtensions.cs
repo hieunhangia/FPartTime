@@ -1,6 +1,6 @@
 using Microsoft.Kiota.Abstractions;
 
-namespace BackendApiClient;
+namespace BackendApiClient.Extensions;
 
 public static class ApiExceptionExtensions
 {

@@ -1,6 +1,9 @@
 using System.Text;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using Api;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.OData;
 using Microsoft.IdentityModel.Tokens;
 using Repository;
 using Scalar.AspNetCore;
@@ -36,7 +39,8 @@ builder.Services.AddRepositoryLevelServices(builder.Configuration);
 
 builder.Services.AddServiceLevelServices(builder.Configuration);
 
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddOData(options => options.Select().Filter().OrderBy().SetMaxTop(100).Count());
 
 builder.Services.AddMemoryCache();
 

@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using ApiSdk;
 using ApiSdk.Models;
-using BackendApiClient;
+using BackendApiClient.Extensions;
 using Frontend.Constants;
 using Frontend.Extensions;
 using Microsoft.AspNetCore.Mvc;

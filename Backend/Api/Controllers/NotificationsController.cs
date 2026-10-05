@@ -1,23 +1,22 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.OData.Query;
 using Service.ApplicationServices;
-using Service.DTOs;
 
 namespace Api.Controllers;
 
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/notifications")]
 [Authorize]
 public class NotificationsController(NotificationsService notificationsService) : ControllerBase
 {
     [HttpGet]
-    [ProducesResponseType<PagedResponseDto<NotificationResponseDto>>(StatusCodes.Status200OK)]
-    [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
+    [EnableQuery]
+    [ProducesResponseType<IEnumerable<NotificationResponseDto>>(StatusCodes.Status200OK)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> GetMyNotifications(
-        [FromQuery] PagedRequestDto requestDto) =>
-        Ok(await notificationsService.GetMyNotificationsAsync(User, requestDto));
+    public IQueryable<NotificationResponseDto> GetMyNotifications() =>
+        notificationsService.GetMyNotificationsQueryable(User);
 
     [HttpPut("{id:guid}/read")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]

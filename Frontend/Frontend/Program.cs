@@ -1,5 +1,6 @@
 using ApiSdk;
 using BackendApiClient;
+using BackendApiClient.Extensions;
 using Frontend.Filters;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;

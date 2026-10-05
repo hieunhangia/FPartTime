@@ -70,6 +70,7 @@ public static class SeedDataExtensions
         }
 
         await dbContext.Database.ExecuteSqlRawAsync(await File.ReadAllTextAsync("Sample Data/address.sql"));
+        await dbContext.Database.ExecuteSqlRawAsync(await File.ReadAllTextAsync("Sample Data/notification.sql"));
 
         await dbContext.SaveChangesAsync();
     }

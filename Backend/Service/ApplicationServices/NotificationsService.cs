@@ -3,7 +3,6 @@ using Microsoft.EntityFrameworkCore;
 using Repository;
 using Repository.Models.Notifications;
 using Riok.Mapperly.Abstractions;
-using Service.DTOs;
 using Service.Extensions;
 using Service.HttpErrorExceptions;
 
@@ -33,20 +32,10 @@ public class NotificationsService(ApplicationDbContext dbContext)
         await dbContext.SaveChangesAsync();
     }
 
-    public async Task<PagedResponseDto<NotificationResponseDto>> GetMyNotificationsAsync(ClaimsPrincipal user,
-        PagedRequestDto requestDto)
-    {
-        var query = dbContext.Notifications.Where(n => n.UserId == user.GetUserId());
-        var totalCount = await query.CountAsync();
-        if (totalCount == 0)
-        {
-            return new PagedResponseDto<NotificationResponseDto>([], 0);
-        }
-
-        return new PagedResponseDto<NotificationResponseDto>(
-            await query.ApplyPaging(requestDto.PageIndex, requestDto.PageSize).ProjectToDto().ToListAsync(),
-            totalCount);
-    }
+    public IQueryable<NotificationResponseDto> GetMyNotificationsQueryable(ClaimsPrincipal user) =>
+        dbContext.Notifications.AsNoTracking()
+            .Where(n => n.UserId == user.GetUserId())
+            .ProjectToDto();
 
     public async Task MarkAsReadAsync(ClaimsPrincipal user, Guid notificationId)
     {
