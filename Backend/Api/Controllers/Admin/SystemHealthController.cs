@@ -15,6 +15,5 @@ public class SystemHealthController(SystemHealthService systemHealthService) : C
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status403Forbidden)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> GetSystemHealth(CancellationToken cancellationToken) =>
-        Ok(await systemHealthService.GetSystemHealthAsync(cancellationToken));
+    public async Task<IActionResult> GetSystemHealth() => Ok(await systemHealthService.GetSystemHealthAsync());
 }

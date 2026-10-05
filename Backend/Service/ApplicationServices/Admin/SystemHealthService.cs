@@ -6,9 +6,9 @@ namespace Service.ApplicationServices.Admin;
 
 public class SystemHealthService(HealthCheckService healthCheckService)
 {
-    public async Task<SystemHealthResponseDto> GetSystemHealthAsync(CancellationToken cancellationToken = default)
+    public async Task<SystemHealthResponseDto> GetSystemHealthAsync()
     {
-        var report = await healthCheckService.CheckHealthAsync(cancellationToken);
+        var report = await healthCheckService.CheckHealthAsync();
         var process = Process.GetCurrentProcess();
         var uptime = DateTime.UtcNow - process.StartTime.ToUniversalTime();
         var uptimePartString = new List<string>();
