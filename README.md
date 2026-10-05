@@ -1,7 +1,6 @@
 **Xây dựng WebAPI và WebApp cuối môn học PRN232**
 
 **1. Web API Services đáp ứng yêu cầu**
-
 * 1.1. Mô tả đầy đủ các tác nhân sử dụng API
 * 1.2. Mô tả đầy đủ chức năng nghiệp vụ của các Endpoints
 * 1.3. Sử dụng ASP.NET Web API
@@ -14,7 +13,6 @@
 * 1.10. Sử dụng JWT và Role-Based Access để phân quyền người dùng theo nghiệp vụ
 
 **2. Ứng dụng Web đóng vai trò Client sử dụng Web API Services đáp ứng yêu cầu**
-
 * 2.1. Mô tả đầy đủ các tác nhân hệ thống
 * 2.2. Mô tả đầy đủ chức năng nghiệp vụ của hệ thống
 * 2.3. Sử dụng mô hình MVC hoặc RazorPages
@@ -25,7 +23,6 @@
 * 2.8. Kiểm tra ràng buộc dữ liệu trong code
 
 **3. Yêu cầu về báo cáo**
-
 * Phân tích, thiết kế chức năng hệ thống và cơ sở dữ liệu.
 * Phân công rõ ràng nhiệm vụ cho từng thành viên nhóm.
 * Kết quả thực hiện bao gồm:
@@ -34,4 +31,31 @@
 * Hình ảnh giao diện và chức năng của ứng dụng
 
 
-7. Quản lý sàn việc làm bán thời gian cho sinh viên
+**Dự án: Quản lý sàn việc làm bán thời gian cho sinh viên**
+* Public
+- Auth
+- Query danh sách job
+
+* Candidate
+- Quản lý profile
+- Đăng kí làm Employer
+- Ứng tuyển job
+- Report job
+
+* Employer
+- Quản lý profile
+- CRUD job
+- Duyệt đơn Candidate
+- Tính năng trả phí: Đẩy tin, chủ động tìm Candidate phù hợp
+
+* Censor
+- Duyệt đơn đăng kí làm Employer
+- Duyệt đơn report job
+
+* Admin
+- Health check hệ thống
+- Quản lý exception
+
+* Manager
+- Quản lý user/role
+- Thống kê ...
