@@ -31,31 +31,31 @@
 * Hình ảnh giao diện và chức năng của ứng dụng
 
 
-**Dự án: Quản lý sàn việc làm bán thời gian cho sinh viên**
-* Public
+# Dự án: Quản lý sàn việc làm bán thời gian cho sinh viên
+**Public**
 - Auth
 - Query danh sách job
 
-* Candidate
+**Candidate**
 - Quản lý profile
 - Đăng kí làm Employer
 - Ứng tuyển job
 - Report job
 
-* Employer
+**Employer**
 - Quản lý profile
 - CRUD job
 - Duyệt đơn Candidate
 - Tính năng trả phí: Đẩy tin, chủ động tìm Candidate phù hợp
 
-* Censor
+**Censor**
 - Duyệt đơn đăng kí làm Employer
 - Duyệt đơn report job
 
-* Admin
+**Admin**
 - Health check hệ thống
 - Quản lý exception
 
-* Manager
+**Manager**
 - Quản lý user/role
 - Thống kê ...
