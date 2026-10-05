@@ -15,7 +15,7 @@ public class NotificationsController(NotificationsService notificationsService) 
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<PagedResponseDto<NotificationResponseDto>>> GetMyNotifications(
+    public async Task<IActionResult> GetMyNotifications(
         [FromQuery] PagedRequestDto requestDto) =>
         Ok(await notificationsService.GetMyNotificationsAsync(User, requestDto));
 

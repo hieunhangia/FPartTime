@@ -4,15 +4,15 @@ using Service.ApplicationServices;
 
 namespace Api.Controllers;
 
-[Route("api/[controller]")]
 [ApiController]
+[Route("api/[controller]")]
 public class IdentityController(IdentityService identityService) : ControllerBase
 {
     [HttpPost("account-exists")]
     [ProducesResponseType<AccountExistResponseDto>(StatusCodes.Status200OK)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<AccountExistResponseDto>> AccountExists([FromBody] AccountExistRequestDto dto) =>
+    public async Task<IActionResult> AccountExists([FromBody] AccountExistRequestDto dto) =>
         Ok(await identityService.AccountExistsAsync(dto));
 
     [HttpPost("request-otp-for-register")]
@@ -24,19 +24,19 @@ public class IdentityController(IdentityService identityService) : ControllerBas
         await identityService.RequestOtpForRegisterAsync(dto);
 
     [HttpPost("register")]
-    [ProducesResponseType(typeof(TokenResponseDto), StatusCodes.Status200OK)]
+    [ProducesResponseType<TokenResponseDto>(StatusCodes.Status200OK)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status409Conflict)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<TokenResponseDto>> Register([FromBody] RegisterRequestDto dto) =>
-        await identityService.RegisterAsync(dto);
+    public async Task<IActionResult> Register([FromBody] RegisterRequestDto dto) =>
+        Ok(await identityService.RegisterAsync(dto));
 
     [HttpPost("password-login")]
-    [ProducesResponseType(typeof(TokenResponseDto), StatusCodes.Status200OK)]
+    [ProducesResponseType<TokenResponseDto>(StatusCodes.Status200OK)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<TokenResponseDto>> PasswordLogin([FromBody] PasswordLoginRequestDto dto) =>
+    public async Task<IActionResult> PasswordLogin([FromBody] PasswordLoginRequestDto dto) =>
         Ok(await identityService.PasswordLoginAsync(dto));
 
     [HttpPost("request-otp-for-login")]
@@ -48,11 +48,11 @@ public class IdentityController(IdentityService identityService) : ControllerBas
         await identityService.RequestOtpForLoginAsync(dto);
 
     [HttpPost("otp-login")]
-    [ProducesResponseType(typeof(TokenResponseDto), StatusCodes.Status200OK)]
+    [ProducesResponseType<TokenResponseDto>(StatusCodes.Status200OK)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<TokenResponseDto>> OtpLogin([FromBody] OtpLoginRequestDto dto) =>
+    public async Task<IActionResult> OtpLogin([FromBody] OtpLoginRequestDto dto) =>
         Ok(await identityService.OtpLoginAsync(dto));
 
     [HttpPost("request-otp-for-reset-password")]
@@ -81,11 +81,11 @@ public class IdentityController(IdentityService identityService) : ControllerBas
         await identityService.ChangePasswordAsync(User, dto);
 
     [HttpPost("refresh-token")]
-    [ProducesResponseType(typeof(TokenResponseDto), StatusCodes.Status200OK)]
+    [ProducesResponseType<TokenResponseDto>(StatusCodes.Status200OK)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<TokenResponseDto>> RefreshToken([FromBody] RefreshTokenRequestDto dto) =>
+    public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenRequestDto dto) =>
         Ok(await identityService.RefreshTokenAsync(dto));
 
     [HttpPost("logout")]
