@@ -12,9 +12,12 @@ public static class DependencyInjection
     {
         services.AddDbContext<ApplicationDbContext>(options =>
             options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
+        services.AddHealthChecks().AddDbContextCheck<ApplicationDbContext>("SQL Server Database");
 
-        services.AddIdentity<User, IdentityRole<Guid>>()
+        services.AddIdentityCore<User>()
+            .AddRoles<IdentityRole<Guid>>()
             .AddEntityFrameworkStores<ApplicationDbContext>()
+            .AddSignInManager<SignInManager<User>>()
             .AddDefaultTokenProviders()
             .AddErrorDescriber<VietnameseIdentityErrorDescriber>();
     }

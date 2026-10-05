@@ -3,6 +3,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Service.ApplicationServices;
+using Service.ApplicationServices.Admin;
 using Service.BackgroundServices;
 using Service.ExternalServices;
 
@@ -15,6 +16,7 @@ public static class DependencyInjection
         services.AddSingleton<JsonWebTokenHandler>();
         services.AddScoped<IdentityService>();
         services.AddScoped<NotificationsService>();
+        services.AddScoped<SystemHealthService>();
 
         services.AddScoped<SmsSenderService>();
 
@@ -23,6 +25,7 @@ public static class DependencyInjection
             new AmazonS3Config { ServiceURL = r2Settings["ServiceURL"] }
         ));
         services.AddSingleton<CloudflareR2StorageService>();
+        services.AddHealthChecks().AddCheck<CloudflareR2HealthCheck>(name: "Cloudflare R2 Storage");
 
         services.AddHostedService<RefreshTokenCleanupService>();
         services.AddHostedService<ExpiredJobCleanupService>();

@@ -72,7 +72,7 @@ public class NotificationsService(ApplicationDbContext dbContext)
 }
 
 [Mapper(RequiredMappingStrategy = RequiredMappingStrategy.Target)]
-public static partial class Mapper
+public static partial class NotificationMapper
 {
     public static partial IQueryable<NotificationResponseDto> ProjectToDto(this IQueryable<Notification> notifications);
 }

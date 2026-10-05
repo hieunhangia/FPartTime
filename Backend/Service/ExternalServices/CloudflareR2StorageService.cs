@@ -1,6 +1,7 @@
 using Amazon.S3;
 using Amazon.S3.Model;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Service.HttpErrorExceptions;
 
 namespace Service.ExternalServices;
@@ -148,6 +149,29 @@ public class CloudflareR2StorageService(IAmazonS3 s3Client, IConfiguration confi
             Expires = DateTime.UtcNow.Add(expiresIn),
             Verb = HttpVerb.GET
         });
+}
+
+public class CloudflareR2HealthCheck(IAmazonS3 s3Client, IConfiguration configuration) : IHealthCheck
+{
+    private readonly string _publicBucketName = configuration["R2Settings:PublicBucketName"]!;
+    private readonly string _privateBucketName = configuration["R2Settings:PrivateBucketName"]!;
+
+    public async Task<HealthCheckResult> CheckHealthAsync(HealthCheckContext context,
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+            cts.CancelAfter(3000);
+            await s3Client.GetBucketLocationAsync(_publicBucketName, cts.Token);
+            await s3Client.GetBucketLocationAsync(_privateBucketName, cts.Token);
+            return HealthCheckResult.Healthy($"Kết nối thành công đến Cloudflare R2.");
+        }
+        catch (Exception ex)
+        {
+            return HealthCheckResult.Unhealthy($"Không thể kết nối đến Cloudflare R2': {ex.Message}", ex);
+        }
+    }
 }
 
 public enum BucketType
