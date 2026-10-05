@@ -10,9 +10,11 @@ public class EmployerRegistrationRequest
     public EmployerRegistrationRequestStatus Status { get; set; } = EmployerRegistrationRequestStatus.Pending;
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime? ProcessedAt { get; set; }
-    public Guid CandidateId { get; set; }
+    public Guid RequesterId { get; set; }
+    public Guid? ProcessorId { get; set; }
 
-    public CandidateProfile? Candidate { get; set; }
+    public CandidateProfile? Requester { get; set; }
+    public CensorProfile? Processor { get; set; }
 }
 
 public enum EmployerRegistrationRequestStatus

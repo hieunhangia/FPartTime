@@ -10,9 +10,11 @@ public class JobReport
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public Guid JobId { get; set; }
     public Guid ReporterId { get; set; }
+    public Guid? ResolverId { get; set; }
 
     public Job? Job { get; set; }
     public CandidateProfile? Reporter { get; set; }
+    public CensorProfile? Resolver { get; set; }
 }
 
 public enum JobReportStatus

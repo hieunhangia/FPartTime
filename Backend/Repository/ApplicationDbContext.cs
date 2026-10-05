@@ -19,6 +19,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<EmployerRegistrationRequest> EmployerRegistrationRequests { get; set; }
     public DbSet<CandidateSchedule> CandidateSchedules { get; set; }
     public DbSet<EmployerProfile> Employers { get; set; }
+    public DbSet<CensorProfile> Censors { get; set; }
     public DbSet<Industry> Industries { get; set; }
     public DbSet<Job> Jobs { get; set; }
     public DbSet<JobApplication> JobApplications { get; set; }
@@ -102,9 +103,14 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             entity.Property(e => e.RejectReason)
                 .HasMaxLength(BusinessRuleConstants.Models.EmployerRegistrationRequest.RejectReasonMaxLength);
 
-            entity.HasOne(e => e.Candidate)
+            entity.HasOne(e => e.Requester)
                 .WithMany(c => c.EmployerRegistrationRequests)
-                .HasForeignKey(e => e.CandidateId)
+                .HasForeignKey(e => e.RequesterId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(e => e.Processor)
+                .WithMany(c => c.EmployerRegistrationRequests)
+                .HasForeignKey(e => e.ProcessorId)
                 .OnDelete(DeleteBehavior.Restrict);
         });
 
@@ -128,6 +134,15 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
                 .HasMaxLength(BusinessRuleConstants.Models.Employer.TaxCodeMaxLength);
             entity.Property(e => e.VerificationDocumentFilePath)
                 .HasMaxLength(BusinessRuleConstants.Models.Employer.VerificationDocumentFilePathMaxLength);
+        });
+
+        builder.Entity<CensorProfile>(entity =>
+        {
+            entity.HasKey(e => e.UserId);
+            entity.HasOne(e => e.User)
+                .WithOne(u => u.CensorProfile)
+                .HasForeignKey<CensorProfile>(e => e.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
         });
 
         builder.Entity<Industry>(entity =>
@@ -200,6 +215,11 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             entity.HasOne(e => e.Reporter)
                 .WithMany(c => c.JobReports)
                 .HasForeignKey(e => e.ReporterId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(e => e.Resolver)
+                .WithMany(c => c.JobReports)
+                .HasForeignKey(e => e.ResolverId)
                 .OnDelete(DeleteBehavior.Restrict);
         });
 
