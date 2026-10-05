@@ -1,6 +1,5 @@
 using System.Text;
 using Api;
-using Service.Hubs;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Repository;
@@ -44,8 +43,6 @@ builder.Services.AddMemoryCache();
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails();
 
-builder.Services.AddSignalR();
-
 builder.Services.AddOpenApi();
 
 var app = builder.Build();
@@ -65,6 +62,5 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
-app.MapHub<NotificationHub>("/hubs/notification");
 
 app.Run();

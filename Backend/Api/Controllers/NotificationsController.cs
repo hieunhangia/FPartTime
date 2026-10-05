@@ -11,13 +11,13 @@ namespace Api.Controllers;
 public class NotificationsController(NotificationsService notificationsService) : ControllerBase
 {
     [HttpGet]
-    [ProducesResponseType<PagedResponse<NotificationResponseDto>>(StatusCodes.Status200OK)]
+    [ProducesResponseType<PagedResponseDto<NotificationResponseDto>>(StatusCodes.Status200OK)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<PagedResponse<NotificationResponseDto>>> GetMyNotifications(
-        [FromQuery] PagedRequest request) =>
-        Ok(await notificationsService.GetMyNotificationsAsync(User, request));
+    public async Task<ActionResult<PagedResponseDto<NotificationResponseDto>>> GetMyNotifications(
+        [FromQuery] PagedRequestDto requestDto) =>
+        Ok(await notificationsService.GetMyNotificationsAsync(User, requestDto));
 
     [HttpPut("{id:guid}/read")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]

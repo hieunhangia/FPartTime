@@ -1,5 +1,4 @@
 using System.Security.Claims;
-using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Repository;
 using Repository.Models.Notifications;
@@ -7,37 +6,46 @@ using Riok.Mapperly.Abstractions;
 using Service.DTOs;
 using Service.Extensions;
 using Service.HttpErrorExceptions;
-using Service.Hubs;
 
 namespace Service.ApplicationServices;
 
-public class NotificationsService(ApplicationDbContext dbContext, IHubContext<NotificationHub> hubContext)
+public class NotificationsService(ApplicationDbContext dbContext)
 {
-    public async Task CreateAndSendNotificationAsync(Guid userId, string title, string content)
+    public async Task CreateNotificationAsync(Guid userId, string title, string content)
     {
-        var notification = new Notification
+        dbContext.Notifications.Add(new Notification
         {
             Title = title,
             Content = content,
             UserId = userId
-        };
-        dbContext.Notifications.Add(notification);
+        });
         await dbContext.SaveChangesAsync();
-        await hubContext.Clients.User(userId.ToString()).SendAsync("ReceiveNotification", notification.MapToDto());
     }
 
-    public async Task<PagedResponse<NotificationResponseDto>> GetMyNotificationsAsync(ClaimsPrincipal user,
-        PagedRequest request)
+    public async Task CreateNotificationAsync(List<Guid> userIds, string title, string content)
+    {
+        dbContext.Notifications.AddRange(userIds.Select(userId => new Notification
+        {
+            Title = title,
+            Content = content,
+            UserId = userId
+        }));
+        await dbContext.SaveChangesAsync();
+    }
+
+    public async Task<PagedResponseDto<NotificationResponseDto>> GetMyNotificationsAsync(ClaimsPrincipal user,
+        PagedRequestDto requestDto)
     {
         var query = dbContext.Notifications.Where(n => n.UserId == user.GetUserId());
         var totalCount = await query.CountAsync();
         if (totalCount == 0)
         {
-            return new PagedResponse<NotificationResponseDto>([], 0);
+            return new PagedResponseDto<NotificationResponseDto>([], 0);
         }
 
-        return new PagedResponse<NotificationResponseDto>(
-            await query.ApplyPaging(request.PageIndex, request.PageSize).ProjectToDto().ToListAsync(), totalCount);
+        return new PagedResponseDto<NotificationResponseDto>(
+            await query.ApplyPaging(requestDto.PageIndex, requestDto.PageSize).ProjectToDto().ToListAsync(),
+            totalCount);
     }
 
     public async Task MarkAsReadAsync(ClaimsPrincipal user, Guid notificationId)
@@ -66,7 +74,6 @@ public class NotificationsService(ApplicationDbContext dbContext, IHubContext<No
 [Mapper(RequiredMappingStrategy = RequiredMappingStrategy.Target)]
 public static partial class Mapper
 {
-    public static partial NotificationResponseDto MapToDto(this Notification notification);
     public static partial IQueryable<NotificationResponseDto> ProjectToDto(this IQueryable<Notification> notifications);
 }
 
