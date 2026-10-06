@@ -67,16 +67,27 @@
                             <li><a class="dropdown-item" href="#">Việc làm đã ứng tuyển</a></li>
                             <li><a class="dropdown-item" href="#">Cài đặt tài khoản</a></li>
                         }
-                        else if (User.IsInRole(Role.Employer))
+                        @if (User.IsInRole(Role.Employer))
                         {
                             <li><a class="dropdown-item" href="#">Quản lý công việc</a></li>
                             <li><a class="dropdown-item" href="#">Ứng viên đã nộp</a></li>
                             <li><a class="dropdown-item" href="#">Cài đặt tài khoản</a></li>
                         }
-                        else if (User.IsInRole(Role.Admin))
+                        @if (User.IsInRole(Role.Censor))
+                        {
+                            <li><a class="dropdown-item" href="#">Quản lý công việc</a></li>
+                            <li><a class="dropdown-item" href="#">Ứng viên đã nộp</a></li>
+                        }
+                        @if(User.IsInRole(Role.Manager))
                         {
                             <li><a class="dropdown-item" href="#">Quản lý người dùng</a></li>
                             <li><a class="dropdown-item" href="#">Quản lý công việc</a></li>
+                        }
+                        @if (User.IsInRole(Role.Admin))
+                        {
+                            <li><a class="dropdown-item" href="#">Quản lý người dùng</a></li>
+                            <li><a class="dropdown-item" href="#">Quản lý công việc</a></li>
+                            <li><a class="dropdown-item" asp-page="/Admin/SystemHealth">Sức khỏe hệ thống</a></li>
                             <li><a class="dropdown-item" href="#">Cài đặt hệ thống</a></li>
                         }
                         <li>
