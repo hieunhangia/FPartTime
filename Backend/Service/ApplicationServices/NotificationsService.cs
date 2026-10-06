@@ -37,6 +37,9 @@ public class NotificationsService(ApplicationDbContext dbContext)
             .Where(n => n.UserId == user.GetUserId())
             .ProjectToDto();
 
+    public async Task<int> GetUnreadCountAsync(ClaimsPrincipal user) =>
+        await dbContext.Notifications.AsNoTracking().CountAsync(n => n.UserId == user.GetUserId() && !n.IsRead);
+
     public async Task MarkAsReadAsync(ClaimsPrincipal user, Guid notificationId)
     {
         var notification = await dbContext.Notifications

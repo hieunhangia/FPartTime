@@ -56,9 +56,25 @@
     padding: 0;
 }
 
+.notification-badge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background-color: #dc3545;
+    color: #fff;
+    border-radius: 10px;
+    font-size: 10px;
+    font-weight: 600;
+    line-height: 1;
+    padding: 2px 4px;
+    min-width: 15px;
+    text-align: center;
+    border: 1px solid #fff;
+}
+
 /* Khung dropdown thông báo */
 .notification-menu {
-    width: 320px;
+    width: 330px;
     padding: 0;
     font-size: 13px;
     border: 1px solid #ccc;
@@ -66,10 +82,27 @@
 }
 
 .notification-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     padding: 8px 12px;
     font-weight: bold;
     border-bottom: 1px solid #eee;
     background-color: #fafafa;
+}
+
+.btn-mark-all-read {
+    background: none;
+    border: none;
+    font-size: 11px;
+    color: #0d6efd;
+    cursor: pointer;
+    padding: 0;
+    font-weight: normal;
+}
+
+.btn-mark-all-read:hover {
+    text-decoration: underline;
 }
 
 .notification-list {
@@ -80,21 +113,88 @@
 .notification-menu ::deep .notification-item {
     padding: 8px 12px;
     border-bottom: 1px solid #f0f0f0;
+    background-color: #fff;
+    transition: background-color 0.15s;
 }
 
 .notification-menu ::deep .notification-item:hover {
     background-color: #f9f9f9;
 }
 
+/* Thông báo chưa đọc */
+.notification-menu ::deep .notification-item.unread {
+    background-color: #f4f8fc;
+}
+
+.notification-menu ::deep .notification-item.unread:hover {
+    background-color: #eaf2f8;
+}
+
+.notification-menu ::deep .notification-item-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 3px;
+}
+
+.notification-menu ::deep .notification-title-wrap {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-width: 0;
+}
+
+.notification-menu ::deep .unread-dot {
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background-color: #0d6efd;
+    flex-shrink: 0;
+}
+
+.notification-menu ::deep .notification-item .title {
+    font-weight: 600;
+    color: #222;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
 .notification-menu ::deep .notification-item .content {
-    color: #333;
+    color: #555;
     word-break: break-word;
+    line-height: 1.35;
+}
+
+.notification-menu ::deep .notification-item.unread .content {
+    color: #111;
+    font-weight: 500;
 }
 
 .notification-menu ::deep .notification-item .time {
     font-size: 11px;
     color: #888;
     margin-top: 4px;
+}
+
+/* Nút đánh dấu đã đọc của từng item */
+.notification-menu ::deep .btn-mark-read {
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 3px;
+    font-size: 10px;
+    color: #666;
+    padding: 1px 6px;
+    cursor: pointer;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.notification-menu ::deep .btn-mark-read:hover {
+    background: #e9ecef;
+    color: #000;
 }
 
 .notification-footer {

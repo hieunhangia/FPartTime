@@ -2,6 +2,7 @@
 #pragma warning disable CS0618
 using ApiSdk.Api.Notifications.Item;
 using ApiSdk.Api.Notifications.ReadAll;
+using ApiSdk.Api.Notifications.UnreadCount;
 using ApiSdk.Models;
 using Microsoft.Kiota.Abstractions.Extensions;
 using Microsoft.Kiota.Abstractions.Serialization;
@@ -23,6 +24,11 @@ namespace ApiSdk.Api.Notifications
         public global::ApiSdk.Api.Notifications.ReadAll.ReadAllRequestBuilder ReadAll
         {
             get => new global::ApiSdk.Api.Notifications.ReadAll.ReadAllRequestBuilder(PathParameters, RequestAdapter);
+        }
+        /// <summary>The unreadCount property</summary>
+        public global::ApiSdk.Api.Notifications.UnreadCount.UnreadCountRequestBuilder UnreadCount
+        {
+            get => new global::ApiSdk.Api.Notifications.UnreadCount.UnreadCountRequestBuilder(PathParameters, RequestAdapter);
         }
         /// <summary>Gets an item from the ApiSdk.api.notifications.item collection</summary>
         /// <param name="position">Unique identifier of the item</param>

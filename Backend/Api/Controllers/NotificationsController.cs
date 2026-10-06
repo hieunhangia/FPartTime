@@ -18,6 +18,12 @@ public class NotificationsController(NotificationsService notificationsService) 
     public IQueryable<NotificationResponseDto> GetMyNotifications() =>
         notificationsService.GetMyNotificationsQueryable(User);
 
+    [HttpGet("unread-count")]
+    [ProducesResponseType<int>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status500InternalServerError)]
+    public async Task<IActionResult> GetUnreadCount() => Ok(await notificationsService.GetUnreadCountAsync(User));
+
     [HttpPut("{id:guid}/read")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status401Unauthorized)]
