@@ -17,8 +17,8 @@ WORKDIR "/src/DbMigrator"
 RUN --mount=type=cache,id=nuget,target=/root/.nuget/packages \
     dotnet publish "DbMigrator.csproj" -c Release -a $TARGETARCH -o /app/publish /p:UseAppHost=false
 
-# Stage 2: Runtime environment (Ubuntu Noble Chiseled siêu nhẹ ~115MB, distroless, zero CVE, glibc native)
-FROM mcr.microsoft.com/dotnet/aspnet:10.0-noble-chiseled AS runtime
+# Stage 2: Runtime environment (Ubuntu Noble Chiseled Extra có ICU/tzdata cho EF Core/SQL Server)
+FROM mcr.microsoft.com/dotnet/aspnet:10.0-noble-chiseled-extra AS runtime
 WORKDIR /app
 
 COPY --from=build /app/publish .
