@@ -4,33 +4,27 @@ using Microsoft.Extensions.Configuration;
 using Repository;
 
 var isReset = args.Contains("--reset");
-var isAll = args.Contains("--all");
-var isMigrate = args.Contains("--migrate") || args.Contains("--migrate-only");
-var isSeed = args.Contains("--seed") || args.Contains("--seed-only");
+var isMigrate = args.Contains("--migrate");
 
-if (args.Length == 0 || (!isReset && !isAll && !isMigrate && !isSeed))
+if (args.Length == 0 || (!isReset && !isMigrate))
 {
     Console.WriteLine("""
                       =====================================================
                                 FPartTime Database Migrator & Seeder
                       =====================================================
                       Cách sử dụng:
-                        dotnet run --project DbMigrator -- [options]
+                        dotnet run --project DbMigrator [options]
 
                       Options:
-                        --all        Chạy EF Core Migrations và nạp Seed Data
-                        --migrate    Chỉ chạy EF Core Migrations (không nạp dữ liệu mẫu)
-                        --seed       Chỉ nạp dữ liệu mẫu (tự động tạo DB/migrate nếu chưa có)
+                        --migrate    Chạy EF Core Migrations
                         --reset      XÓA DB hiện tại, chạy lại Migrations và nạp Seed Data
 
                       Ví dụ:
-                        dotnet run --project DbMigrator -- --all
-                        dotnet run --project DbMigrator -- --migrate
-                        dotnet run --project DbMigrator -- --seed
-                        dotnet run --project DbMigrator -- --reset
+                        dotnet run --project DbMigrator --migrate
+                        dotnet run --project DbMigrator --reset
 
                       Chạy qua Docker Compose:
-                        docker compose run --rm db-migrator --all
+                        docker compose run --rm db-migrator --migrate
                         docker compose run --rm db-migrator --reset
                       =====================================================
                       """);
@@ -52,8 +46,7 @@ var options = new DbContextOptionsBuilder<ApplicationDbContext>()
 
 await using var db = new ApplicationDbContext(options);
 
-var shouldMigrate = isReset || isAll || isMigrate;
-var shouldSeed = isReset || isAll || isSeed;
+var shouldMigrate = isReset || isMigrate;
 
 Console.WriteLine("==================================================");
 Console.WriteLine("🚀 Bắt đầu FPartTime Database Tool (Pure DbContext)...");
@@ -68,26 +61,6 @@ try
         Console.WriteLine("✅ Đã xóa Database thành công.");
     }
 
-    // Bảo vệ khi chạy --seed riêng lẻ: nếu DB chưa có hoặc chưa migrate đầy đủ, tự động migrate trước
-    if (shouldSeed && !shouldMigrate)
-    {
-        var canConnect = await db.Database.CanConnectAsync();
-        var hasPendingMigrations = false;
-
-        if (canConnect)
-        {
-            var pending = await db.Database.GetPendingMigrationsAsync();
-            hasPendingMigrations = pending.Any();
-        }
-
-        if (!canConnect || hasPendingMigrations)
-        {
-            Console.WriteLine("⚠️  Phát hiện Database chưa tồn tại hoặc chưa áp dụng đầy đủ Migrations.");
-            Console.WriteLine("🛡️  Tự động kích hoạt tạo Database và áp dụng Migrations trước khi nạp Seed Data...");
-            shouldMigrate = true;
-        }
-    }
-
     if (shouldMigrate)
     {
         Console.WriteLine("🔄 Đang áp dụng EF Core Migrations...");
@@ -95,7 +68,7 @@ try
         Console.WriteLine("✅ Migrations hoàn tất.");
     }
 
-    if (shouldSeed)
+    if (isReset)
     {
         var seeder = new DataSeeder(db);
         await seeder.SeedAsync();
