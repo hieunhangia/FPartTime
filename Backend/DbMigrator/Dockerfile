@@ -15,7 +15,7 @@ WORKDIR "/src/DbMigrator"
 RUN dotnet publish "DbMigrator.csproj" -c Release -o /app/publish /p:UseAppHost=false
 
 # Stage 2: Runtime environment
-FROM mcr.microsoft.com/dotnet/runtime:10.0 AS runtime
+FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS runtime
 WORKDIR /app
 
 COPY --from=build /app/publish .
