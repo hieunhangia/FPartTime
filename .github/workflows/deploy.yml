@@ -68,6 +68,7 @@ jobs:
         with:
           context: ./Backend
           file: ./Backend/Dockerfile
+          platforms: linux/amd64,linux/arm64
           push: true
           tags: |
             ghcr.io/${{ env.REPO_LC }}/backend:latest
@@ -82,6 +83,7 @@ jobs:
         with:
           context: ./Frontend
           file: ./Frontend/Dockerfile
+          platforms: linux/amd64,linux/arm64
           push: true
           tags: |
             ghcr.io/${{ env.REPO_LC }}/frontend:latest
@@ -96,6 +98,7 @@ jobs:
         with:
           context: ./Backend
           file: ./Backend/DbMigrator/Dockerfile
+          platforms: linux/amd64,linux/arm64
           push: true
           tags: |
             ghcr.io/${{ env.REPO_LC }}/db-migrator:latest
@@ -108,26 +111,45 @@ jobs:
     if: needs.build-and-push.outputs.any_changed == 'true'
     runs-on: ubuntu-latest
     steps:
-      - name: Deploy to VPS via SSH
-        uses: appleboy/ssh-action@v1.0.3
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Copy docker-compose.yml to VPS
+        uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SERVER_SSH_KEY }}
           port: ${{ secrets.SERVER_PORT || 22 }}
+          source: "docker-compose.yml"
+          target: ${{ secrets.SERVER_WORKDIR }}
+
+      - name: Deploy to VPS via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        env:
+          GITHUB_ACTOR: ${{ github.actor }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SERVER_WORKDIR: ${{ secrets.SERVER_WORKDIR }}
+          MIGRATE_DB: ${{ needs.build-and-push.outputs.db_migrator == 'true' || needs.build-and-push.outputs.compose == 'true' || github.event_name == 'workflow_dispatch' }}
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          port: ${{ secrets.SERVER_PORT || 22 }}
+          envs: GITHUB_ACTOR,GITHUB_TOKEN,SERVER_WORKDIR,MIGRATE_DB
           script: |
-            cd ${{ secrets.SERVER_WORKDIR }}
+            set -e
+            cd "$SERVER_WORKDIR"
 
             echo "=== 1. Logging in to GHCR ==="
-            echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+            echo "$GITHUB_TOKEN" | docker login ghcr.io -u "$GITHUB_ACTOR" --password-stdin
 
             echo "=== 2. Pulling latest images ==="
             docker compose pull backend frontend db-migrator
 
-            MIGRATE_DB="${{ needs.build-and-push.outputs.db_migrator == 'true' || needs.build-and-push.outputs.compose == 'true' || github.event_name == 'workflow_dispatch' }}"
             if [ "$MIGRATE_DB" = "true" ]; then
               echo "=== 3. Database changes detected -> Running database migrations ==="
-              docker compose run --rm db-migrator
+              docker compose run --rm db-migrator --migrate
             else
               echo "=== 3. No database schema changes detected -> Skipping migrations ==="
             fi
@@ -137,5 +159,8 @@ jobs:
 
             echo "=== 5. Cleaning up old images ==="
             docker image prune -f
+
+            echo "=== 6. Logging out of GHCR ==="
+            docker logout ghcr.io
 
             echo "=== Deployment Completed Successfully! ==="
