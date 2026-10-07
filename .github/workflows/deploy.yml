@@ -1,0 +1,141 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ "master" ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    outputs:
+      backend: ${{ steps.filter.outputs.backend }}
+      frontend: ${{ steps.filter.outputs.frontend }}
+      db_migrator: ${{ steps.filter.outputs.db_migrator }}
+      compose: ${{ steps.filter.outputs.compose }}
+      any_changed: ${{ steps.filter.outputs.backend == 'true' || steps.filter.outputs.frontend == 'true' || steps.filter.outputs.db_migrator == 'true' || steps.filter.outputs.compose == 'true' || github.event_name == 'workflow_dispatch' }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Phân tích các file thay đổi trong commit
+      - name: Detect file changes
+        id: filter
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            backend:
+              - 'Backend/Api/**'
+              - 'Backend/Service/**'
+              - 'Backend/Repository/**'
+              - 'Backend/Dockerfile'
+              - 'Backend/.dockerignore'
+              - 'Backend/*.sln*'
+            frontend:
+              - 'Frontend/**'
+            db_migrator:
+              - 'Backend/DbMigrator/**'
+              - 'Backend/Repository/**'
+            compose:
+              - 'docker-compose.yml'
+              - '.github/workflows/deploy.yml'
+
+      - name: Lowercase repository name
+        if: steps.filter.outputs.backend == 'true' || steps.filter.outputs.frontend == 'true' || steps.filter.outputs.db_migrator == 'true' || steps.filter.outputs.compose == 'true' || github.event_name == 'workflow_dispatch'
+        run: |
+          echo "REPO_LC=${GITHUB_REPOSITORY,,}" >> ${GITHUB_ENV}
+
+      - name: Log in to GitHub Container Registry
+        if: steps.filter.outputs.backend == 'true' || steps.filter.outputs.frontend == 'true' || steps.filter.outputs.db_migrator == 'true' || steps.filter.outputs.compose == 'true' || github.event_name == 'workflow_dispatch'
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Docker Buildx
+        if: steps.filter.outputs.backend == 'true' || steps.filter.outputs.frontend == 'true' || steps.filter.outputs.db_migrator == 'true' || steps.filter.outputs.compose == 'true' || github.event_name == 'workflow_dispatch'
+        uses: docker/setup-buildx-action@v3
+
+      # 1. Chỉ Build & Push Backend API khi có thay đổi liên quan đến Backend
+      - name: Build and push Backend API
+        if: github.event_name == 'workflow_dispatch' || steps.filter.outputs.backend == 'true' || steps.filter.outputs.compose == 'true'
+        uses: docker/build-push-action@v5
+        with:
+          context: ./Backend
+          file: ./Backend/Dockerfile
+          push: true
+          tags: |
+            ghcr.io/${{ env.REPO_LC }}/backend:latest
+            ghcr.io/${{ env.REPO_LC }}/backend:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      # 2. Chỉ Build & Push Frontend khi có thay đổi liên quan đến Frontend
+      - name: Build and push Frontend Client
+        if: github.event_name == 'workflow_dispatch' || steps.filter.outputs.frontend == 'true' || steps.filter.outputs.compose == 'true'
+        uses: docker/build-push-action@v5
+        with:
+          context: ./Frontend
+          file: ./Frontend/Dockerfile
+          push: true
+          tags: |
+            ghcr.io/${{ env.REPO_LC }}/frontend:latest
+            ghcr.io/${{ env.REPO_LC }}/frontend:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      # 3. Chỉ Build & Push DbMigrator khi có thay đổi liên quan đến DbMigrator / Entity
+      - name: Build and push DbMigrator
+        if: github.event_name == 'workflow_dispatch' || steps.filter.outputs.db_migrator == 'true' || steps.filter.outputs.compose == 'true'
+        uses: docker/build-push-action@v5
+        with:
+          context: ./Backend
+          file: ./Backend/DbMigrator/Dockerfile
+          push: true
+          tags: |
+            ghcr.io/${{ env.REPO_LC }}/db-migrator:latest
+            ghcr.io/${{ env.REPO_LC }}/db-migrator:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  deploy:
+    needs: build-and-push
+    if: needs.build-and-push.outputs.any_changed == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to VPS via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          port: ${{ secrets.SERVER_PORT || 22 }}
+          script: |
+            cd ${{ secrets.SERVER_WORKDIR }}
+
+            echo "=== 1. Logging in to GHCR ==="
+            echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+            echo "=== 2. Pulling latest images ==="
+            docker compose pull backend frontend db-migrator
+
+            MIGRATE_DB="${{ needs.build-and-push.outputs.db_migrator == 'true' || needs.build-and-push.outputs.compose == 'true' || github.event_name == 'workflow_dispatch' }}"
+            if [ "$MIGRATE_DB" = "true" ]; then
+              echo "=== 3. Database changes detected -> Running database migrations ==="
+              docker compose run --rm db-migrator
+            else
+              echo "=== 3. No database schema changes detected -> Skipping migrations ==="
+            fi
+
+            echo "=== 4. Recreating updated containers ==="
+            docker compose up -d
+
+            echo "=== 5. Cleaning up old images ==="
+            docker image prune -f
+
+            echo "=== Deployment Completed Successfully! ==="

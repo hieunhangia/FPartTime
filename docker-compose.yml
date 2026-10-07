@@ -12,6 +12,7 @@ services:
       - fparttime-net
 
   db-migrator:
+    image: ghcr.io/hieunhangia/fparttime/db-migrator:latest
     build:
       context: ./Backend
       dockerfile: DbMigrator/Dockerfile
@@ -25,6 +26,7 @@ services:
       - fparttime-net
 
   backend:
+    image: ghcr.io/hieunhangia/fparttime/backend:latest
     build:
       context: ./Backend
       dockerfile: Dockerfile
@@ -53,6 +55,7 @@ services:
       - fparttime-net
 
   frontend:
+    image: ghcr.io/hieunhangia/fparttime/frontend:latest
     build:
       context: ./Frontend
       dockerfile: Dockerfile
