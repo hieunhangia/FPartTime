@@ -1,0 +1,12 @@
+**/.git
+**/.gitignore
+**/.vs
+**/.idea
+**/bin
+**/obj
+**/*.user
+**/*.DotSettings*
+**/*.md
+**/*.log
+.env
+.env.*

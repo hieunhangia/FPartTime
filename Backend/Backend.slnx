@@ -1,5 +1,6 @@
 <Solution>
   <Project Path="Api/Api.csproj" />
+  <Project Path="DbMigrator/DbMigrator.csproj" />
   <Project Path="Repository/Repository.csproj" />
   <Project Path="Service/Service.csproj" />
 </Solution>

@@ -4,6 +4,7 @@ using System.Text.Json.Serialization;
 using Api;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.OData;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
@@ -66,6 +67,11 @@ builder.Services.AddOpenApi(options =>
 
 var app = builder.Build();
 
+app.UseForwardedHeaders(new ForwardedHeadersOptions
+{
+    ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
+});
+
 app.UseExceptionHandler();
 
 // Configure the HTTP request pipeline.
@@ -74,8 +80,6 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
     app.MapScalarApiReference();
 }
-
-//await app.SeedDataAsync();
 
 app.UseAuthentication();
 app.UseAuthorization();

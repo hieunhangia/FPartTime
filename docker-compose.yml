@@ -1,0 +1,89 @@
+services:
+  database:
+    image: mcr.microsoft.com/azure-sql-edge:latest
+    container_name: fparttime-db
+    restart: unless-stopped
+    environment:
+      - ACCEPT_EULA=Y
+      - MSSQL_SA_PASSWORD=${DB_PASSWORD:-StrongPassword@2026!}
+    volumes:
+      - mssql_data:/var/opt/mssql
+    networks:
+      - fparttime-net
+
+  db-migrator:
+    build:
+      context: ./Backend
+      dockerfile: DbMigrator/Dockerfile
+    container_name: fparttime-db-migrator
+    profiles: ["tools"]
+    environment:
+      - ConnectionStrings__DefaultConnection=Server=database,1433;Database=FPartTime;User Id=sa;Password=${DB_PASSWORD:-StrongPassword@2026!};TrustServerCertificate=True;
+      - RESET_DATABASE=${RESET_DATABASE:-false}
+      - SEED_DATA=${SEED_DATA:-false}
+    depends_on:
+      - database
+    networks:
+      - fparttime-net
+
+  backend:
+    build:
+      context: ./Backend
+      dockerfile: Dockerfile
+    container_name: fparttime-backend
+    restart: unless-stopped
+    environment:
+      - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT:-Staging}
+      - ConnectionStrings__DefaultConnection=Server=database,1433;Database=FPartTime;User Id=sa;Password=${DB_PASSWORD:-StrongPassword@2026!};TrustServerCertificate=True;
+      - JwtSettings__SecretKey=${JWT_SECRET_KEY}
+      - JwtSettings__Issuer=${JWT_ISSUER:-https://api.yourdomain.com}
+      - JwtSettings__Audience=${JWT_AUDIENCE:-https://api.yourdomain.com}
+      - JwtSettings__AccessTokenExpirationInMinutes=${JWT_ACCESS_TOKEN_EXPIRATION_MINUTES:-15}
+      - JwtSettings__RefreshTokenExpirationInDays=${JWT_REFRESH_TOKEN_EXPIRATION_DAYS:-7}
+      - R2Settings__ServiceURL=${R2_SERVICE_URL}
+      - R2Settings__PublicDomain=${R2_PUBLIC_DOMAIN}
+      - R2Settings__AccessKey=${R2_ACCESS_KEY}
+      - R2Settings__SecretKey=${R2_SECRET_KEY}
+      - R2Settings__PublicBucketName=${R2_PUBLIC_BUCKET_NAME}
+      - R2Settings__PrivateBucketName=${R2_PRIVATE_BUCKET_NAME}
+      - R2Settings__PresignedGetExpirySeconds=${R2_PRESIGNED_GET_EXPIRY_SECONDS:-3600}
+      - SystemHealthCheck__HeaderName=${HEALTH_CHECK_HEADER:-X-System-Health-Check-Key}
+      - SystemHealthCheck__ApiKey=${HEALTH_CHECK_API_KEY}
+    depends_on:
+      - database
+    networks:
+      - fparttime-net
+
+  frontend:
+    build:
+      context: ./Frontend
+      dockerfile: Dockerfile
+    container_name: fparttime-frontend
+    restart: unless-stopped
+    environment:
+      - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT:-Staging}
+      - BackendApi__BaseUrl=${BACKEND_API_BASE_URL:-https://api.yourdomain.com}
+      - BackendApi__AccessTokenAllowedHosts=${BACKEND_API_ALLOWED_HOSTS:-api.yourdomain.com,localhost,backend}
+    depends_on:
+      - backend
+    networks:
+      - fparttime-net
+
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    container_name: fparttime-cloudflared
+    restart: unless-stopped
+    command: tunnel --no-autoupdate run --token ${CLOUDFLARE_TUNNEL_TOKEN}
+    depends_on:
+      - frontend
+      - backend
+    networks:
+      - fparttime-net
+
+volumes:
+  mssql_data:
+    name: fparttime_mssql_data
+
+networks:
+  fparttime-net:
+    name: fparttime-net
