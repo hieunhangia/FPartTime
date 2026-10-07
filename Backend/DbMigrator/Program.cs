@@ -20,7 +20,7 @@ if (args.Length == 0 || (!isReset && !isAll && !isMigrate && !isSeed))
                       Options:
                         --all        Chạy EF Core Migrations và nạp Seed Data
                         --migrate    Chỉ chạy EF Core Migrations (không nạp dữ liệu mẫu)
-                        --seed       Chỉ nạp dữ liệu mẫu (không chạy migration)
+                        --seed       Chỉ nạp dữ liệu mẫu (tự động tạo DB/migrate nếu chưa có)
                         --reset      XÓA DB hiện tại, chạy lại Migrations và nạp Seed Data
 
                       Ví dụ:
@@ -66,6 +66,26 @@ try
         Console.WriteLine("⚠️  Đang xóa toàn bộ Database (--reset)...");
         await db.Database.EnsureDeletedAsync();
         Console.WriteLine("✅ Đã xóa Database thành công.");
+    }
+
+    // Bảo vệ khi chạy --seed riêng lẻ: nếu DB chưa có hoặc chưa migrate đầy đủ, tự động migrate trước
+    if (shouldSeed && !shouldMigrate)
+    {
+        var canConnect = await db.Database.CanConnectAsync();
+        var hasPendingMigrations = false;
+
+        if (canConnect)
+        {
+            var pending = await db.Database.GetPendingMigrationsAsync();
+            hasPendingMigrations = pending.Any();
+        }
+
+        if (!canConnect || hasPendingMigrations)
+        {
+            Console.WriteLine("⚠️  Phát hiện Database chưa tồn tại hoặc chưa áp dụng đầy đủ Migrations.");
+            Console.WriteLine("🛡️  Tự động kích hoạt tạo Database và áp dụng Migrations trước khi nạp Seed Data...");
+            shouldMigrate = true;
+        }
     }
 
     if (shouldMigrate)
