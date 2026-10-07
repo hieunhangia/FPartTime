@@ -106,42 +106,34 @@ public class DataSeeder(ApplicationDbContext db)
 
     private async Task SeedSampleSqlDataAsync()
     {
-        var sampleDataDir = Path.Combine(AppContext.BaseDirectory, "Sample Data");
-
         // 1. Address SQL (Provinces & Communes)
-        var hasProvinces = await db.Provinces.AnyAsync();
-        if (!hasProvinces)
-        {
-            var addressSqlPath = Path.Combine(sampleDataDir, "address.sql");
-            if (File.Exists(addressSqlPath))
-            {
-                Console.WriteLine("➡️ Đang nạp dữ liệu từ address.sql...");
-                var sql = await File.ReadAllTextAsync(addressSqlPath);
-                await db.Database.ExecuteSqlRawAsync(sql);
-                Console.WriteLine("  [+] Đã thực thi address.sql thành công.");
-            }
-        }
-        else
-        {
-            Console.WriteLine("ℹ️ Dữ liệu địa chỉ (Provinces) đã có sẵn.");
-        }
+        await SeedSqlFileIfEmptyAsync(() => db.Provinces.AnyAsync(), "address.sql");
 
         // 2. Notification SQL
-        var hasNotifications = await db.Notifications.AnyAsync();
-        if (!hasNotifications)
+        await SeedSqlFileIfEmptyAsync(() => db.Notifications.AnyAsync(), "notification.sql");
+    }
+
+    private async Task SeedSqlFileIfEmptyAsync(Func<Task<bool>> hasDataAsync, string fileName)
+    {
+        if (await hasDataAsync())
         {
-            var notificationSqlPath = Path.Combine(sampleDataDir, "notification.sql");
-            if (File.Exists(notificationSqlPath))
-            {
-                Console.WriteLine("➡️ Đang nạp dữ liệu từ notification.sql...");
-                var sql = await File.ReadAllTextAsync(notificationSqlPath);
-                await db.Database.ExecuteSqlRawAsync(sql);
-                Console.WriteLine("  [+] Đã thực thi notification.sql thành công.");
-            }
+            Console.WriteLine($"ℹ️ Không cần nạp dữ liệu từ {fileName} vì đã có sẵn dữ liệu.");
+            return;
         }
-        else
+
+        var filePath = Path.IsPathRooted(fileName)
+            ? fileName
+            : Path.Combine(AppContext.BaseDirectory, "Sample Data", fileName);
+
+        if (!File.Exists(filePath))
         {
-            Console.WriteLine("ℹ️ Dữ liệu thông báo (Notifications) đã có sẵn.");
+            Console.WriteLine($"⚠️  Không tìm thấy file SQL: {filePath}");
+            return;
         }
+
+        Console.WriteLine($"➡️ Đang nạp dữ liệu từ {fileName}...");
+        var sql = await File.ReadAllTextAsync(filePath);
+        await db.Database.ExecuteSqlRawAsync(sql);
+        Console.WriteLine($"  [+] Đã thực thi {fileName} thành công.");
     }
 }
