@@ -2,7 +2,7 @@ name: CI/CD Pipeline
 
 on:
   push:
-    branches: [ "master" ]
+    branches: ["master"]
   workflow_dispatch:
 
 permissions:
@@ -18,7 +18,7 @@ jobs:
   # 1. Phát hiện các module thay đổi trong commit
   # -------------------------------------------------------------
   changes:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04-arm
     outputs:
       backend: ${{ steps.filter.outputs.backend }}
       frontend: ${{ steps.filter.outputs.frontend }}
@@ -27,7 +27,7 @@ jobs:
       any_build: ${{ steps.filter.outputs.backend == 'true' || steps.filter.outputs.frontend == 'true' || steps.filter.outputs.db_migrator == 'true' || steps.filter.outputs.compose == 'true' || github.event_name == 'workflow_dispatch' }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Detect file changes
         id: filter
@@ -56,10 +56,10 @@ jobs:
   build-backend:
     needs: changes
     if: needs.changes.outputs.backend == 'true' || needs.changes.outputs.compose == 'true' || github.event_name == 'workflow_dispatch'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04-arm
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Lowercase repository name
         run: |
@@ -94,10 +94,10 @@ jobs:
   build-frontend:
     needs: changes
     if: needs.changes.outputs.frontend == 'true' || needs.changes.outputs.compose == 'true' || github.event_name == 'workflow_dispatch'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04-arm
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Lowercase repository name
         run: |
@@ -132,10 +132,10 @@ jobs:
   build-migrator:
     needs: changes
     if: needs.changes.outputs.db_migrator == 'true' || needs.changes.outputs.compose == 'true' || github.event_name == 'workflow_dispatch'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04-arm
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Lowercase repository name
         run: |
@@ -174,10 +174,10 @@ jobs:
       needs.changes.outputs.any_build == 'true' &&
       !contains(needs.*.result, 'failure') &&
       !contains(needs.*.result, 'cancelled')
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04-arm
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Copy docker-compose.yml to VPS
         uses: appleboy/scp-action@v0.1.7
