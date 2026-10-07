@@ -9,23 +9,29 @@ permissions:
   contents: read
   packages: write
 
+env:
+  REGISTRY: ghcr.io
+  TARGET_PLATFORM: linux/arm64
+
 jobs:
-  build-and-push:
+  # -------------------------------------------------------------
+  # 1. Phát hiện các module thay đổi trong commit
+  # -------------------------------------------------------------
+  changes:
     runs-on: ubuntu-latest
     outputs:
       backend: ${{ steps.filter.outputs.backend }}
       frontend: ${{ steps.filter.outputs.frontend }}
       db_migrator: ${{ steps.filter.outputs.db_migrator }}
       compose: ${{ steps.filter.outputs.compose }}
-      any_changed: ${{ steps.filter.outputs.backend == 'true' || steps.filter.outputs.frontend == 'true' || steps.filter.outputs.db_migrator == 'true' || steps.filter.outputs.compose == 'true' || github.event_name == 'workflow_dispatch' }}
+      any_build: ${{ steps.filter.outputs.backend == 'true' || steps.filter.outputs.frontend == 'true' || steps.filter.outputs.db_migrator == 'true' || steps.filter.outputs.compose == 'true' || github.event_name == 'workflow_dispatch' }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # Phân tích các file thay đổi trong commit
       - name: Detect file changes
         id: filter
-        uses: dorny/paths-filter@v3
+        uses: dorny/paths-filter@v4
         with:
           filters: |
             backend:
@@ -44,71 +50,130 @@ jobs:
               - 'docker-compose.yml'
               - '.github/workflows/deploy.yml'
 
+  # -------------------------------------------------------------
+  # 2. Build & Push Backend API (Chạy song song - ARM64)
+  # -------------------------------------------------------------
+  build-backend:
+    needs: changes
+    if: needs.changes.outputs.backend == 'true' || needs.changes.outputs.compose == 'true' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
       - name: Lowercase repository name
-        if: steps.filter.outputs.backend == 'true' || steps.filter.outputs.frontend == 'true' || steps.filter.outputs.db_migrator == 'true' || steps.filter.outputs.compose == 'true' || github.event_name == 'workflow_dispatch'
         run: |
           echo "REPO_LC=${GITHUB_REPOSITORY,,}" >> ${GITHUB_ENV}
 
       - name: Log in to GitHub Container Registry
-        if: steps.filter.outputs.backend == 'true' || steps.filter.outputs.frontend == 'true' || steps.filter.outputs.db_migrator == 'true' || steps.filter.outputs.compose == 'true' || github.event_name == 'workflow_dispatch'
         uses: docker/login-action@v3
         with:
-          registry: ghcr.io
+          registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Set up Docker Buildx
-        if: steps.filter.outputs.backend == 'true' || steps.filter.outputs.frontend == 'true' || steps.filter.outputs.db_migrator == 'true' || steps.filter.outputs.compose == 'true' || github.event_name == 'workflow_dispatch'
         uses: docker/setup-buildx-action@v3
 
-      # 1. Chỉ Build & Push Backend API khi có thay đổi liên quan đến Backend
-      - name: Build and push Backend API
-        if: github.event_name == 'workflow_dispatch' || steps.filter.outputs.backend == 'true' || steps.filter.outputs.compose == 'true'
-        uses: docker/build-push-action@v5
+      - name: Build and push Backend API (ARM64)
+        uses: docker/build-push-action@v6
         with:
           context: ./Backend
           file: ./Backend/Dockerfile
-          platforms: linux/amd64,linux/arm64
+          platforms: ${{ env.TARGET_PLATFORM }}
           push: true
           tags: |
             ghcr.io/${{ env.REPO_LC }}/backend:latest
             ghcr.io/${{ env.REPO_LC }}/backend:${{ github.sha }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-from: type=gha,scope=backend-arm64
+          cache-to: type=gha,mode=max,scope=backend-arm64
 
-      # 2. Chỉ Build & Push Frontend khi có thay đổi liên quan đến Frontend
-      - name: Build and push Frontend Client
-        if: github.event_name == 'workflow_dispatch' || steps.filter.outputs.frontend == 'true' || steps.filter.outputs.compose == 'true'
-        uses: docker/build-push-action@v5
+  # -------------------------------------------------------------
+  # 3. Build & Push Frontend Client (Chạy song song - ARM64)
+  # -------------------------------------------------------------
+  build-frontend:
+    needs: changes
+    if: needs.changes.outputs.frontend == 'true' || needs.changes.outputs.compose == 'true' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Lowercase repository name
+        run: |
+          echo "REPO_LC=${GITHUB_REPOSITORY,,}" >> ${GITHUB_ENV}
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and push Frontend Client (ARM64)
+        uses: docker/build-push-action@v6
         with:
           context: ./Frontend
           file: ./Frontend/Dockerfile
-          platforms: linux/amd64,linux/arm64
+          platforms: ${{ env.TARGET_PLATFORM }}
           push: true
           tags: |
             ghcr.io/${{ env.REPO_LC }}/frontend:latest
             ghcr.io/${{ env.REPO_LC }}/frontend:${{ github.sha }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-from: type=gha,scope=frontend-arm64
+          cache-to: type=gha,mode=max,scope=frontend-arm64
 
-      # 3. Chỉ Build & Push DbMigrator khi có thay đổi liên quan đến DbMigrator / Entity
-      - name: Build and push DbMigrator
-        if: github.event_name == 'workflow_dispatch' || steps.filter.outputs.db_migrator == 'true' || steps.filter.outputs.compose == 'true'
-        uses: docker/build-push-action@v5
+  # -------------------------------------------------------------
+  # 4. Build & Push DbMigrator (Chạy song song - ARM64)
+  # -------------------------------------------------------------
+  build-migrator:
+    needs: changes
+    if: needs.changes.outputs.db_migrator == 'true' || needs.changes.outputs.compose == 'true' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Lowercase repository name
+        run: |
+          echo "REPO_LC=${GITHUB_REPOSITORY,,}" >> ${GITHUB_ENV}
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and push DbMigrator (ARM64)
+        uses: docker/build-push-action@v6
         with:
           context: ./Backend
           file: ./Backend/DbMigrator/Dockerfile
-          platforms: linux/amd64,linux/arm64
+          platforms: ${{ env.TARGET_PLATFORM }}
           push: true
           tags: |
             ghcr.io/${{ env.REPO_LC }}/db-migrator:latest
             ghcr.io/${{ env.REPO_LC }}/db-migrator:${{ github.sha }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-from: type=gha,scope=dbmigrator-arm64
+          cache-to: type=gha,mode=max,scope=dbmigrator-arm64
 
+  # -------------------------------------------------------------
+  # 5. Triển khai lên Oracle ARM VPS qua SSH
+  # -------------------------------------------------------------
   deploy:
-    needs: build-and-push
-    if: needs.build-and-push.outputs.any_changed == 'true'
+    needs: [changes, build-backend, build-frontend, build-migrator]
+    if: |
+      always() &&
+      needs.changes.outputs.any_build == 'true' &&
+      !contains(needs.*.result, 'failure') &&
+      !contains(needs.*.result, 'cancelled')
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -124,19 +189,21 @@ jobs:
           source: "docker-compose.yml"
           target: ${{ secrets.SERVER_WORKDIR }}
 
-      - name: Deploy to VPS via SSH
-        uses: appleboy/ssh-action@v1.0.3
+      - name: Deploy to Oracle ARM VPS via SSH
+        uses: appleboy/ssh-action@v1.2.2
         env:
           GITHUB_ACTOR: ${{ github.actor }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SERVER_WORKDIR: ${{ secrets.SERVER_WORKDIR }}
-          MIGRATE_DB: ${{ needs.build-and-push.outputs.db_migrator == 'true' || needs.build-and-push.outputs.compose == 'true' || github.event_name == 'workflow_dispatch' }}
+          UPDATE_BACKEND: ${{ needs.changes.outputs.backend == 'true' || needs.changes.outputs.compose == 'true' || github.event_name == 'workflow_dispatch' }}
+          UPDATE_FRONTEND: ${{ needs.changes.outputs.frontend == 'true' || needs.changes.outputs.compose == 'true' || github.event_name == 'workflow_dispatch' }}
+          UPDATE_MIGRATOR: ${{ needs.changes.outputs.db_migrator == 'true' || needs.changes.outputs.compose == 'true' || github.event_name == 'workflow_dispatch' }}
         with:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SERVER_SSH_KEY }}
           port: ${{ secrets.SERVER_PORT || 22 }}
-          envs: GITHUB_ACTOR,GITHUB_TOKEN,SERVER_WORKDIR,MIGRATE_DB
+          envs: GITHUB_ACTOR,GITHUB_TOKEN,SERVER_WORKDIR,UPDATE_BACKEND,UPDATE_FRONTEND,UPDATE_MIGRATOR
           script: |
             set -e
             cd "$SERVER_WORKDIR"
@@ -144,10 +211,20 @@ jobs:
             echo "=== 1. Logging in to GHCR ==="
             echo "$GITHUB_TOKEN" | docker login ghcr.io -u "$GITHUB_ACTOR" --password-stdin
 
-            echo "=== 2. Pulling latest images ==="
-            docker compose pull backend frontend db-migrator
+            echo "=== 2. Pulling only updated ARM64 images ==="
+            SERVICES_TO_PULL=""
+            [ "$UPDATE_BACKEND" = "true" ] && SERVICES_TO_PULL="$SERVICES_TO_PULL backend"
+            [ "$UPDATE_FRONTEND" = "true" ] && SERVICES_TO_PULL="$SERVICES_TO_PULL frontend"
+            [ "$UPDATE_MIGRATOR" = "true" ] && SERVICES_TO_PULL="$SERVICES_TO_PULL db-migrator"
 
-            if [ "$MIGRATE_DB" = "true" ]; then
+            if [ -n "$SERVICES_TO_PULL" ]; then
+              echo "Pulling updated images:$SERVICES_TO_PULL"
+              docker compose pull $SERVICES_TO_PULL
+            else
+              echo "No images needed to pull."
+            fi
+
+            if [ "$UPDATE_MIGRATOR" = "true" ]; then
               echo "=== 3. Database changes detected -> Running database migrations ==="
               docker compose run --rm db-migrator --migrate
             else
@@ -155,7 +232,7 @@ jobs:
             fi
 
             echo "=== 4. Recreating updated containers ==="
-            docker compose up -d
+            docker compose up -d --remove-orphans
 
             echo "=== 5. Cleaning up old images ==="
             docker image prune -f
@@ -163,4 +240,4 @@ jobs:
             echo "=== 6. Logging out of GHCR ==="
             docker logout ghcr.io
 
-            echo "=== Deployment Completed Successfully! ==="
+            echo "=== Deployment to Oracle ARM Completed Successfully! ==="
