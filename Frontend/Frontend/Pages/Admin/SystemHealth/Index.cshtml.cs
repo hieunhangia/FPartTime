@@ -10,11 +10,7 @@ using Microsoft.Extensions.Caching.Memory;
 namespace Frontend.Pages.Admin.SystemHealth;
 
 [Authorize(Roles = Role.Admin)]
-public class IndexModel(
-    IHttpClientFactory httpClientFactory,
-    IConfiguration configuration,
-    IMemoryCache memoryCache,
-    ILogger<IndexModel> logger)
+public class IndexModel(IHttpClientFactory httpClientFactory, IConfiguration configuration, IMemoryCache memoryCache)
     : PageModel
 {
     private const string CacheKey = "BetterStack_SystemHealth_Cache";
@@ -97,9 +93,8 @@ public class IndexModel(
             memoryCache.Set(CacheKey, result, CacheDuration);
             HealthData = result;
         }
-        catch (Exception ex)
+        catch
         {
-            logger.LogError(ex, "Đã xảy ra lỗi khi kết nối đến dịch vụ giám sát.");
             TempData.SetErrorMessage("Đã xảy ra lỗi khi kết nối đến dịch vụ giám sát.");
             HealthData = new SystemHealthData();
         }

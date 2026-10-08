@@ -65,6 +65,7 @@ services:
       - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT}
       - BackendApi__BaseUrl=${BACKEND_API_BASE_URL}
       - BackendApi__AccessTokenAllowedHosts=${BACKEND_API_ALLOWED_HOSTS}
+      - BetterStack__ApiToken=${BETTER_STACK_API_TOKEN}
     depends_on:
       - backend
     networks:
