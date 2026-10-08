@@ -1,0 +1,22 @@
+.stat-card {
+    transition: transform 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+.stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.06);
+}
+
+.monitor-row {
+    cursor: pointer;
+    transition: background-color 0.15s ease-in-out;
+}
+
+.monitor-row:hover {
+    background-color: rgba(0, 0, 0, 0.035) !important;
+}
+
+.tabular-nums {
+    font-feature-settings: "tnum";
+    font-variant-numeric: tabular-nums;
+}

@@ -1,0 +1,66 @@
+.metric-card {
+    background-color: #f8f9fa;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    transition: transform 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+.metric-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.06);
+}
+
+.metric-label {
+    color: #6c757d;
+    font-size: 0.875rem;
+}
+
+.metric-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #212529;
+    margin-top: 0.25rem;
+    font-feature-settings: "tnum";
+    font-variant-numeric: tabular-nums;
+}
+
+.monitor-url {
+    font-family: var(--bs-font-monospace);
+    font-size: 0.875rem;
+    color: #6c757d;
+    word-break: break-all;
+}
+
+.chart-wrapper {
+    height: 320px;
+    width: 100%;
+    position: relative;
+}
+
+.legend-dot {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 2px;
+    flex-shrink: 0;
+}
+
+.legend-dns {
+    background-color: #8B5CF6;
+}
+
+.legend-tcp {
+    background-color: #3B82F6;
+}
+
+.legend-tls {
+    background-color: #10B981;
+}
+
+.legend-transfer {
+    background-color: #059669;
+}
+
+.tabular-nums {
+    font-feature-settings: "tnum";
+    font-variant-numeric: tabular-nums;
+}

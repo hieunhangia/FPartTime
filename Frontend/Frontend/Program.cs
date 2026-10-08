@@ -1,3 +1,4 @@
+using System.Net.Http.Headers;
 using ApiSdk;
 using BackendApiClient;
 using BackendApiClient.Extensions;
@@ -11,6 +12,8 @@ using Microsoft.Kiota.Abstractions.Authentication;
 using Microsoft.Kiota.Http.HttpClientLibrary;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Configuration.AddJsonFile("appsettings.secret.json", optional: true, reloadOnChange: true);
 
 // Add services to the container.
 builder.Services.AddRazorPages(options =>
@@ -99,6 +102,16 @@ builder.Services.AddHttpClient<ApiClient>()
 
         return new ApiClient(adapter);
     });
+
+builder.Services.AddHttpClient("BetterStack", client =>
+{
+    client.BaseAddress = new Uri(builder.Configuration["BetterStack:ApiBaseUrl"]!.TrimEnd('/') + "/");
+    client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer",
+        builder.Configuration["BetterStack:ApiToken"] ??
+        throw new InvalidOperationException("BetterStack:ApiToken is not configured."));
+});
+
+builder.Services.AddMemoryCache();
 
 var app = builder.Build();
 

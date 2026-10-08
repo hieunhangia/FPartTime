@@ -1,0 +1,324 @@
+@page "{id}"
+@model Frontend.Pages.Admin.SystemHealth.DetailModel
+@{
+    ViewData["Title"] = $"{Model.DetailData.Name} - Chi tiết giám sát";
+}
+
+<div class="container my-4">
+    <!-- Breadcrumb & Hành động -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <a asp-page="./Index" class="btn btn-outline-secondary btn-sm">
+            &larr; Quay lại danh sách
+        </a>
+        <a asp-page="./Detail" asp-route-id="@Model.DetailData.MonitorId" asp-route-refresh="true"
+           class="btn btn-outline-primary btn-sm">
+            Làm mới
+        </a>
+    </div>
+
+    @if (Model.DetailData.IsConfigured)
+    {
+        <!-- Tiêu đề dịch vụ -->
+        <div class="mb-4">
+            <div class="d-flex align-items-center gap-2">
+                <h3 class="mb-0 fw-bold">@Model.DetailData.Name</h3>
+                <span class="badge @(Model.DetailData.Status switch
+                                   {
+                                       "up" => "bg-success",
+                                       "down" => "bg-danger",
+                                       "paused" => "bg-secondary",
+                                       "validating" => "bg-secondary",
+                                       "maintenance" => "bg-warning text-dark",
+                                       _ => "bg-light text-dark"
+                                   })">@Model.DetailData.StatusText</span>
+            </div>
+            <div class="monitor-url mt-1">@Model.DetailData.Url</div>
+        </div>
+
+        <!-- 3 Thẻ chỉ số tổng quan -->
+        <div class="row g-3 mb-4">
+            <div class="col-12 col-md-4">
+                <div class="card h-100 shadow-sm border-0 metric-card">
+                    <div class="card-body p-3">
+                        <div class="metric-label">Thời gian hoạt động liên tục</div>
+                        <div class="metric-value">@Model.DetailData.CurrentlyUpFor</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-md-4">
+                <div class="card h-100 shadow-sm border-0 metric-card">
+                    <div class="card-body p-3">
+                        <div class="metric-label">Lần kiểm tra cuối</div>
+                        <div class="metric-value">@Model.DetailData.LastCheckedAgo</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-md-4">
+                <div class="card h-100 shadow-sm border-0 metric-card">
+                    <div class="card-body p-3">
+                        <div class="metric-label">Tổng số sự cố</div>
+                        <div class="metric-value">@Model.DetailData.IncidentsCount</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Biểu đồ độ trễ phản hồi -->
+        <div class="card mb-4 shadow-sm border">
+            <div class="card-header bg-white py-3">
+                <h6 class="mb-0 fw-bold">Thời gian phản hồi</h6>
+            </div>
+            <div class="card-body">
+                @if (Model.DetailData.ChartPoints.Count == 0)
+                {
+                    <div class="text-center text-muted py-5">
+                        Chưa có đủ dữ liệu độ trễ phản hồi trong 24 giờ qua.
+                    </div>
+                }
+                else
+                {
+                    <div class="chart-wrapper">
+                        <canvas id="responseTimesChart"></canvas>
+                    </div>
+                    <!-- Chú giải biểu đồ -->
+                    <div class="d-flex flex-wrap gap-3 mt-3 pt-2 border-top small text-muted">
+                        <span class="d-flex align-items-center gap-1">
+                            <span class="legend-dot legend-dns"></span> Tra cứu DNS
+                        </span>
+                        <span class="d-flex align-items-center gap-1">
+                            <span class="legend-dot legend-tcp"></span> Kết nối TCP
+                        </span>
+                        <span class="d-flex align-items-center gap-1">
+                            <span class="legend-dot legend-tls"></span> Bắt tay TLS/SSL
+                        </span>
+                        <span class="d-flex align-items-center gap-1">
+                            <span class="legend-dot legend-transfer"></span> Truyền dữ liệu
+                        </span>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- Bảng thống kê SLA -->
+        <div class="card mb-4 shadow-sm border">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                    <tr>
+                        <th>Khoảng thời gian</th>
+                        <th>Mức độ sẵn sàng (SLA)</th>
+                        <th>Thời gian gián đoạn</th>
+                        <th>Số sự cố</th>
+                        <th>Sự cố dài nhất</th>
+                        <th>Sự cố trung bình</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    @foreach (var sla in Model.DetailData.SlaPeriods)
+                    {
+                        <tr>
+                            <td><strong>@sla.PeriodName</strong></td>
+                            <td class="fw-bold tabular-nums">@sla.AvailabilityText</td>
+                            <td class="text-muted tabular-nums">@sla.DowntimeText</td>
+                            <td class="tabular-nums">@sla.IncidentsCount</td>
+                            <td class="text-muted tabular-nums">@sla.LongestIncidentText</td>
+                            <td class="text-muted tabular-nums">@sla.AvgIncidentText</td>
+                        </tr>
+                    }
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Bộ lọc tùy chọn khoảng thời gian -->
+            <form method="get" class="p-3 bg-light border-top">
+                <div class="row g-2 align-items-center">
+                    <div class="col-auto">
+                        <label for="fromDate" class="col-form-label col-form-label-sm">Từ ngày</label>
+                    </div>
+                    <div class="col-auto">
+                        <input type="date" id="fromDate" name="FromDate" value="@Model.FromDate"
+                               class="form-control form-control-sm">
+                    </div>
+                    <div class="col-auto">
+                        <label for="toDate" class="col-form-label col-form-label-sm">Đến ngày</label>
+                    </div>
+                    <div class="col-auto">
+                        <input type="date" id="toDate" name="ToDate" value="@Model.ToDate"
+                               class="form-control form-control-sm">
+                    </div>
+                    <div class="col-auto">
+                        <button type="submit" class="btn btn-secondary btn-sm">Tính toán</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    }
+</div>
+
+@if (Model.DetailData.ChartPoints.Count > 0)
+{
+    @section Scripts {
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <script>
+            (function () {
+                const chartData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.DetailData.ChartPoints));
+                if (!chartData || chartData.length === 0) return;
+
+                const minTime = chartData[0].EpochMs;
+                const maxTime = chartData[chartData.length - 1].EpochMs;
+                const durationMinutes = Math.max(1, (maxTime - minTime) / (60 * 1000));
+
+                // Mục tiêu chia khoảng ~10 cột mốc thời gian trên biểu đồ
+                const targetCount = 10;
+                const standardSteps = [1, 2, 5, 10, 15, 20, 30, 60, 120, 180, 240, 360, 720];
+                let bestStep = standardSteps[0];
+                let bestDiff = Infinity;
+                for (let i = 0; i < standardSteps.length; i++) {
+                    const count = durationMinutes / standardSteps[i];
+                    const diff = Math.abs(count - targetCount);
+                    if (diff < bestDiff) {
+                        bestDiff = diff;
+                        bestStep = standardSteps[i];
+                    }
+                }
+                const stepMinutes = bestStep;
+
+                // Căn chỉnh mốc thời gian đầu tiên đến số tròn tiếp theo
+                const startDate = new Date(minTime);
+                startDate.setSeconds(0, 0);
+                const startMins = startDate.getMinutes();
+                const remainder = startMins % stepMinutes;
+                if (remainder !== 0) {
+                    startDate.setMinutes(startMins + (stepMinutes - remainder));
+                }
+
+                const ticksList = [];
+                let curr = startDate.getTime();
+                while (curr <= maxTime) {
+                    ticksList.push(curr);
+                    curr += stepMinutes * 60 * 1000;
+                }
+                if (ticksList.length === 0) {
+                    ticksList.push(minTime, maxTime);
+                }
+
+                // Định dạng mốc thời gian làm tròn (vd: 9:00, 10:00)
+                function formatTickTime(timestamp) {
+                    const d = new Date(timestamp);
+                    const h = d.getHours();
+                    const m = d.getMinutes().toString().padStart(2, '0');
+                    return `${h}:${m}`;
+                }
+
+                const ctx = document.getElementById('responseTimesChart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        datasets: [
+                            {
+                                label: 'Tra cứu DNS',
+                                data: chartData.map(p => ({ x: p.EpochMs, y: p.NameLookupMs })),
+                                borderColor: '#8B5CF6',
+                                backgroundColor: 'rgba(139, 92, 246, 0.25)',
+                                fill: true,
+                                tension: 0.15,
+                                pointRadius: 0
+                            },
+                            {
+                                label: 'Kết nối TCP',
+                                data: chartData.map(p => ({ x: p.EpochMs, y: p.ConnectionMs })),
+                                borderColor: '#3B82F6',
+                                backgroundColor: 'rgba(59, 130, 246, 0.25)',
+                                fill: true,
+                                tension: 0.15,
+                                pointRadius: 0
+                            },
+                            {
+                                label: 'Bắt tay TLS/SSL',
+                                data: chartData.map(p => ({ x: p.EpochMs, y: p.TlsHandshakeMs })),
+                                borderColor: '#10B981',
+                                backgroundColor: 'rgba(16, 185, 129, 0.25)',
+                                fill: true,
+                                tension: 0.15,
+                                pointRadius: 0
+                            },
+                            {
+                                label: 'Truyền dữ liệu',
+                                data: chartData.map(p => ({ x: p.EpochMs, y: p.DataTransferMs })),
+                                borderColor: '#059669',
+                                backgroundColor: 'rgba(5, 150, 105, 0.25)',
+                                fill: true,
+                                tension: 0.15,
+                                pointRadius: 0
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        interaction: {
+                            mode: 'nearest',
+                            axis: 'x',
+                            intersect: false
+                        },
+                        plugins: {
+                            legend: {
+                                display: false
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    title: function(tooltipItems) {
+                                        if (tooltipItems.length > 0) {
+                                            const xVal = tooltipItems[0].parsed.x;
+                                            const d = new Date(xVal);
+                                            const h = d.getHours();
+                                            const m = d.getMinutes().toString().padStart(2, '0');
+                                            const s = d.getSeconds().toString().padStart(2, '0');
+                                            return `${h}:${m}:${s} - ${d.toLocaleDateString('vi-VN')}`;
+                                        }
+                                        return '';
+                                    },
+                                    label: function(context) {
+                                        return context.dataset.label + ': ' + context.parsed.y + ' ms';
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            x: {
+                                type: 'linear',
+                                min: minTime,
+                                max: maxTime,
+                                grid: {
+                                    display: true,
+                                    color: 'rgba(0, 0, 0, 0.04)'
+                                },
+                                afterBuildTicks: function(scale) {
+                                    scale.ticks = ticksList.map(v => ({ value: v }));
+                                },
+                                ticks: {
+                                    autoSkip: false,
+                                    maxRotation: 0,
+                                    callback: function(value) {
+                                        return formatTickTime(value);
+                                    },
+                                    font: { size: 11 }
+                                }
+                            },
+                            y: {
+                                stacked: true,
+                                beginAtZero: true,
+                                ticks: {
+                                    callback: function(value) {
+                                        return value >= 1000 ? (value / 1000).toFixed(1) + 's' : value + ' ms';
+                                    },
+                                    font: { size: 11 }
+                                }
+                            }
+                        }
+                    }
+                });
+            })();
+        </script>
+    }
+}

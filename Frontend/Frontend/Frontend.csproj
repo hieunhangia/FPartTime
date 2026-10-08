@@ -10,4 +10,8 @@
       <ProjectReference Include="..\BackendApiClient\BackendApiClient.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="Pages\Admin\SystemHealth\" />
+    </ItemGroup>
+
 </Project>
