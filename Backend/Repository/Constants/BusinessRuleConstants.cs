@@ -3,6 +3,14 @@ namespace Repository.Constants;
 public static class BusinessRuleConstants
 {
     public const string PhoneNumberRegex = @"^0\d{9}$";
+    public const string CCCDNumberRegex = @"^\d{12}$";
+
+    public static class FileUpload
+    {
+        public const long MaxFileSizeInBytes = 5 * 1024 * 1024;
+        public static readonly string[] AllowedImageExtensions = [".jpg", ".jpeg", ".png"];
+        public static readonly string[] AllowedDocumentExtensions = [".pdf", ".jpg", ".jpeg", ".png"];
+    }
 
     public static class Identity
     {
@@ -46,6 +54,8 @@ public static class BusinessRuleConstants
             public const int CompanyNameMaxLength = 100;
             public const int TaxCodeMaxLength = 50;
             public const int VerificationDocumentPathMaxLength = 200;
+            public const int FullNameMaxLength = 100;
+            public const int CCCDNumberMaxLength = 12;
             public const int RejectReasonMaxLength = 500;
         }
 

@@ -1,0 +1,145 @@
+@page "{id:guid}"
+@model Frontend.Pages.Censor.EmployerRegistrations.DetailModel
+@{
+    ViewData["Title"] = "Chi tiết đơn đăng ký nhà tuyển dụng";
+}
+
+<div class="container my-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="mb-0">Chi tiết đơn đăng ký</h2>
+        <a asp-page="./Index" class="btn btn-outline-secondary">Quay lại danh sách</a>
+    </div>
+
+    @if (Model.Registration != null)
+    {
+        var (statusLabel, statusCss) = Model.GetStatusDisplay(Model.Registration.Status);
+        
+        <div class="row">
+            <div class="col-md-8">
+                <div class="card mb-4 shadow-sm">
+                    <div class="card-header bg-white">
+                        <h5 class="card-title mb-0">Thông tin doanh nghiệp</h5>
+                    </div>
+                    <div class="card-body">
+                        <dl class="row mb-0">
+                            <dt class="col-sm-4">Tên công ty</dt>
+                            <dd class="col-sm-8">@Model.Registration.CompanyName</dd>
+
+                            <dt class="col-sm-4">Mã số thuế</dt>
+                            <dd class="col-sm-8">@Model.Registration.TaxCode</dd>
+
+                            <dt class="col-sm-4">Giấy tờ xác thực</dt>
+                            <dd class="col-sm-8">
+                                <a href="@Model.Registration.DocumentUrl" target="_blank" class="btn btn-sm btn-outline-info">
+                                    <i class="bi bi-file-earmark-text"></i> Xem tài liệu đính kèm
+                                </a>
+                            </dd>
+                        </dl>
+                    </div>
+                </div>
+
+                <div class="card mb-4 shadow-sm">
+                    <div class="card-header bg-white">
+                        <h5 class="card-title mb-0">Thông tin người đại diện</h5>
+                    </div>
+                    <div class="card-body">
+                        <dl class="row mb-0">
+                            <dt class="col-sm-4">Họ và tên</dt>
+                            <dd class="col-sm-8">@Model.Registration.FullName</dd>
+
+                            <dt class="col-sm-4">Ngày sinh</dt>
+                            <dd class="col-sm-8">@Model.Registration.DateOfBirth?.ToString()</dd>
+
+                            <dt class="col-sm-4">Số điện thoại</dt>
+                            <dd class="col-sm-8">@Model.Registration.PhoneNumber</dd>
+
+                            <dt class="col-sm-4">Số CCCD</dt>
+                            <dd class="col-sm-8">@Model.Registration.CccdNumber</dd>
+                        </dl>
+                        
+                        <div class="row mt-3">
+                            <div class="col-md-6 text-center">
+                                <p class="fw-bold mb-1">Mặt trước CCCD</p>
+                                <img src="@Model.Registration.CccdFrontImageUrl" class="img-fluid border rounded" alt="Mặt trước CCCD" />
+                            </div>
+                            <div class="col-md-6 text-center">
+                                <p class="fw-bold mb-1">Mặt sau CCCD</p>
+                                <img src="@Model.Registration.CccdBackImageUrl" class="img-fluid border rounded" alt="Mặt sau CCCD" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="card mb-4 shadow-sm">
+                    <div class="card-header bg-white">
+                        <h5 class="card-title mb-0">Trạng thái xử lý</h5>
+                    </div>
+                    <div class="card-body">
+                        <p><strong>Trạng thái hiện tại:</strong> <span class="badge @statusCss">@statusLabel</span></p>
+                        <p><strong>Ngày gửi:</strong> @Model.Registration.CreatedAt?.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</p>
+                        
+                        @if (Model.Registration.ProcessedAt.HasValue)
+                        {
+                            <p><strong>Ngày xử lý:</strong> @Model.Registration.ProcessedAt.Value.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</p>
+                        }
+
+                        @if (!string.IsNullOrEmpty(Model.Registration.RejectReason))
+                        {
+                            <div class="alert alert-danger mt-3">
+                                <strong>Lý do từ chối:</strong><br />
+                                @Model.Registration.RejectReason
+                            </div>
+                        }
+
+                        @if (Model.Registration.Status == "Pending")
+                        {
+                            <hr />
+                            <div class="d-grid gap-2">
+                                <form method="post" asp-page-handler="Approve" asp-route-id="@Model.Registration.Id" onsubmit="return confirm('Bạn có chắc chắn muốn duyệt đơn này?');">
+                                    <button type="submit" class="btn btn-success w-100 mb-2">
+                                        <i class="bi bi-check-circle"></i> Duyệt đơn
+                                    </button>
+                                </form>
+                                
+                                <button type="button" class="btn btn-danger w-100" data-bs-toggle="modal" data-bs-target="#rejectModal">
+                                    <i class="bi bi-x-circle"></i> Từ chối
+                                </button>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal Từ chối -->
+        <div class="modal fade" id="rejectModal" tabindex="-1" aria-labelledby="rejectModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <form method="post" asp-page-handler="Reject" asp-route-id="@Model.Registration.Id">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="rejectModalLabel">Từ chối đơn đăng ký</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="mb-3">
+                                <label asp-for="RejectDto.RejectReason" class="form-label">Lý do từ chối <span class="text-danger">*</span></label>
+                                <textarea asp-for="RejectDto.RejectReason" class="form-control" rows="4" required></textarea>
+                                <span asp-validation-for="RejectDto.RejectReason" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                            <button type="submit" class="btn btn-danger">Xác nhận từ chối</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

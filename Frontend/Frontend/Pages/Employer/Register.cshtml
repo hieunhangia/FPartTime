@@ -1,0 +1,93 @@
+@page
+@model Frontend.Pages.Employer.RegisterModel
+@{
+    ViewData["Title"] = "Đăng ký trở thành nhà tuyển dụng";
+}
+
+<div class="container my-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <h2 class="mb-3">Đăng ký trở thành nhà tuyển dụng</h2>
+            <div class="alert alert-info" role="alert">
+                Gửi yêu cầu kèm giấy tờ xác thực doanh nghiệp và CCCD. Yêu cầu sẽ được đội ngũ kiểm duyệt trước khi tài khoản của bạn được nâng cấp thành nhà tuyển dụng.
+            </div>
+
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+            <form method="post" enctype="multipart/form-data">
+                <div class="card mb-4">
+                    <div class="card-header fw-bold">Thông tin doanh nghiệp</div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label asp-for="Input.CompanyName" class="form-label"></label>
+                            <input asp-for="Input.CompanyName" class="form-control" autofocus />
+                            <span asp-validation-for="Input.CompanyName" class="text-danger"></span>
+                        </div>
+                        <div class="mb-3">
+                            <label asp-for="Input.TaxCode" class="form-label"></label>
+                            <input asp-for="Input.TaxCode" class="form-control" />
+                            <span asp-validation-for="Input.TaxCode" class="text-danger"></span>
+                        </div>
+                        <div class="mb-3">
+                            <label asp-for="Input.DocumentFile" class="form-label"></label>
+                            <input asp-for="Input.DocumentFile" class="form-control" accept=".pdf,.jpg,.jpeg,.png" />
+                            <div class="form-text">Chấp nhận PDF, JPG, JPEG, PNG. Dung lượng tối đa 5MB.</div>
+                            <span asp-validation-for="Input.DocumentFile" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card mb-4">
+                    <div class="card-header fw-bold">Thông tin người đại diện</div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label asp-for="Input.FullName" class="form-label"></label>
+                            <input asp-for="Input.FullName" class="form-control" />
+                            <span asp-validation-for="Input.FullName" class="text-danger"></span>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="Input.DateOfBirth" class="form-label"></label>
+                                <input asp-for="Input.DateOfBirth" class="form-control" />
+                                <span asp-validation-for="Input.DateOfBirth" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="Input.PhoneNumber" class="form-label"></label>
+                                <input asp-for="Input.PhoneNumber" class="form-control" placeholder="VD: 0912345678" />
+                                <span asp-validation-for="Input.PhoneNumber" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label asp-for="Input.CCCDNumber" class="form-label"></label>
+                            <input asp-for="Input.CCCDNumber" class="form-control" maxlength="12" inputmode="numeric" />
+                            <span asp-validation-for="Input.CCCDNumber" class="text-danger"></span>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="Input.CCCDFrontImage" class="form-label"></label>
+                                <input asp-for="Input.CCCDFrontImage" class="form-control" accept=".jpg,.jpeg,.png" />
+                                <div class="form-text">JPG, JPEG hoặc PNG. Tối đa 5MB.</div>
+                                <span asp-validation-for="Input.CCCDFrontImage" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="Input.CCCDBackImage" class="form-label"></label>
+                                <input asp-for="Input.CCCDBackImage" class="form-control" accept=".jpg,.jpeg,.png" />
+                                <div class="form-text">JPG, JPEG hoặc PNG. Tối đa 5MB.</div>
+                                <span asp-validation-for="Input.CCCDBackImage" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center">
+                    <a asp-page="MyRegistrations" class="btn btn-outline-secondary">Xem các yêu cầu của tôi</a>
+                    <button type="submit" class="btn btn-primary">Gửi yêu cầu</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

@@ -97,7 +97,20 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
                 .HasMaxLength(BusinessRuleConstants.Models.EmployerRegistrationRequest.CompanyNameMaxLength);
             entity.Property(e => e.TaxCode)
                 .HasMaxLength(BusinessRuleConstants.Models.EmployerRegistrationRequest.TaxCodeMaxLength);
-            entity.Property(e => e.VerificationDocumentPath)
+            entity.Property(e => e.DocumentPath)
+                .HasMaxLength(
+                    BusinessRuleConstants.Models.EmployerRegistrationRequest.VerificationDocumentPathMaxLength);
+            entity.Property(e => e.FullName)
+                .HasMaxLength(BusinessRuleConstants.Models.EmployerRegistrationRequest.FullNameMaxLength);
+            entity.Property(e => e.PhoneNumber)
+                .HasMaxLength(BusinessRuleConstants.Models.PhoneNumberLength)
+                .IsFixedLength();
+            entity.Property(e => e.CCCDNumber)
+                .HasMaxLength(BusinessRuleConstants.Models.EmployerRegistrationRequest.CCCDNumberMaxLength);
+            entity.Property(e => e.CCCDFrontImagePath)
+                .HasMaxLength(
+                    BusinessRuleConstants.Models.EmployerRegistrationRequest.VerificationDocumentPathMaxLength);
+            entity.Property(e => e.CCCDBackImagePath)
                 .HasMaxLength(
                     BusinessRuleConstants.Models.EmployerRegistrationRequest.VerificationDocumentPathMaxLength);
             entity.Property(e => e.RejectReason)

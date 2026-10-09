@@ -15,9 +15,9 @@ public static class DependencyInjection
         services.AddSingleton<JsonWebTokenHandler>();
         services.AddScoped<IdentityService>();
         services.AddScoped<NotificationsService>();
-
+        services.AddScoped<EmployerRegistrationService>();
+        services.AddScoped<CensorEmployerRegistrationService>();
         services.AddScoped<SmsSenderService>();
-
         var r2Settings = configuration.GetSection("R2Settings");
         services.AddSingleton<IAmazonS3>(new AmazonS3Client(r2Settings["AccessKey"], r2Settings["SecretKey"],
             new AmazonS3Config { ServiceURL = r2Settings["ServiceURL"] }

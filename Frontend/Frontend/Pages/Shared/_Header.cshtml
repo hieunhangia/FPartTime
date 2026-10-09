@@ -11,9 +11,9 @@
         <nav class="header-nav">
             <a href="#">Trang chủ</a>
             <a href="#">Tìm việc làm</a>
-            @if (!User.IsInRole(Role.Employer))
+            @if (User.IsInRole(Role.Candidate))
             {
-                <a href="#">Trở thành nhà tuyển dụng</a>
+                <a asp-page="/Employer/MyRegistrations">Trở thành nhà tuyển dụng</a>
             }
         </nav>
 
@@ -65,6 +65,7 @@
                         {
                             <li><a class="dropdown-item" href="#">Hồ sơ cá nhân</a></li>
                             <li><a class="dropdown-item" href="#">Việc làm đã ứng tuyển</a></li>
+                            <li><a class="dropdown-item" asp-page="/Employer/MyRegistrations">Yêu cầu đăng ký nhà tuyển dụng</a></li>
                             <li><a class="dropdown-item" href="#">Cài đặt tài khoản</a></li>
                         }
                         @if (User.IsInRole(Role.Employer))
@@ -75,6 +76,7 @@
                         }
                         @if (User.IsInRole(Role.Censor))
                         {
+                            <li><a class="dropdown-item" asp-page="/Censor/EmployerRegistrations/Index">Duyệt đơn đăng ký nhà tuyển dụng</a></li>
                             <li><a class="dropdown-item" href="#">Quản lý công việc</a></li>
                             <li><a class="dropdown-item" href="#">Ứng viên đã nộp</a></li>
                         }

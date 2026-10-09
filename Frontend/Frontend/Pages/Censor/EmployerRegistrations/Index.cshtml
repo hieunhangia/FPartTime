@@ -1,0 +1,77 @@
+@page
+@using ApiSdk.Models
+@model Frontend.Pages.Censor.EmployerRegistrations.IndexModel
+@{
+    ViewData["Title"] = "Duyệt đơn đăng ký nhà tuyển dụng";
+}
+
+<div class="container my-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="mb-0">Duyệt đơn đăng ký nhà tuyển dụng</h2>
+    </div>
+
+    <div class="card mb-4 shadow-sm">
+        <div class="card-body">
+            <form method="get" class="row g-3 align-items-center">
+                <div class="col-auto">
+                    <label asp-for="StatusFilter" class="col-form-label fw-bold">Lọc theo trạng thái:</label>
+                </div>
+                <div class="col-auto">
+                    <select asp-for="StatusFilter" class="form-select">
+                        <option value="">-- Tất cả --</option>
+                        <option value="0">Chờ duyệt</option>
+                        <option value="1">Đã duyệt</option>
+                        <option value="2">Đã từ chối</option>
+                        <option value="3">Đã hủy</option>
+                    </select>
+                </div>
+                <div class="col-auto">
+                    <button type="submit" class="btn btn-primary">Lọc</button>
+                    <a asp-page="./Index" class="btn btn-outline-secondary">Xóa bộ lọc</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    @if (Model.Registrations.Count == 0)
+    {
+        <div class="alert alert-light border text-center py-5" role="alert">
+            <p class="mb-0">Không có đơn đăng ký nào.</p>
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-hover align-middle shadow-sm">
+                <thead class="table-light">
+                    <tr>
+                        <th>Tên công ty</th>
+                        <th>Người đăng ký</th>
+                        <th>Trạng thái</th>
+                        <th>Ngày gửi</th>
+                        <th class="text-end">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var registration in Model.Registrations)
+                    {
+                        var (statusLabel, statusCss) = Model.GetStatusDisplay(registration.Status);
+                        <tr>
+                            <td>@registration.CompanyName</td>
+                            <td>@registration.FullName</td>
+                            <td><span class="badge @statusCss">@statusLabel</span></td>
+                            <td>@registration.CreatedAt?.ToLocalTime().ToString("dd/MM/yyyy HH:mm") ?? "-"</td>
+                            <td class="text-end">
+                                @if (registration.Id is not null)
+                                {
+                                    <a asp-page="Detail" asp-route-id="@registration.Id"
+                                       class="btn btn-sm btn-outline-primary">Xem chi tiết</a>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>
