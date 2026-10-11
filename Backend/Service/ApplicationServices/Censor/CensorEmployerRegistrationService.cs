@@ -22,7 +22,8 @@ public class RejectEmployerRegistrationRequestDto
 public class CensorEmployerRegistrationService(
     ApplicationDbContext dbContext,
     CloudflareR2StorageService storageService,
-    UserManager<User> userManager)
+    UserManager<User> userManager,
+    NotificationsService notificationsService)
 {
     public async Task<List<EmployerRegistrationViewDto>> GetRegistrationsAsync(EmployerRegistrationRequestStatus? status)
     {
@@ -96,6 +97,11 @@ public class CensorEmployerRegistrationService(
 
             await dbContext.SaveChangesAsync();
             await transaction.CommitAsync();
+
+            await notificationsService.CreateNotificationAsync(
+                request.RequesterId,
+                "Yêu cầu đăng ký Nhà tuyển dụng đã được duyệt",
+                $"Yêu cầu đăng ký trở thành Nhà tuyển dụng cho doanh nghiệp \"{request.CompanyName}\" của bạn đã được phê duyệt thành công.");
         }
         catch
         {
@@ -123,6 +129,11 @@ public class CensorEmployerRegistrationService(
         request.ProcessorId = censorId;
 
         await dbContext.SaveChangesAsync();
+
+        await notificationsService.CreateNotificationAsync(
+            request.RequesterId,
+            "Yêu cầu đăng ký Nhà tuyển dụng bị từ chối",
+            $"Yêu cầu đăng ký trở thành Nhà tuyển dụng cho doanh nghiệp \"{request.CompanyName}\" của bạn đã bị từ chối. Lý do: {rejectReason}");
     }
 }
 
