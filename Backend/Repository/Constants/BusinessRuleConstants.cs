@@ -4,12 +4,21 @@ public static class BusinessRuleConstants
 {
     public const string PhoneNumberRegex = @"^0\d{9}$";
     public const string CCCDNumberRegex = @"^\d{12}$";
+    public const string TaxCodeRegex = @"^\d{12}$";
 
-    public static class FileUpload
+    public static class StoreObject
     {
         public const long MaxFileSizeInBytes = 5 * 1024 * 1024;
         public static readonly string[] AllowedImageExtensions = [".jpg", ".jpeg", ".png"];
         public static readonly string[] AllowedDocumentExtensions = [".pdf", ".jpg", ".jpeg", ".png"];
+
+        public static class EmployerRegistration
+        {
+            public const string BasePath = "employer-registrations";
+            public const string Document = "document";
+            public const string CccdFront = "cccd-front";
+            public const string CccdBack = "cccd-back";
+        }
     }
 
     public static class Identity

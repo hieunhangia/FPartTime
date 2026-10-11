@@ -4,6 +4,7 @@ public static class BusinessRuleConstants
 {
     public const string PhoneNumberRegex = @"^0\d{9}$";
     public const string CCCDNumberRegex = @"^\d{12}$";
+    public const string TaxCodeRegex = @"^\d{12}$";
 
     public static class FileUpload
     {

@@ -34,25 +34,28 @@ public class EmployerRegistrationService(
 
         ValidateDateOfBirth(dto.DateOfBirth);
         ValidateUploadedFile(dto.DocumentFile, "Tài liệu xác thực doanh nghiệp",
-            BusinessRuleConstants.FileUpload.AllowedDocumentExtensions);
+            BusinessRuleConstants.StoreObject.AllowedDocumentExtensions);
         ValidateUploadedFile(dto.CCCDFrontImage, "Ảnh CCCD mặt trước",
-            BusinessRuleConstants.FileUpload.AllowedImageExtensions);
+            BusinessRuleConstants.StoreObject.AllowedImageExtensions);
         ValidateUploadedFile(dto.CCCDBackImage, "Ảnh CCCD mặt sau",
-            BusinessRuleConstants.FileUpload.AllowedImageExtensions);
+            BusinessRuleConstants.StoreObject.AllowedImageExtensions);
 
         var requestId = Guid.NewGuid();
-        var basePath = $"employer-registrations/{Guid.NewGuid():N}";
+        var basePath = $"{BusinessRuleConstants.StoreObject.EmployerRegistration.BasePath}/{Guid.NewGuid():N}";
         var uploadedKeys = new List<string>();
         string documentPath;
         string cccdFrontImagePath;
         string cccdBackImagePath;
         try
         {
-            documentPath = await UploadFileAsync($"{basePath}/document", dto.DocumentFile!);
+            documentPath = await UploadFileAsync(
+                $"{basePath}/{BusinessRuleConstants.StoreObject.EmployerRegistration.Document}", dto.DocumentFile!);
             uploadedKeys.Add(documentPath);
-            cccdFrontImagePath = await UploadFileAsync($"{basePath}/cccd-front", dto.CCCDFrontImage!);
+            cccdFrontImagePath = await UploadFileAsync(
+                $"{basePath}/{BusinessRuleConstants.StoreObject.EmployerRegistration.CccdFront}", dto.CCCDFrontImage!);
             uploadedKeys.Add(cccdFrontImagePath);
-            cccdBackImagePath = await UploadFileAsync($"{basePath}/cccd-back", dto.CCCDBackImage!);
+            cccdBackImagePath = await UploadFileAsync(
+                $"{basePath}/{BusinessRuleConstants.StoreObject.EmployerRegistration.CccdBack}", dto.CCCDBackImage!);
             uploadedKeys.Add(cccdBackImagePath);
         }
         catch
@@ -164,6 +167,11 @@ public class EmployerRegistrationService(
             throw new BadRequestException("Ngày sinh không được ở tương lai.");
         }
 
+        if (dateOfBirth.Value > today.AddYears(-18))
+        {
+            throw new BadRequestException("Ngày sinh phải trên 18 tuổi.");
+        }
+
         if (dateOfBirth.Value < today.AddYears(-100))
         {
             throw new BadRequestException("Ngày sinh không hợp lệ.");
@@ -177,7 +185,7 @@ public class EmployerRegistrationService(
             throw new BadRequestException($"{fieldLabel} là bắt buộc.");
         }
 
-        if (file.Length > BusinessRuleConstants.FileUpload.MaxFileSizeInBytes)
+        if (file.Length > BusinessRuleConstants.StoreObject.MaxFileSizeInBytes)
         {
             throw new BadRequestException($"{fieldLabel} không được vượt quá 5MB.");
         }
@@ -199,8 +207,7 @@ public class EmployerRegistrationRequestDto
     public string CompanyName { get; set; } = string.Empty;
 
     [Required(ErrorMessage = "Mã số thuế là bắt buộc.")]
-    [MaxLength(BusinessRuleConstants.Models.EmployerRegistrationRequest.TaxCodeMaxLength,
-        ErrorMessage = "Mã số thuế không được vượt quá 50 ký tự.")]
+    [RegularExpression(BusinessRuleConstants.TaxCodeRegex, ErrorMessage = "Mã số thuế phải gồm đúng 12 chữ số.")]
     public string TaxCode { get; set; } = string.Empty;
 
     [Required(ErrorMessage = "Họ và tên là bắt buộc.")]

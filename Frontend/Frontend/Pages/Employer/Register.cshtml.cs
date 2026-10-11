@@ -138,7 +138,7 @@ public class RegisterModel(ApiClient apiClient) : PageModel
         public string CompanyName { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "Mã số thuế là bắt buộc.")]
-        [MaxLength(50, ErrorMessage = "Mã số thuế không được vượt quá 50 ký tự.")]
+        [RegularExpression(BusinessRuleConstants.TaxCodeRegex, ErrorMessage = "Mã số thuế phải gồm đúng 12 chữ số.")]
         [Display(Name = "Mã số thuế")]
         public string TaxCode { get; set; } = string.Empty;
 

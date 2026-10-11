@@ -36,7 +36,7 @@
                         <tr>
                             <td>@registration.CompanyName</td>
                             <td><span class="badge @statusCss">@statusLabel</span></td>
-                            <td>@registration.CreatedAt?.ToLocalTime().ToString("dd/MM/yyyy HH:mm") ?? "-"</td>
+                            <td>@(registration.CreatedAt?.ToLocalTime().ToString("dd/MM/yyyy HH:mm") ?? "-")</td>
                             <td class="text-end">
                                 @if (registration.Id is not null)
                                 {

@@ -11,9 +11,9 @@
         <nav class="header-nav">
             <a href="#">Trang chủ</a>
             <a href="#">Tìm việc làm</a>
-            @if (!User.IsInRole(Role.Employer))
+            @if (User.IsInRole(Role.Candidate))
             {
-                <a asp-page="/Employer/MyRegistrations">Trở thành nhà tuyển dụng</a>
+                <a href="/Employer/MyRegistrations">Trở thành nhà tuyển dụng</a>
             }
         </nav>
 
