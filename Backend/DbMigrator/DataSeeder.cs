@@ -65,24 +65,22 @@ public class DataSeeder(ApplicationDbContext db)
 
     private async Task CreateUserIfNotExistsAsync(string username, string password, params string[] roleNames)
     {
-        var existingUser = await db.Users.FirstOrDefaultAsync(u => u.UserName == username);
-        if (existingUser != null)
+        var user = await db.Users.FirstOrDefaultAsync(u => u.UserName == username);
+        if (user == null)
         {
-            return;
+            user = new User
+            {
+                Id = Guid.NewGuid(),
+                UserName = username,
+                NormalizedUserName = username.ToUpperInvariant(),
+                SecurityStamp = Guid.NewGuid().ToString(),
+                ConcurrencyStamp = Guid.NewGuid().ToString()
+            };
+            user.PasswordHash = _hasher.HashPassword(user, password);
+
+            db.Users.Add(user);
+            await db.SaveChangesAsync();
         }
-
-        var user = new User
-        {
-            Id = Guid.NewGuid(),
-            UserName = username,
-            NormalizedUserName = username.ToUpperInvariant(),
-            SecurityStamp = Guid.NewGuid().ToString(),
-            ConcurrencyStamp = Guid.NewGuid().ToString()
-        };
-        user.PasswordHash = _hasher.HashPassword(user, password);
-
-        db.Users.Add(user);
-        await db.SaveChangesAsync();
 
         foreach (var roleName in roleNames)
         {
@@ -99,6 +97,28 @@ public class DataSeeder(ApplicationDbContext db)
                     });
                 }
             }
+        }
+
+        if (roleNames.Contains(Role.Candidate) && !await db.Candidates.AnyAsync(c => c.UserId == user.Id))
+        {
+            db.Candidates.Add(new CandidateProfile { UserId = user.Id });
+        }
+
+        if (roleNames.Contains(Role.Employer) && !await db.Employers.AnyAsync(e => e.UserId == user.Id))
+        {
+            db.Employers.Add(new EmployerProfile
+            {
+                UserId = user.Id,
+                CompanyName = user.UserName ?? string.Empty,
+                MaxActivePosts = BusinessRuleConstants.Employers.DefaultMaxActivePosts,
+                TaxCode = user.UserName ?? string.Empty,
+                VerificationDocumentFilePath = $"employer-registrations/{user.UserName}.pdf"
+            });
+        }
+
+        if (roleNames.Contains(Role.Censor) && !await db.Censors.AnyAsync(c => c.UserId == user.Id))
+        {
+            db.Censors.Add(new CensorProfile { UserId = user.Id });
         }
 
         await db.SaveChangesAsync();
