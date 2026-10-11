@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace DbMigrator.Migrations
 {
     /// <inheritdoc />
-    public partial class Database : Migration
+    public partial class First : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -383,7 +383,13 @@ namespace DbMigrator.Migrations
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     CompanyName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
                     TaxCode = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
-                    VerificationDocumentPath = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
+                    DocumentPath = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
+                    FullName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    DateOfBirth = table.Column<DateOnly>(type: "date", nullable: false),
+                    PhoneNumber = table.Column<string>(type: "nchar(10)", fixedLength: true, maxLength: 10, nullable: false),
+                    CCCDNumber = table.Column<string>(type: "nvarchar(12)", maxLength: 12, nullable: false),
+                    CCCDFrontImagePath = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
+                    CCCDBackImagePath = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
                     RejectReason = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
                     Status = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
