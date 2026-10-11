@@ -28,13 +28,32 @@
                             <dt class="col-sm-4">Mã số thuế</dt>
                             <dd class="col-sm-8">@Model.Registration.TaxCode</dd>
 
-                            <dt class="col-sm-4">Giấy tờ xác thực</dt>
-                            <dd class="col-sm-8">
-                                <a href="@Model.Registration.DocumentUrl" target="_blank" class="btn btn-sm btn-outline-info">
-                                    <i class="bi bi-file-earmark-text"></i> Xem tài liệu đính kèm
-                                </a>
-                            </dd>
                         </dl>
+
+                        @if (!string.IsNullOrWhiteSpace(Model.Registration.DocumentUrl))
+                        {
+                            <div class="row mt-3">
+                                @if (Model.Registration.DocumentUrl.Contains(".pdf", StringComparison.OrdinalIgnoreCase))
+                                {
+                                    <div class="col-12">
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <p class="fw-bold mb-0">Giấy tờ xác thực</p>
+                                            <a href="@Model.Registration.DocumentUrl" target="_blank" class="btn btn-sm btn-outline-primary">
+                                                <i class="bi bi-box-arrow-up-right"></i> Mở trong tab mới
+                                            </a>
+                                        </div>
+                                        <iframe src="@Model.Registration.DocumentUrl" class="w-100 border rounded" style="height: 600px;" title="Giấy tờ xác thực"></iframe>
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div class="col-md-6">
+                                        <p class="fw-bold mb-1">Giấy tờ xác thực</p>
+                                        <img src="@Model.Registration.DocumentUrl" class="img-fluid border rounded" alt="Giấy tờ xác thực" />
+                                    </div>
+                                }
+                            </div>
+                        }
                     </div>
                 </div>
 

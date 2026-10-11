@@ -149,7 +149,24 @@ public class CloudflareR2StorageService(IAmazonS3 s3Client, IConfiguration confi
             Expires = DateTime.UtcNow.Add(expiresIn),
             Verb = HttpVerb.GET
         });
+    public Task<string> GeneratePresignedUrlAsync(string filePath, TimeSpan expiresIn, string contentType)
+    {
+        return s3Client.GetPreSignedURLAsync(new GetPreSignedUrlRequest
+        {
+            BucketName = _privateBucketName,
+            Key = filePath,
+            Expires = DateTime.UtcNow.Add(expiresIn),
+            Verb = HttpVerb.GET,
+            ResponseHeaderOverrides = new ResponseHeaderOverrides
+            {
+                ContentType = contentType,
+                ContentDisposition = "inline"
+            }
+        });
+    }
 }
+
+        
 
 public class CloudflareR2HealthCheck(IAmazonS3 s3Client, IConfiguration configuration) : IHealthCheck
 {

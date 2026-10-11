@@ -41,23 +41,25 @@
             <div class="row g-3">
                 @if (!string.IsNullOrWhiteSpace(registration.DocumentUrl))
                 {
-                    <div class="col-md-6">
-                        <label class="form-label">Tài liệu xác thực</label>
-                        @if (registration.DocumentUrl.Contains(".pdf", StringComparison.OrdinalIgnoreCase))
-                        {
-                            <div>
-                                <a href="@registration.DocumentUrl" target="_blank" class="btn btn-outline-primary">
-                                    <i class="bi bi-file-earmark-pdf"></i> Xem tài liệu PDF
+                    @if (registration.DocumentUrl.Contains(".pdf", StringComparison.OrdinalIgnoreCase))
+                    {
+                        <div class="col-12">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <label class="form-label mb-0">Tài liệu xác thực</label>
+                                <a href="@registration.DocumentUrl" target="_blank" class="btn btn-sm btn-outline-primary">
+                                    <i class="bi bi-box-arrow-up-right"></i> Mở trong tab mới
                                 </a>
                             </div>
-                        }
-                        else
-                        {
-                            <div>
-                                <img src="@registration.DocumentUrl" alt="Tài liệu xác thực doanh nghiệp" class="img-fluid rounded border" />
-                            </div>
-                        }
-                    </div>
+                            <iframe src="@registration.DocumentUrl" class="w-100 border rounded" style="height: 600px;" title="Tài liệu xác thực doanh nghiệp"></iframe>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="col-md-6">
+                            <label class="form-label">Tài liệu xác thực</label>
+                            <img src="@registration.DocumentUrl" alt="Tài liệu xác thực doanh nghiệp" class="img-fluid rounded border" />
+                        </div>
+                    }
                 }
                 else
                 {

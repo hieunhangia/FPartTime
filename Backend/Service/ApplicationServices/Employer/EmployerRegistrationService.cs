@@ -102,18 +102,21 @@ public class EmployerRegistrationService(
     public async Task<EmployerRegistrationDetailDto> GetMyRegistrationByIdAsync(ClaimsPrincipal user, Guid id)
     {
         var userId = user.GetUserId();
-
+        string imageUrl = string.Empty;
         var request = await dbContext.EmployerRegistrationRequests
             .AsNoTracking()
-            .FirstOrDefaultAsync(r => r.Id == id && r.RequesterId == userId);
+            .FirstOrDefaultAsync(r => r.Id == id && r.RequesterId == userId) ?? throw new NotFoundException("Không tìm thấy yêu cầu đăng ký.");
 
-        if (request == null)
+        if (request.DocumentPath.Contains(".pdf", StringComparison.OrdinalIgnoreCase))
         {
-            throw new NotFoundException("Không tìm thấy yêu cầu đăng ký.");
+            imageUrl = await storageService.GeneratePresignedUrlAsync(request.DocumentPath,TimeSpan.FromMinutes(15),"application/pdf");
         }
-
+        else
+        {
+            imageUrl = await storageService.GeneratePresignedUrlAsync(request.DocumentPath,TimeSpan.FromMinutes(15));
+        }
         return request.ToDetailDto(
-            await storageService.GeneratePresignedUrlAsync(request.DocumentPath,TimeSpan.FromMinutes(15)),
+            imageUrl,
             await storageService.GeneratePresignedUrlAsync(request.CCCDFrontImagePath,TimeSpan.FromMinutes(15)),
             await storageService.GeneratePresignedUrlAsync(request.CCCDBackImagePath,TimeSpan.FromMinutes(15)));
     }
