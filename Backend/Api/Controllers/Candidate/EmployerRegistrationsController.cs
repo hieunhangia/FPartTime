@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Repository.Constants;
 using Service.ApplicationServices;
+using Service.ApplicationServices.Employer;
 
 namespace Api.Controllers.Candidate
 {

@@ -10,7 +10,7 @@ using Service.ExternalServices;
 using Service.Extensions;
 using Service.HttpErrorExceptions;
 
-namespace Service.ApplicationServices;
+namespace Service.ApplicationServices.Employer;
 
 public class EmployerRegistrationService(
     ApplicationDbContext dbContext,

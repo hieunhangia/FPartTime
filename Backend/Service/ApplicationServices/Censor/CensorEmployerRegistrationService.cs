@@ -8,8 +8,9 @@ using Repository.Constants;
 using Service.ExternalServices;
 using Service.Extensions;
 using Service.HttpErrorExceptions;
+using Service.ApplicationServices.Employer;
 
-namespace Service.ApplicationServices;
+namespace Service.ApplicationServices.Censor;
 
 public class RejectEmployerRegistrationRequestDto
 {

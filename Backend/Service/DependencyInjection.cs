@@ -4,6 +4,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Service.ApplicationServices;
 using Service.ApplicationServices.Candidate;
+using Service.ApplicationServices.Censor;
+using Service.ApplicationServices.Employer;
 using Service.BackgroundServices;
 using Service.ExternalServices;
 

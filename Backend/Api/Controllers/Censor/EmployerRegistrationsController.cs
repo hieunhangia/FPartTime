@@ -4,6 +4,8 @@ using Microsoft.AspNetCore.Mvc;
 using Repository.Constants;
 using Repository.Models.Users;
 using Service.ApplicationServices;
+using Service.ApplicationServices.Censor;
+using Service.ApplicationServices.Employer;
 
 namespace Api.Controllers.Censor
 {
