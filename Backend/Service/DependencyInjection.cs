@@ -3,6 +3,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Service.ApplicationServices;
+using Service.ApplicationServices.Candidate;
 using Service.BackgroundServices;
 using Service.ExternalServices;
 
@@ -18,6 +19,7 @@ public static class DependencyInjection
         services.AddScoped<EmployerRegistrationService>();
         services.AddScoped<CensorEmployerRegistrationService>();
         services.AddScoped<SmsSenderService>();
+        services.AddScoped<CandidateProfileService>();
         var r2Settings = configuration.GetSection("R2Settings");
         services.AddSingleton<IAmazonS3>(new AmazonS3Client(r2Settings["AccessKey"], r2Settings["SecretKey"],
             new AmazonS3Config { ServiceURL = r2Settings["ServiceURL"] }
