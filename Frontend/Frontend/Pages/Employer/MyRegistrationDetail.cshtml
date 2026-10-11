@@ -31,21 +31,39 @@
 
                 <dt class="col-sm-4">Mã số thuế</dt>
                 <dd class="col-sm-8">@registration.TaxCode</dd>
-
-                <dt class="col-sm-4">Tài liệu xác thực doanh nghiệp</dt>
-                <dd class="col-sm-8">
-                    @if (!string.IsNullOrWhiteSpace(registration.DocumentUrl))
-                    {
-                        <div class="mb-2">
-                            <img src="@registration.DocumentUrl" alt="Tài liệu xác thực doanh nghiệp" class="img-fluid rounded border" style="max-height: 300px" />
-                        </div>
-                    }
-                    else
-                    {
-                        <span>-</span>
-                    }
-                </dd>
             </dl>
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header fw-bold">Tài liệu xác thực doanh nghiệp</div>
+        <div class="card-body">
+            <div class="row g-3">
+                @if (!string.IsNullOrWhiteSpace(registration.DocumentUrl))
+                {
+                    <div class="col-md-6">
+                        <label class="form-label">Tài liệu xác thực</label>
+                        @if (registration.DocumentUrl.Contains(".pdf", StringComparison.OrdinalIgnoreCase))
+                        {
+                            <div>
+                                <a href="@registration.DocumentUrl" target="_blank" class="btn btn-outline-primary">
+                                    <i class="bi bi-file-earmark-pdf"></i> Xem tài liệu PDF
+                                </a>
+                            </div>
+                        }
+                        else
+                        {
+                            <div>
+                                <img src="@registration.DocumentUrl" alt="Tài liệu xác thực doanh nghiệp" class="img-fluid rounded border" />
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <div class="col-12 text-muted">Không có tài liệu xác thực doanh nghiệp.</div>
+                }
+            </div>
         </div>
     </div>
 
