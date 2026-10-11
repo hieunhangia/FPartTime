@@ -11,7 +11,7 @@
         <nav class="header-nav">
             <a href="#">Trang chủ</a>
             <a href="#">Tìm việc làm</a>
-            @if (User.IsInRole(Role.Candidate))
+            @if (!User.IsInRole(Role.Employer))
             {
                 <a asp-page="/Employer/MyRegistrations">Trở thành nhà tuyển dụng</a>
             }
@@ -26,17 +26,23 @@
             {
                 <!-- Nút thông báo quả chuông -->
                 <div class="dropdown">
-                    <button class="btn btn-outline-secondary btn-sm notification-bell-btn position-relative" type="button" id="notificationDropdown"
-                            data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false" title="Thông báo">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="currentColor" viewBox="0 0 16 16">
-                            <path d="M8 16a2 2 0 0 0 2-2H6a2 2 0 0 0 2 2M8 1.918l-.797.161A4 4 0 0 0 4 6c0 .628-.134 2.197-.459 3.742-.16.767-.376 1.566-.663 2.258h10.244c-.287-.692-.502-1.49-.663-2.258C12.134 8.197 12 6.628 12 6a4 4 0 0 0-3.203-3.92zM14.22 12c.223.447.481.801.78 1H1c.299-.199.557-.553.78-1C2.68 10.2 3 6.88 3 6c0-2.42 1.72-4.44 4.005-4.901a1 1 0 1 1 1.99 0A5 5 0 0 1 13 6c0 .88.32 4.2 1.22 6"/>
+                    <button class="btn btn-outline-secondary btn-sm notification-bell-btn position-relative"
+                            type="button" id="notificationDropdown"
+                            data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false"
+                            title="Thông báo">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="currentColor"
+                             viewBox="0 0 16 16">
+                            <path
+                                d="M8 16a2 2 0 0 0 2-2H6a2 2 0 0 0 2 2M8 1.918l-.797.161A4 4 0 0 0 4 6c0 .628-.134 2.197-.459 3.742-.16.767-.376 1.566-.663 2.258h10.244c-.287-.692-.502-1.49-.663-2.258C12.134 8.197 12 6.628 12 6a4 4 0 0 0-3.203-3.92zM14.22 12c.223.447.481.801.78 1H1c.299-.199.557-.553.78-1C2.68 10.2 3 6.88 3 6c0-2.42 1.72-4.44 4.005-4.901a1 1 0 1 1 1.99 0A5 5 0 0 1 13 6c0 .88.32 4.2 1.22 6"/>
                         </svg>
                         <span id="notificationBadge" class="notification-badge" style="display: none;"></span>
                     </button>
-                    <div class="dropdown-menu dropdown-menu-end notification-menu" aria-labelledby="notificationDropdown">
+                    <div class="dropdown-menu dropdown-menu-end notification-menu"
+                         aria-labelledby="notificationDropdown">
                         <div class="notification-header">
                             <span>Thông báo</span>
-                            <button type="button" id="btnMarkAllRead" class="btn-mark-all-read" style="display: none;" title="Đánh dấu tất cả là đã đọc">
+                            <button type="button" id="btnMarkAllRead" class="btn-mark-all-read" style="display: none;"
+                                    title="Đánh dấu tất cả là đã đọc">
                                 Đã đọc tất cả
                             </button>
                         </div>
@@ -44,7 +50,8 @@
                             <div id="notificationLoading" class="notification-status">Đang tải...</div>
                         </div>
                         <div class="notification-footer">
-                            <button type="button" id="btnLoadMoreNotifications" class="btn-load-more" style="display: none;">
+                            <button type="button" id="btnLoadMoreNotifications" class="btn-load-more"
+                                    style="display: none;">
                                 Tải thêm
                             </button>
                             <div id="notificationEnd" class="notification-status" style="display: none;">
@@ -63,34 +70,25 @@
                     <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
                         @if (User.IsInRole(Role.Candidate))
                         {
-                            <li><a class="dropdown-item" href="#">Hồ sơ cá nhân</a></li>
-                            <li><a class="dropdown-item" href="#">Việc làm đã ứng tuyển</a></li>
-                            <li><a class="dropdown-item" asp-page="/Employer/MyRegistrations">Yêu cầu đăng ký nhà tuyển dụng</a></li>
-                            <li><a class="dropdown-item" href="#">Cài đặt tài khoản</a></li>
+                            <li><a class="dropdown-item" asp-page="/Employer/MyRegistrations">Đơn đăng ký nhà tuyển
+                                    dụng</a></li>
                         }
                         @if (User.IsInRole(Role.Employer))
                         {
                             <li><a class="dropdown-item" href="#">Quản lý công việc</a></li>
-                            <li><a class="dropdown-item" href="#">Ứng viên đã nộp</a></li>
-                            <li><a class="dropdown-item" href="#">Cài đặt tài khoản</a></li>
                         }
                         @if (User.IsInRole(Role.Censor))
                         {
-                            <li><a class="dropdown-item" asp-page="/Censor/EmployerRegistrations/Index">Duyệt đơn đăng ký nhà tuyển dụng</a></li>
-                            <li><a class="dropdown-item" href="#">Quản lý công việc</a></li>
-                            <li><a class="dropdown-item" href="#">Ứng viên đã nộp</a></li>
+                            <li><a class="dropdown-item" asp-page="/Censor/EmployerRegistrations/Index">Quản lý đơn đăng
+                                    ký nhà tuyển dụng</a></li>
                         }
-                        @if(User.IsInRole(Role.Manager))
+                        @if (User.IsInRole(Role.Manager))
                         {
                             <li><a class="dropdown-item" href="#">Quản lý người dùng</a></li>
-                            <li><a class="dropdown-item" href="#">Quản lý công việc</a></li>
                         }
                         @if (User.IsInRole(Role.Admin))
                         {
-                            <li><a class="dropdown-item" href="#">Quản lý người dùng</a></li>
-                            <li><a class="dropdown-item" href="#">Quản lý công việc</a></li>
                             <li><a class="dropdown-item" asp-page="/Admin/SystemHealth/Index">Sức khỏe hệ thống</a></li>
-                            <li><a class="dropdown-item" href="#">Cài đặt hệ thống</a></li>
                         }
                         <li>
                             <hr class="dropdown-divider">
