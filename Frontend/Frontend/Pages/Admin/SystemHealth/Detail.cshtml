@@ -1,22 +1,23 @@
 @page "{id}"
+@using Frontend.Services.Admin
 @model Frontend.Pages.Admin.SystemHealth.DetailModel
 @{
-    ViewData["Title"] = $"{Model.DetailData.Name} - Chi tiết giám sát";
+    ViewData["Title"] = $"{Model.DetailData?.Name} - Chi tiết giám sát";
 }
 
 <div class="container my-4">
     <!-- Breadcrumb & Hành động -->
     <div class="d-flex justify-content-between align-items-center mb-3">
-        <a asp-page="./Index" class="btn btn-outline-secondary btn-sm">
+        <a asp-page="Index" class="btn btn-outline-secondary btn-sm">
             &larr; Quay lại danh sách
         </a>
-        <a asp-page="./Detail" asp-route-id="@Model.DetailData.MonitorId" asp-route-refresh="true"
+        <a asp-page="Detail" asp-route-id="@Model.DetailData?.MonitorId" asp-route-refresh="true"
            class="btn btn-outline-primary btn-sm">
             Làm mới
         </a>
     </div>
 
-    @if (Model.DetailData.IsConfigured)
+    @if (Model.DetailData != null)
     {
         <!-- Tiêu đề dịch vụ -->
         <div class="mb-4">
@@ -24,12 +25,13 @@
                 <h3 class="mb-0 fw-bold">@Model.DetailData.Name</h3>
                 <span class="badge @(Model.DetailData.Status switch
                                    {
-                                       "up" => "bg-success",
-                                       "down" => "bg-danger",
-                                       "paused" => "bg-secondary",
-                                       "validating" => "bg-secondary",
-                                       "maintenance" => "bg-warning text-dark",
-                                       _ => "bg-light text-dark"
+                                       MonitorStatus.Up => "bg-success",
+                                       MonitorStatus.Down => "bg-danger",
+                                       MonitorStatus.Pending => "bg-warning text-dark",
+                                       MonitorStatus.Paused => "bg-secondary",
+                                       MonitorStatus.Validating => "bg-secondary",
+                                       MonitorStatus.Maintenance => "bg-warning text-dark",
+                                       _ => "bg-secondary"
                                    })">@Model.DetailData.StatusText</span>
             </div>
             <div class="monitor-url mt-1">@Model.DetailData.Url</div>
@@ -155,7 +157,7 @@
     }
 </div>
 
-@if (Model.DetailData.ChartPoints.Count > 0)
+@if (Model.DetailData?.ChartPoints.Count > 0)
 {
     @section Scripts {
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>

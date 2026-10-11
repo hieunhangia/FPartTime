@@ -17,4 +17,9 @@ public static class BusinessRuleConstants
         public const string PasswordRegex = @"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^a-zA-Z\d]).{6,}$";
         public const string OtpRegex = @"^\d{6}$";
     }
+    
+    public static class SystemHealth
+    {
+        public const int CacheDuration = 3;
+    }
 }

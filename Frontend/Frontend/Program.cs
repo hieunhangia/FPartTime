@@ -3,6 +3,7 @@ using ApiSdk;
 using BackendApiClient;
 using BackendApiClient.Extensions;
 using Frontend.Filters;
+using Frontend.Services.Admin;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authentication;
@@ -103,13 +104,15 @@ builder.Services.AddHttpClient<ApiClient>()
         return new ApiClient(adapter);
     });
 
-builder.Services.AddHttpClient("BetterStack", client =>
+builder.Services.AddHttpClient(SystemHealthService.BetterStackClientName, client =>
 {
     client.BaseAddress = new Uri(builder.Configuration["BetterStack:ApiBaseUrl"]!.TrimEnd('/') + "/");
     client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer",
         builder.Configuration["BetterStack:ApiToken"] ??
         throw new InvalidOperationException("BetterStack:ApiToken is not configured."));
 });
+
+builder.Services.AddScoped<SystemHealthService>();
 
 builder.Services.AddMemoryCache();
 
