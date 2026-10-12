@@ -22,14 +22,6 @@ namespace ApiSdk.Models
 #endif
         /// <summary>Stores additional data not described in the OpenAPI description found when deserializing. Can be used for serialization as well.</summary>
         public IDictionary<string, object> AdditionalData { get; set; }
-        /// <summary>The refreshToken property</summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-        public string? RefreshToken { get; set; }
-#nullable restore
-#else
-        public string RefreshToken { get; set; }
-#endif
         /// <summary>
         /// Instantiates a new <see cref="global::ApiSdk.Models.TokenResponseDto"/> and sets the default values.
         /// </summary>
@@ -56,7 +48,6 @@ namespace ApiSdk.Models
             return new Dictionary<string, Action<IParseNode>>
             {
                 { "accessToken", n => { AccessToken = n.GetStringValue(); } },
-                { "refreshToken", n => { RefreshToken = n.GetStringValue(); } },
             };
         }
         /// <summary>
@@ -67,7 +58,6 @@ namespace ApiSdk.Models
         {
             if(ReferenceEquals(writer, null)) throw new ArgumentNullException(nameof(writer));
             writer.WriteStringValue("accessToken", AccessToken);
-            writer.WriteStringValue("refreshToken", RefreshToken);
             writer.WriteAdditionalData(AdditionalData);
         }
     }

@@ -12,7 +12,7 @@ using Repository;
 namespace DbMigrator.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20261011053518_First")]
+    [Migration("20261012135535_First")]
     partial class First
     {
         /// <inheritdoc />
@@ -614,39 +614,6 @@ namespace DbMigrator.Migrations
                     b.ToTable("EmployerRegistrationRequests");
                 });
 
-            modelBuilder.Entity("Repository.Models.Users.RefreshToken", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("ExpiryAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<bool>("IsRevoked")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("IsUsed")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("Token")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("Token")
-                        .IsUnique();
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("RefreshTokens");
-                });
-
             modelBuilder.Entity("Repository.Models.Users.User", b =>
                 {
                     b.Property<Guid>("Id")
@@ -949,17 +916,6 @@ namespace DbMigrator.Migrations
                     b.Navigation("Requester");
                 });
 
-            modelBuilder.Entity("Repository.Models.Users.RefreshToken", b =>
-                {
-                    b.HasOne("Repository.Models.Users.User", "User")
-                        .WithMany("RefreshTokens")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("Repository.Models.Address.Province", b =>
                 {
                     b.Navigation("Communes");
@@ -1013,8 +969,6 @@ namespace DbMigrator.Migrations
                     b.Navigation("EmployerProfile");
 
                     b.Navigation("Notifications");
-
-                    b.Navigation("RefreshTokens");
                 });
 #pragma warning restore 612, 618
         }

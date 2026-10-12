@@ -28,7 +28,6 @@ public static class DependencyInjection
         services.AddSingleton<CloudflareR2StorageService>();
         services.AddHealthChecks().AddCheck<CloudflareR2HealthCheck>(name: "Cloudflare R2 Storage", tags: ["storage"]);
 
-        services.AddHostedService<RefreshTokenCleanupService>();
         services.AddHostedService<ExpiredJobCleanupService>();
     }
 }

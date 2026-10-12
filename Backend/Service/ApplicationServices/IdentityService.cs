@@ -17,7 +17,6 @@ using Service.HttpErrorExceptions;
 namespace Service.ApplicationServices;
 
 public class IdentityService(
-    ApplicationDbContext dbContext,
     UserManager<User> userManager,
     SignInManager<User> signInManager,
     SmsSenderService smsSenderService,
@@ -199,53 +198,6 @@ public class IdentityService(
             await userManager.ChangePasswordAsync(authenticatedUser, dto.CurrentPassword, dto.NewPassword));
     }
 
-    public async Task<TokenResponseDto> RefreshTokenAsync(RefreshTokenRequestDto dto)
-    {
-        var storedRefreshToken = await dbContext.RefreshTokens.FirstOrDefaultAsync(x => x.Token == dto.RefreshToken);
-        if (storedRefreshToken == null || storedRefreshToken.ExpiryAt < DateTime.UtcNow)
-        {
-            throw new UnauthorizedException("Phiên đăng nhập không hợp lệ hoặc đã hết hạn. Vui lòng đăng nhập lại.");
-        }
-
-        if (storedRefreshToken.IsUsed || storedRefreshToken.IsRevoked)
-        {
-            var activeTokens = await dbContext.RefreshTokens
-                .Where(x => x.UserId == storedRefreshToken.UserId && !x.IsRevoked)
-                .ToListAsync();
-            foreach (var token in activeTokens)
-            {
-                token.IsRevoked = true;
-            }
-
-            await dbContext.SaveChangesAsync();
-            throw new UnauthorizedException("Phiên đăng nhập không hợp lệ hoặc đã hết hạn. Vui lòng đăng nhập lại.");
-        }
-
-        storedRefreshToken.IsUsed = true;
-        await dbContext.SaveChangesAsync();
-
-        var user = await userManager.FindByIdAsync(storedRefreshToken.UserId.ToString());
-        if (user == null || await userManager.IsLockedOutAsync(user))
-        {
-            throw new UnauthorizedException("Tài khoản người dùng không tồn tại hoặc đã bị khóa.");
-        }
-
-        return await GenerateTokensAsync(user);
-    }
-
-    public async Task LogoutAsync(LogoutRequestDto dto)
-    {
-        var storedRefreshToken = await dbContext.RefreshTokens
-            .FirstOrDefaultAsync(x => x.Token == dto.RefreshToken);
-        if (storedRefreshToken == null || storedRefreshToken.IsRevoked)
-        {
-            return;
-        }
-
-        storedRefreshToken.IsRevoked = true;
-        await dbContext.SaveChangesAsync();
-    }
-
     private async Task RequestOtpAsync(string phoneNumber, RequestOtpPurpose purpose)
     {
         var user = await userManager.FindByNameAsync(phoneNumber);
@@ -313,17 +265,7 @@ public class IdentityService(
                 new SigningCredentials(new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings["SecretKey"]!)),
                     SecurityAlgorithms.HmacSha256)
         });
-        var refreshToken = Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));
-        dbContext.RefreshTokens.Add(new RefreshToken
-        {
-            Token = refreshToken,
-            UserId = user.Id,
-            ExpiryAt = DateTime.UtcNow.AddDays(jwtSettings.GetValue<double>("RefreshTokenExpirationInDays")),
-            IsUsed = false,
-            IsRevoked = false
-        });
-        await dbContext.SaveChangesAsync();
-        return new TokenResponseDto { AccessToken = accessToken, RefreshToken = refreshToken };
+        return new TokenResponseDto { AccessToken = accessToken };
     }
 
     private static void ThrowIfIdentityResultFailed(IdentityResult identityResult)
@@ -422,20 +364,7 @@ public class ChangePasswordRequestDto
     public string NewPassword { get; set; } = string.Empty;
 }
 
-public class RefreshTokenRequestDto
-{
-    [Required(ErrorMessage = "Refresh Token là bắt buộc.")]
-    public required string RefreshToken { get; set; }
-}
-
 public class TokenResponseDto
 {
     public required string AccessToken { get; set; }
-    public required string RefreshToken { get; set; }
-}
-
-public class LogoutRequestDto
-{
-    [Required(ErrorMessage = "Refresh Token là bắt buộc.")]
-    public required string RefreshToken { get; set; }
 }

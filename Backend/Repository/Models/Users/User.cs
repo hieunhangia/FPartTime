@@ -5,7 +5,6 @@ namespace Repository.Models.Users;
 
 public class User : IdentityUser<Guid>
 {
-    public ICollection<RefreshToken>? RefreshTokens { get; set; }
     public ICollection<Notification>? Notifications { get; set; }
     public CandidateProfile? CandidateProfile { get; set; }
     public EmployerProfile? EmployerProfile { get; set; }

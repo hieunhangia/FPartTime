@@ -36,55 +36,27 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
 
         options.Events = new CookieAuthenticationEvents
         {
-            OnValidatePrincipal = async context =>
+            OnValidatePrincipal = context =>
             {
                 var accessToken = context.Properties.GetTokenValue(HttpContextApiAuthExtensions.AccessTokenName);
                 if (string.IsNullOrEmpty(accessToken))
                 {
                     context.RejectPrincipal();
-                    return;
+                    return Task.CompletedTask;
                 }
 
                 if (new JsonWebTokenHandler().ReadJsonWebToken(accessToken).ValidTo < DateTime.UtcNow)
                 {
-                    var refreshToken = context.Properties.GetTokenValue(HttpContextApiAuthExtensions.RefreshTokenName);
-                    if (string.IsNullOrEmpty(refreshToken))
-                    {
-                        context.RejectPrincipal();
-                        return;
-                    }
-
-                    try
-                    {
-                        var tokenResponse = await context.HttpContext.RequestServices
-                            .GetRequiredService<RefreshTokenApiClient>().RefreshTokenAsync(refreshToken);
-                        if (tokenResponse is { AccessToken: not null, RefreshToken: not null })
-                        {
-                            context.Properties.UpdateTokenValue(HttpContextApiAuthExtensions.AccessTokenName,
-                                tokenResponse.AccessToken);
-                            context.Properties.UpdateTokenValue(HttpContextApiAuthExtensions.RefreshTokenName,
-                                tokenResponse.RefreshToken);
-                            context.ShouldRenew = true;
-                        }
-                        else
-                        {
-                            context.RejectPrincipal();
-                        }
-                    }
-                    catch
-                    {
-                        context.RejectPrincipal();
-                    }
+                    context.RejectPrincipal();
                 }
+
+                return Task.CompletedTask;
             }
         };
     });
 
 builder.Services.AddAuthorization();
 
-builder.Services.AddHttpClient(RefreshTokenApiClient.HttpClientName);
-builder.Services.AddTransient<RefreshTokenApiClient>();
-builder.Services.AddTransient<RefreshTokenDelegatingHandler>();
 builder.Services.AddScoped<IAccessTokenProvider, CookieAccessTokenProvider>();
 builder.Services.AddScoped<IAuthenticationProvider>(sp =>
 {
@@ -92,7 +64,6 @@ builder.Services.AddScoped<IAuthenticationProvider>(sp =>
     return new BaseBearerTokenAuthenticationProvider(tokenProvider);
 });
 builder.Services.AddHttpClient<ApiClient>()
-    .AddHttpMessageHandler<RefreshTokenDelegatingHandler>()
     .AddTypedClient<ApiClient>((httpClient, sp) =>
     {
         var authProvider = sp.GetRequiredService<IAuthenticationProvider>();

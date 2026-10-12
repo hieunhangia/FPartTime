@@ -57,13 +57,13 @@ public class OtpLoginModel(ApiClient apiClient) : PageModel
                 Otp = LoginForm.Otp
             });
 
-            if (tokenResponse?.AccessToken is null || tokenResponse.RefreshToken is null)
+            if (tokenResponse?.AccessToken is null)
             {
                 TempData.SetErrorMessage("Đăng nhập thất bại. Vui lòng kiểm tra lại mã OTP.");
                 return Page();
             }
 
-            await HttpContext.SignInWithApiTokenAsync(tokenResponse.AccessToken, tokenResponse.RefreshToken);
+            await HttpContext.SignInWithApiTokenAsync(tokenResponse.AccessToken);
             TempData.SetSuccessMessage("Đăng nhập thành công.");
             return Redirect("/");
         }

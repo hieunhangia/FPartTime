@@ -12,7 +12,6 @@ namespace Repository;
 public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
     : IdentityDbContext<User, IdentityRole<Guid>, Guid>(options)
 {
-    public DbSet<RefreshToken> RefreshTokens { get; set; }
     public DbSet<Commune> Communes { get; set; }
     public DbSet<Province> Provinces { get; set; }
     public DbSet<CandidateProfile> Candidates { get; set; }
@@ -31,17 +30,6 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
-
-        builder.Entity<RefreshToken>(entity =>
-        {
-            entity.Property(e => e.Token).HasMaxLength(BusinessRuleConstants.Models.RefreshToken.TokenMaxLength);
-            entity.HasIndex(e => e.Token).IsUnique();
-
-            entity.HasOne(e => e.User)
-                .WithMany(u => u.RefreshTokens)
-                .HasForeignKey(e => e.UserId)
-                .OnDelete(DeleteBehavior.Restrict);
-        });
 
         builder.Entity<Commune>(entity =>
         {

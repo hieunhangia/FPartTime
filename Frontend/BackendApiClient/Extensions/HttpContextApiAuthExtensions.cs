@@ -9,13 +9,12 @@ namespace BackendApiClient.Extensions;
 public static class HttpContextApiAuthExtensions
 {
     public const string AccessTokenName = "access_token";
-    public const string RefreshTokenName = "refresh_token";
 
     extension(HttpContext httpContext)
     {
-        public async Task SignInWithApiTokenAsync(string accessToken, string refreshToken)
+        public async Task SignInWithApiTokenAsync(string accessToken)
         {
-            if (string.IsNullOrEmpty(accessToken) || string.IsNullOrEmpty(refreshToken)) return;
+            if (string.IsNullOrEmpty(accessToken)) return;
             var authProperties = new AuthenticationProperties
             {
                 IsPersistent = true,
@@ -23,8 +22,7 @@ public static class HttpContextApiAuthExtensions
             };
             authProperties.StoreTokens(
             [
-                new AuthenticationToken { Name = AccessTokenName, Value = accessToken },
-                new AuthenticationToken { Name = RefreshTokenName, Value = refreshToken }
+                new AuthenticationToken { Name = AccessTokenName, Value = accessToken }
             ]);
             await httpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(
                 new ClaimsIdentity(new JsonWebTokenHandler().ReadJsonWebToken(accessToken).Claims,
@@ -35,7 +33,5 @@ public static class HttpContextApiAuthExtensions
             await httpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
 
         public async Task<string?> GetAccessTokenAsync() => await httpContext.GetTokenAsync(AccessTokenName);
-
-        public async Task<string?> GetRefreshTokenAsync() => await httpContext.GetTokenAsync(RefreshTokenName);
     }
 }

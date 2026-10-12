@@ -83,13 +83,13 @@ public class RegisterModel(ApiClient apiClient) : PageModel
                 Password = RegisterForm.Password,
                 Otp = RegisterForm.Otp
             });
-            if (response?.AccessToken is null || response.RefreshToken is null)
+            if (response?.AccessToken is null)
             {
                 TempData.SetErrorMessage("Đăng ký thất bại. Vui lòng kiểm tra lại thông tin đăng ký.");
                 return Page();
             }
 
-            await HttpContext.SignInWithApiTokenAsync(response.AccessToken, response.RefreshToken);
+            await HttpContext.SignInWithApiTokenAsync(response.AccessToken);
             TempData.SetSuccessMessage("Đăng ký tài khoản thành công.");
             return Redirect("/");
         }

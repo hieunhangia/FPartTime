@@ -27,17 +27,11 @@ public static class BusinessRuleConstants
         public const string OtpRegex = @"^\d{6}$";
         public const int OtpExpiresInMinutes = 5;
         public const int MaxOtpFailedAttempts = 5;
-        public const int RefreshTokenCleanupIntervalInHours = 24;
     }
 
     public static class Models
     {
         public const int PhoneNumberLength = 10;
-
-        public static class RefreshToken
-        {
-            public const int TokenMaxLength = 200;
-        }
 
         public static class Commune
         {

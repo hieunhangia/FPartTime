@@ -79,18 +79,4 @@ public class IdentityController(IdentityService identityService) : ControllerBas
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status500InternalServerError)]
     public async Task ChangePassword([FromBody] ChangePasswordRequestDto dto) =>
         await identityService.ChangePasswordAsync(User, dto);
-
-    [HttpPost("refresh-token")]
-    [ProducesResponseType<TokenResponseDto>(StatusCodes.Status200OK)]
-    [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
-    [ProducesResponseType<ProblemDetails>(StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType<ProblemDetails>(StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenRequestDto dto) =>
-        Ok(await identityService.RefreshTokenAsync(dto));
-
-    [HttpPost("logout")]
-    [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
-    [ProducesResponseType<ProblemDetails>(StatusCodes.Status500InternalServerError)]
-    public async Task Logout([FromBody] LogoutRequestDto dto) => await identityService.LogoutAsync(dto);
 }

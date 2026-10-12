@@ -2,10 +2,8 @@
 #pragma warning disable CS0618
 using ApiSdk.Api.Identity.AccountExists;
 using ApiSdk.Api.Identity.ChangePassword;
-using ApiSdk.Api.Identity.Logout;
 using ApiSdk.Api.Identity.OtpLogin;
 using ApiSdk.Api.Identity.PasswordLogin;
-using ApiSdk.Api.Identity.RefreshToken;
 using ApiSdk.Api.Identity.Register;
 using ApiSdk.Api.Identity.RequestOtpForLogin;
 using ApiSdk.Api.Identity.RequestOtpForRegister;
@@ -35,11 +33,6 @@ namespace ApiSdk.Api.Identity
         {
             get => new global::ApiSdk.Api.Identity.ChangePassword.ChangePasswordRequestBuilder(PathParameters, RequestAdapter);
         }
-        /// <summary>The logout property</summary>
-        public global::ApiSdk.Api.Identity.Logout.LogoutRequestBuilder Logout
-        {
-            get => new global::ApiSdk.Api.Identity.Logout.LogoutRequestBuilder(PathParameters, RequestAdapter);
-        }
         /// <summary>The otpLogin property</summary>
         public global::ApiSdk.Api.Identity.OtpLogin.OtpLoginRequestBuilder OtpLogin
         {
@@ -49,11 +42,6 @@ namespace ApiSdk.Api.Identity
         public global::ApiSdk.Api.Identity.PasswordLogin.PasswordLoginRequestBuilder PasswordLogin
         {
             get => new global::ApiSdk.Api.Identity.PasswordLogin.PasswordLoginRequestBuilder(PathParameters, RequestAdapter);
-        }
-        /// <summary>The refreshToken property</summary>
-        public global::ApiSdk.Api.Identity.RefreshToken.RefreshTokenRequestBuilder RefreshToken
-        {
-            get => new global::ApiSdk.Api.Identity.RefreshToken.RefreshTokenRequestBuilder(PathParameters, RequestAdapter);
         }
         /// <summary>The register property</summary>
         public global::ApiSdk.Api.Identity.Register.RegisterRequestBuilder Register
