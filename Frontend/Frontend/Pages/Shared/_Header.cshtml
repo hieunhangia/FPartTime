@@ -5,15 +5,14 @@
     <div class="header-inner">
 
         <div class="header-logo">
-            <a href="/">LOGO</a>
+            <a asp-page="/Public/Index">LOGO</a>
         </div>
 
         <nav class="header-nav">
-            <a href="#">Trang chủ</a>
             <a href="#">Tìm việc làm</a>
             @if (User.IsInRole(Role.Candidate))
             {
-                <a href="/Employer/MyRegistrations">Trở thành nhà tuyển dụng</a>
+                <a href="/Candidate/EmployerRegistrations/MyRegistrations">Trở thành nhà tuyển dụng</a>
             }
         </nav>
 
@@ -70,7 +69,7 @@
                     <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
                         @if (User.IsInRole(Role.Candidate))
                         {
-                            <li><a class="dropdown-item" asp-page="/Employer/MyRegistrations">Đơn đăng ký nhà tuyển
+                            <li><a class="dropdown-item" asp-page="/Candidate/EmployerRegistrations/MyRegistrations">Đơn đăng ký nhà tuyển
                                     dụng</a></li>
                         }
                         @if (User.IsInRole(Role.Employer))

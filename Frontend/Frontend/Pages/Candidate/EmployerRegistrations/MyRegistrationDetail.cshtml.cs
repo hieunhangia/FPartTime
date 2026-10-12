@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Kiota.Abstractions;
 
-namespace Frontend.Pages.Employer;
+namespace Frontend.Pages.Candidate.EmployerRegistrations;
 
 [Authorize(Roles = Role.Candidate)]
 public class MyRegistrationDetailModel(ApiClient apiClient) : PageModel
