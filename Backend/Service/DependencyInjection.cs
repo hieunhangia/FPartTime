@@ -4,10 +4,9 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Service.ApplicationServices;
 using Service.ApplicationServices.Candidate;
-using Service.ApplicationServices.Censor;
-using Service.ApplicationServices.Employer;
 using Service.BackgroundServices;
 using Service.ExternalServices;
+using EmployerRegistrationService = Service.ApplicationServices.Censor.EmployerRegistrationService;
 
 namespace Service;
 
@@ -18,8 +17,8 @@ public static class DependencyInjection
         services.AddSingleton<JsonWebTokenHandler>();
         services.AddScoped<IdentityService>();
         services.AddScoped<NotificationsService>();
+        services.AddScoped<ApplicationServices.Candidate.EmployerRegistrationService>();
         services.AddScoped<EmployerRegistrationService>();
-        services.AddScoped<CensorEmployerRegistrationService>();
         services.AddScoped<SmsSenderService>();
         services.AddScoped<CandidateProfileService>();
         var r2Settings = configuration.GetSection("R2Settings");

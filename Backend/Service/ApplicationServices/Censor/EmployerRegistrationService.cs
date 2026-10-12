@@ -5,10 +5,11 @@ using Microsoft.EntityFrameworkCore;
 using Repository;
 using Repository.Models.Users;
 using Repository.Constants;
+using Service.ApplicationServices.Candidate;
 using Service.ExternalServices;
 using Service.Extensions;
 using Service.HttpErrorExceptions;
-using Service.ApplicationServices.Employer;
+using EmployerRegistrationMapper = Service.ApplicationServices.Candidate.EmployerRegistrationMapper;
 
 namespace Service.ApplicationServices.Censor;
 
@@ -19,7 +20,7 @@ public class RejectEmployerRegistrationRequestDto
     public string RejectReason { get; set; } = string.Empty;
 }
 
-public class CensorEmployerRegistrationService(
+public class EmployerRegistrationService(
     ApplicationDbContext dbContext,
     CloudflareR2StorageService storageService,
     UserManager<User> userManager,
@@ -34,9 +35,8 @@ public class CensorEmployerRegistrationService(
             query = query.Where(r => r.Status == status.Value);
         }
 
-        return await query
-            .OrderByDescending(r => r.CreatedAt)
-            .ProjectToViewDto()
+        return await EmployerRegistrationMapper.ProjectToViewDto(query
+                .OrderByDescending(r => r.CreatedAt))
             .ToListAsync();
     }
 
@@ -46,8 +46,7 @@ public class CensorEmployerRegistrationService(
             .AsNoTracking()
             .FirstOrDefaultAsync(r => r.Id == id) ?? throw new NotFoundException("Không tìm thấy yêu cầu đăng ký.");
 
-        return request.ToDetailDto(
-            await storageService.GeneratePresignedUrlAsync(request.DocumentPath, TimeSpan.FromMinutes(15)),
+        return EmployerRegistrationMapper.ToDetailDto(request, await storageService.GeneratePresignedUrlAsync(request.DocumentPath, TimeSpan.FromMinutes(15)),
             await storageService.GeneratePresignedUrlAsync(request.CCCDFrontImagePath, TimeSpan.FromMinutes(15)),
             await storageService.GeneratePresignedUrlAsync(request.CCCDBackImagePath, TimeSpan.FromMinutes(15)));
     }

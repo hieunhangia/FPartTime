@@ -6,14 +6,14 @@ public static class BusinessRuleConstants
     public const string CCCDNumberRegex = @"^\d{12}$";
     public const string TaxCodeRegex = @"^\d{12}$";
 
-    public static class StoreObject
+    public static class ObjectStorage
     {
         public const long MaxFileSizeInBytes = 5 * 1024 * 1024;
-        public static readonly string[] AllowedImageExtensions = [".jpg", ".jpeg", ".png"];
-        public static readonly string[] AllowedDocumentExtensions = [".pdf", ".jpg", ".jpeg", ".png"];
 
         public static class EmployerRegistration
         {
+            public static readonly string[] AllowedImageExtensions = [".jpg", ".jpeg", ".png"];
+            public static readonly string[] AllowedDocumentExtensions = [".pdf", ".jpg", ".jpeg", ".png"];
             public const string BasePath = "employer-registrations";
             public const string Document = "document";
             public const string CccdFront = "cccd-front";

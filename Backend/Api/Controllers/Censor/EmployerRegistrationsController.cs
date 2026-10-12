@@ -1,18 +1,17 @@
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Repository.Constants;
 using Repository.Models.Users;
-using Service.ApplicationServices;
+using Service.ApplicationServices.Candidate;
 using Service.ApplicationServices.Censor;
-using Service.ApplicationServices.Employer;
+using EmployerRegistrationService = Service.ApplicationServices.Censor.EmployerRegistrationService;
 
 namespace Api.Controllers.Censor
 {
     [Route("api/censor/employer-registrations")]
     [ApiController]
     [Authorize(Roles = Role.Censor)]
-    public class EmployerRegistrationsController(CensorEmployerRegistrationService registrationService) : ControllerBase
+    public class EmployerRegistrationsController(EmployerRegistrationService registrationService) : ControllerBase
     {
         [HttpGet]
         [ProducesResponseType<IEnumerable<EmployerRegistrationViewDto>>(StatusCodes.Status200OK)]

@@ -6,11 +6,11 @@ using Repository;
 using Repository.Constants;
 using Repository.Models.Users;
 using Riok.Mapperly.Abstractions;
-using Service.ExternalServices;
 using Service.Extensions;
+using Service.ExternalServices;
 using Service.HttpErrorExceptions;
 
-namespace Service.ApplicationServices.Employer;
+namespace Service.ApplicationServices.Candidate;
 
 public class EmployerRegistrationService(
     ApplicationDbContext dbContext,
@@ -34,14 +34,14 @@ public class EmployerRegistrationService(
 
         ValidateDateOfBirth(dto.DateOfBirth);
         ValidateUploadedFile(dto.DocumentFile, "Tài liệu xác thực doanh nghiệp",
-            BusinessRuleConstants.StoreObject.AllowedDocumentExtensions);
+            BusinessRuleConstants.ObjectStorage.EmployerRegistration.AllowedDocumentExtensions);
         ValidateUploadedFile(dto.CCCDFrontImage, "Ảnh CCCD mặt trước",
-            BusinessRuleConstants.StoreObject.AllowedImageExtensions);
+            BusinessRuleConstants.ObjectStorage.EmployerRegistration.AllowedImageExtensions);
         ValidateUploadedFile(dto.CCCDBackImage, "Ảnh CCCD mặt sau",
-            BusinessRuleConstants.StoreObject.AllowedImageExtensions);
+            BusinessRuleConstants.ObjectStorage.EmployerRegistration.AllowedImageExtensions);
 
         var requestId = Guid.NewGuid();
-        var basePath = $"{BusinessRuleConstants.StoreObject.EmployerRegistration.BasePath}/{Guid.NewGuid():N}";
+        var basePath = $"{BusinessRuleConstants.ObjectStorage.EmployerRegistration.BasePath}/{Guid.NewGuid():N}";
         var uploadedKeys = new List<string>();
         string documentPath;
         string cccdFrontImagePath;
@@ -49,13 +49,14 @@ public class EmployerRegistrationService(
         try
         {
             documentPath = await UploadFileAsync(
-                $"{basePath}/{BusinessRuleConstants.StoreObject.EmployerRegistration.Document}", dto.DocumentFile!);
+                $"{basePath}/{BusinessRuleConstants.ObjectStorage.EmployerRegistration.Document}", dto.DocumentFile!);
             uploadedKeys.Add(documentPath);
             cccdFrontImagePath = await UploadFileAsync(
-                $"{basePath}/{BusinessRuleConstants.StoreObject.EmployerRegistration.CccdFront}", dto.CCCDFrontImage!);
+                $"{basePath}/{BusinessRuleConstants.ObjectStorage.EmployerRegistration.CccdFront}",
+                dto.CCCDFrontImage!);
             uploadedKeys.Add(cccdFrontImagePath);
             cccdBackImagePath = await UploadFileAsync(
-                $"{basePath}/{BusinessRuleConstants.StoreObject.EmployerRegistration.CccdBack}", dto.CCCDBackImage!);
+                $"{basePath}/{BusinessRuleConstants.ObjectStorage.EmployerRegistration.CccdBack}", dto.CCCDBackImage!);
             uploadedKeys.Add(cccdBackImagePath);
         }
         catch
@@ -64,7 +65,7 @@ public class EmployerRegistrationService(
             {
                 try
                 {
-                    await storageService.DeleteFileAsync(key);
+                    await storageService.DeleteFileAsync(key, BucketType.Private);
                 }
                 catch
                 {
@@ -105,23 +106,26 @@ public class EmployerRegistrationService(
     public async Task<EmployerRegistrationDetailDto> GetMyRegistrationByIdAsync(ClaimsPrincipal user, Guid id)
     {
         var userId = user.GetUserId();
-        string imageUrl = string.Empty;
+        string imageUrl;
         var request = await dbContext.EmployerRegistrationRequests
-            .AsNoTracking()
-            .FirstOrDefaultAsync(r => r.Id == id && r.RequesterId == userId) ?? throw new NotFoundException("Không tìm thấy yêu cầu đăng ký.");
+                          .AsNoTracking()
+                          .FirstOrDefaultAsync(r => r.Id == id && r.RequesterId == userId) ??
+                      throw new NotFoundException("Không tìm thấy yêu cầu đăng ký.");
 
         if (request.DocumentPath.Contains(".pdf", StringComparison.OrdinalIgnoreCase))
         {
-            imageUrl = await storageService.GeneratePresignedUrlAsync(request.DocumentPath,TimeSpan.FromMinutes(15),"application/pdf");
+            imageUrl = await storageService.GeneratePresignedUrlAsync(request.DocumentPath, TimeSpan.FromMinutes(15),
+                "application/pdf");
         }
         else
         {
-            imageUrl = await storageService.GeneratePresignedUrlAsync(request.DocumentPath,TimeSpan.FromMinutes(15));
+            imageUrl = await storageService.GeneratePresignedUrlAsync(request.DocumentPath, TimeSpan.FromMinutes(15));
         }
+
         return request.ToDetailDto(
             imageUrl,
-            await storageService.GeneratePresignedUrlAsync(request.CCCDFrontImagePath,TimeSpan.FromMinutes(15)),
-            await storageService.GeneratePresignedUrlAsync(request.CCCDBackImagePath,TimeSpan.FromMinutes(15)));
+            await storageService.GeneratePresignedUrlAsync(request.CCCDFrontImagePath, TimeSpan.FromMinutes(15)),
+            await storageService.GeneratePresignedUrlAsync(request.CCCDBackImagePath, TimeSpan.FromMinutes(15)));
     }
 
     public async Task CancelAsync(ClaimsPrincipal user, Guid id)
@@ -150,7 +154,7 @@ public class EmployerRegistrationService(
         var extension = Path.GetExtension(file.FileName);
         var key = $"{keyPrefix}{extension.ToLowerInvariant()}";
         await using var stream = file.OpenReadStream();
-        await storageService.UploadFileAsync(key, stream, file.ContentType);
+        await storageService.UploadFileAsync(key, stream, file.ContentType, BucketType.Private);
         return key;
     }
 
@@ -185,9 +189,10 @@ public class EmployerRegistrationService(
             throw new BadRequestException($"{fieldLabel} là bắt buộc.");
         }
 
-        if (file.Length > BusinessRuleConstants.StoreObject.MaxFileSizeInBytes)
+        if (file.Length > BusinessRuleConstants.ObjectStorage.MaxFileSizeInBytes)
         {
-            throw new BadRequestException($"{fieldLabel} không được vượt quá 5MB.");
+            throw new BadRequestException(
+                $"{fieldLabel} không được vượt quá {BusinessRuleConstants.ObjectStorage.MaxFileSizeInBytes / (1024 * 1024)}MB.");
         }
 
         var extension = Path.GetExtension(file.FileName);
