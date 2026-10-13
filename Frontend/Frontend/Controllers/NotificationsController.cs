@@ -20,7 +20,7 @@ public class NotificationsController(ApiClient apiClient) : ControllerBase
             return new JsonResult(new
             {
                 success = true, data = await apiClient.Api.Notifications
-                    .GetWithOdataAsync<NotificationResponseDto>(q => q
+                    .GetWithODataAsync<NotificationResponseDto>(q => q
                         .Skip(skip)
                         .Top(top)
                         .OrderByDescending(n => n.CreatedAt)) ?? []

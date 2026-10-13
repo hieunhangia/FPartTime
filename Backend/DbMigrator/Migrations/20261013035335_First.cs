@@ -1,12 +1,12 @@
-using System;
+﻿using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace Repository.Migrations
+namespace DbMigrator.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreate : Migration
+    public partial class First : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -243,7 +243,6 @@ namespace Repository.Migrations
                         onDelete: ReferentialAction.Restrict);
                 });
 
-
             migrationBuilder.CreateTable(
                 name: "Communes",
                 columns: table => new
@@ -305,7 +304,7 @@ namespace Repository.Migrations
                     MaxAgeRequirement = table.Column<int>(type: "int", nullable: true),
                     CommuneCode = table.Column<string>(type: "nvarchar(10)", nullable: false),
                     DetailAddress = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
-                    ExpiryAt = table.Column<DateOnly>(type: "date", nullable: false),
+                    ExpiryAt = table.Column<DateOnly>(type: "date", nullable: true),
                     Status = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     EmployerId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
@@ -615,7 +614,6 @@ namespace Repository.Migrations
                 name: "IX_Notifications_UserId",
                 table: "Notifications",
                 column: "UserId");
-
         }
 
         /// <inheritdoc />
@@ -656,7 +654,6 @@ namespace Repository.Migrations
 
             migrationBuilder.DropTable(
                 name: "Notifications");
-
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");

@@ -74,7 +74,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
         builder.Entity<CandidateSchedule>(entity =>
         {
             entity.HasOne(e => e.Candidate)
-                .WithMany(c => c.CandidateSchedules)
+                .WithMany(c => c.PreferredWorkSchedules)
                 .HasForeignKey(e => e.CandidateId)
                 .OnDelete(DeleteBehavior.Restrict);
         });

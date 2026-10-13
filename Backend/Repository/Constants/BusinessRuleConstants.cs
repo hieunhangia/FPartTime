@@ -99,4 +99,11 @@ public static class BusinessRuleConstants
     {
         public const int DefaultMaxActivePosts = 5;
     }
+    
+    public static class Jobs
+    {
+        public const int MaxVacanciesPerJob = 10;
+        public const int MaxJobSchedulesPerJob = 30;
+        public const int MaxJobSalariesPerJob = 10;
+    }
 }

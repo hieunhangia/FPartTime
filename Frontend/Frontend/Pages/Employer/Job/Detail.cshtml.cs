@@ -1,0 +1,110 @@
+using System.Globalization;
+using ApiSdk;
+using ApiSdk.Models;
+using BackendApiClient.Extensions;
+using Frontend.Constants;
+using Frontend.Extensions;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.Kiota.Abstractions;
+
+namespace Frontend.Pages.Employer.Job;
+
+[Authorize(Roles = Role.Employer)]
+public class DetailModel(ApiClient apiClient) : PageModel
+{
+    public JobDetailResponseDto? Job { get; private set; }
+
+    public async Task<IActionResult> OnGetAsync(Guid id)
+    {
+        try
+        {
+            Job = await apiClient.Api.Jobs[id].GetAsync();
+            if (Job == null)
+            {
+                TempData.SetErrorMessage("Không tìm thấy thông tin công việc.");
+                return RedirectToPage("./Index");
+            }
+        }
+        catch (ApiException ex)
+        {
+            TempData.SetErrorMessage(ex.ToFriendlyErrorMessage());
+            return RedirectToPage("./Index");
+        }
+        catch
+        {
+            TempData.SetErrorMessage("Đã xảy ra lỗi khi tải thông tin chi tiết công việc.");
+            return RedirectToPage("./Index");
+        }
+
+        return Page();
+    }
+
+    public (string Label, string CssClass) GetStatusDisplay(JobStatus? status) => status switch
+    {
+        JobStatus.Active => ("Đang mở", "bg-success"),
+        JobStatus.Closed => ("Đã đóng", "bg-secondary"),
+        JobStatus.Hidden => ("Bị ẩn bởi Admin", "bg-warning text-dark"),
+        _ => (status?.ToString() ?? "-", "bg-secondary")
+    };
+
+    public (string Label, string CssClass) GetApplicationStatusDisplay(JobApplicationStatus? status) => status switch
+    {
+        JobApplicationStatus.Pending => ("Chờ duyệt", "bg-warning text-dark"),
+        JobApplicationStatus.Accepted => ("Đã nhận", "bg-success"),
+        JobApplicationStatus.Rejected => ("Đã từ chối", "bg-danger"),
+        _ => (status?.ToString() ?? "-", "bg-secondary")
+    };
+
+    public string GetDayOfWeekDisplay(DayOfWeekObject? day) => day switch
+    {
+        DayOfWeekObject.Monday => "Thứ Hai",
+        DayOfWeekObject.Tuesday => "Thứ Ba",
+        DayOfWeekObject.Wednesday => "Thứ Tư",
+        DayOfWeekObject.Thursday => "Thứ Năm",
+        DayOfWeekObject.Friday => "Thứ Sáu",
+        DayOfWeekObject.Saturday => "Thứ Bảy",
+        DayOfWeekObject.Sunday => "Chủ Nhật",
+        _ => day?.ToString() ?? "-"
+    };
+
+    public string GetGenderDisplay(Gender? gender) => gender switch
+    {
+        Gender.Male => "Nam",
+        Gender.Female => "Nữ",
+        _ => "Không yêu cầu"
+    };
+
+    public string GetTimeUnitDisplay(JobSalaryTimeUnit? unit) => unit switch
+    {
+        JobSalaryTimeUnit.Hour => "Giờ",
+        JobSalaryTimeUnit.Session => "Ca (Buổi)",
+        JobSalaryTimeUnit.Day => "Ngày",
+        JobSalaryTimeUnit.Week => "Tuần",
+        JobSalaryTimeUnit.Month => "Tháng",
+        JobSalaryTimeUnit.Project => "Dự án",
+        _ => unit?.ToString() ?? "-"
+    };
+
+    public string FormatSalaryRate(int? quantity, JobSalaryTimeUnit? unit)
+    {
+        var unitText = GetTimeUnitDisplay(unit);
+        return quantity is > 1 ? $"{quantity} {unitText}" : unitText;
+    }
+
+    public string FormatSalaryAmount(double? amount)
+    {
+        return amount.HasValue ? amount.Value.ToString("N0", new CultureInfo("vi-VN")) + " VNĐ" : "-";
+    }
+
+    public string FormatDate(Date? date)
+    {
+        return date.HasValue ? $"{date.Value.Day:D2}/{date.Value.Month:D2}/{date.Value.Year}" : "-";
+    }
+
+    public string FormatTime(Time? time)
+    {
+        return time.HasValue ? $"{time.Value.Hour:D2}:{time.Value.Minute:D2}" : "-";
+    }
+}

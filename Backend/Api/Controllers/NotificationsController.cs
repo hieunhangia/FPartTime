@@ -1,6 +1,6 @@
+using Api.Attributes;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.OData.Query;
 using Service.ApplicationServices;
 
 namespace Api.Controllers;
@@ -11,7 +11,7 @@ namespace Api.Controllers;
 public class NotificationsController(NotificationsService notificationsService) : ControllerBase
 {
     [HttpGet]
-    [EnableQuery]
+    [ODataEnableQuery(OutputType.List)]
     [ProducesResponseType<IEnumerable<NotificationResponseDto>>(StatusCodes.Status200OK)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status500InternalServerError)]

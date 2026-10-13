@@ -16,7 +16,7 @@ public class CandidateProfile
 
     public User? User { get; set; }
     public Commune? PreferredWorkCommune { get; set; }
-    public ICollection<CandidateSchedule>? CandidateSchedules { get; set; }
+    public ICollection<CandidateSchedule>? PreferredWorkSchedules { get; set; }
     public ICollection<EmployerRegistrationRequest>? EmployerRegistrationRequests { get; set; }
     public ICollection<JobApplication>? JobApplications { get; set; }
     public ICollection<JobReport>? JobReports { get; set; }

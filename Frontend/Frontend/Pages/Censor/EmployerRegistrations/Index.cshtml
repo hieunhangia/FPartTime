@@ -19,10 +19,10 @@
                 <div class="col-auto">
                     <select asp-for="StatusFilter" class="form-select">
                         <option value="">-- Tất cả --</option>
-                        <option value="0">Chờ duyệt</option>
-                        <option value="1">Đã duyệt</option>
-                        <option value="2">Đã từ chối</option>
-                        <option value="3">Đã hủy</option>
+                        <option value="@EmployerRegistrationRequestStatus.Pending">Chờ duyệt</option>
+                        <option value="@EmployerRegistrationRequestStatus.Approved">Đã duyệt</option>
+                        <option value="@EmployerRegistrationRequestStatus.Rejected">Đã từ chối</option>
+                        <option value="@EmployerRegistrationRequestStatus.Cancelled">Đã hủy</option>
                     </select>
                 </div>
                 <div class="col-auto">

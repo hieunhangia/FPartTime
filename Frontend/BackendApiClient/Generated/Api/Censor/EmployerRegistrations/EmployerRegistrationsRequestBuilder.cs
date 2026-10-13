@@ -103,7 +103,7 @@ namespace ApiSdk.Api.Censor.EmployerRegistrations
         {
             #pragma warning disable CS1591
             [QueryParameter("status")]
-            public int? Status { get; set; }
+            public global::ApiSdk.Models.EmployerRegistrationRequestStatus? Status { get; set; }
             #pragma warning restore CS1591
         }
     }

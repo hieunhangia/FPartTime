@@ -4,6 +4,7 @@ using ApiSdk.Api.CandidateProfiles;
 using ApiSdk.Api.Censor;
 using ApiSdk.Api.EmployerRegistrations;
 using ApiSdk.Api.Identity;
+using ApiSdk.Api.Jobs;
 using ApiSdk.Api.Notifications;
 using Microsoft.Kiota.Abstractions.Extensions;
 using Microsoft.Kiota.Abstractions;
@@ -38,6 +39,11 @@ namespace ApiSdk.Api
         public global::ApiSdk.Api.Identity.IdentityRequestBuilder Identity
         {
             get => new global::ApiSdk.Api.Identity.IdentityRequestBuilder(PathParameters, RequestAdapter);
+        }
+        /// <summary>The Jobs property</summary>
+        public global::ApiSdk.Api.Jobs.JobsRequestBuilder Jobs
+        {
+            get => new global::ApiSdk.Api.Jobs.JobsRequestBuilder(PathParameters, RequestAdapter);
         }
         /// <summary>The notifications property</summary>
         public global::ApiSdk.Api.Notifications.NotificationsRequestBuilder Notifications

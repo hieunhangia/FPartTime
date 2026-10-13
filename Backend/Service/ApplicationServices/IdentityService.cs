@@ -72,7 +72,12 @@ public class IdentityService(
             throw new BadRequestException("Mã OTP không hợp lệ hoặc đã hết hạn.");
         }
 
-        var user = new User { UserName = dto.PhoneNumber, CandidateProfile = new CandidateProfile() };
+        var user = new User
+        {
+            UserName = dto.PhoneNumber,
+            PhoneNumber = dto.PhoneNumber,
+            CandidateProfile = new CandidateProfile()
+        };
         ThrowIfIdentityResultFailed(await userManager.CreateAsync(user, dto.Password));
 
         cache.Remove(cacheKey);

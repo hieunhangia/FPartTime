@@ -15,7 +15,7 @@ public class Job
     public int? MaxAgeRequirement { get; set; }
     public required string CommuneCode { get; set; }
     public required string DetailAddress { get; set; }
-    public DateOnly ExpiryAt { get; set; }
+    public DateOnly? ExpiryAt { get; set; }
     public JobStatus Status { get; set; } = JobStatus.Active;
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public Guid EmployerId { get; set; }

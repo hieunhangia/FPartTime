@@ -76,7 +76,7 @@ public class EmployerRegistrationService(
                 CompanyName = request.CompanyName,
                 TaxCode = request.TaxCode,
                 VerificationDocumentFilePath = request.DocumentPath,
-                MaxActivePosts = 5,
+                MaxActivePosts = BusinessRuleConstants.Employers.DefaultMaxActivePosts,
                 ContactPhone = request.PhoneNumber
             };
             

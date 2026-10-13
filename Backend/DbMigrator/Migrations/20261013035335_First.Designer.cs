@@ -12,7 +12,7 @@ using Repository;
 namespace DbMigrator.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20261012135535_First")]
+    [Migration("20261013035335_First")]
     partial class First
     {
         /// <inheritdoc />
@@ -236,7 +236,7 @@ namespace DbMigrator.Migrations
                     b.Property<Guid>("EmployerId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateOnly>("ExpiryAt")
+                    b.Property<DateOnly?>("ExpiryAt")
                         .HasColumnType("date");
 
                     b.Property<string>("GenderRequirement")
@@ -868,7 +868,7 @@ namespace DbMigrator.Migrations
             modelBuilder.Entity("Repository.Models.Users.CandidateSchedule", b =>
                 {
                     b.HasOne("Repository.Models.Users.CandidateProfile", "Candidate")
-                        .WithMany("CandidateSchedules")
+                        .WithMany("PreferredWorkSchedules")
                         .HasForeignKey("CandidateId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
@@ -939,13 +939,13 @@ namespace DbMigrator.Migrations
 
             modelBuilder.Entity("Repository.Models.Users.CandidateProfile", b =>
                 {
-                    b.Navigation("CandidateSchedules");
-
                     b.Navigation("EmployerRegistrationRequests");
 
                     b.Navigation("JobApplications");
 
                     b.Navigation("JobReports");
+
+                    b.Navigation("PreferredWorkSchedules");
                 });
 
             modelBuilder.Entity("Repository.Models.Users.CensorProfile", b =>

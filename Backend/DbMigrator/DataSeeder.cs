@@ -46,14 +46,8 @@ public class DataSeeder(ApplicationDbContext db)
     private async Task SeedUsersAsync()
     {
         Console.WriteLine("➡️ Đang kiểm tra và tạo người dùng mặc định...");
-
-        // 1. Admin mặc định (gán tất cả các roles)
         await CreateUserIfNotExistsAsync("0000000000", "Admin@123", Role.AllRoles);
-
-        // 2. Manager mặc định
         await CreateUserIfNotExistsAsync("0123456789", "Manager@123", Role.Manager);
-
-        // 3. Người dùng mẫu (Candidate, Employer, Censor, SupportStaff)
         for (var i = 1; i <= 5; i++)
         {
             await CreateUserIfNotExistsAsync($"000000000{i}", "Candidate@123", Role.Candidate);
@@ -63,16 +57,17 @@ public class DataSeeder(ApplicationDbContext db)
         }
     }
 
-    private async Task CreateUserIfNotExistsAsync(string username, string password, params string[] roleNames)
+    private async Task CreateUserIfNotExistsAsync(string phoneNumber, string password, params string[] roleNames)
     {
-        var user = await db.Users.FirstOrDefaultAsync(u => u.UserName == username);
+        var user = await db.Users.FirstOrDefaultAsync(u => u.PhoneNumber == phoneNumber);
         if (user == null)
         {
             user = new User
             {
                 Id = Guid.NewGuid(),
-                UserName = username,
-                NormalizedUserName = username.ToUpperInvariant(),
+                UserName = phoneNumber,
+                PhoneNumber = phoneNumber,
+                NormalizedUserName = phoneNumber.ToUpperInvariant(),
                 SecurityStamp = Guid.NewGuid().ToString(),
                 ConcurrencyStamp = Guid.NewGuid().ToString()
             };
@@ -131,6 +126,9 @@ public class DataSeeder(ApplicationDbContext db)
 
         // 2. Notification SQL
         await SeedSqlFileIfEmptyAsync(() => db.Notifications.AnyAsync(), "notification.sql");
+
+        // 3. Job SQL
+        await SeedSqlFileIfEmptyAsync(() => db.Jobs.AnyAsync(), "job.sql");
     }
 
     private async Task SeedSqlFileIfEmptyAsync(Func<Task<bool>> hasDataAsync, string fileName)

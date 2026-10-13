@@ -42,13 +42,7 @@ namespace ApiSdk.Models
         public string FullName { get; set; }
 #endif
         /// <summary>The gender property</summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
         public global::ApiSdk.Models.Gender? Gender { get; set; }
-#nullable restore
-#else
-        public global::ApiSdk.Models.Gender Gender { get; set; }
-#endif
         /// <summary>The preferredWorkCommuneCode property</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
@@ -94,7 +88,7 @@ namespace ApiSdk.Models
                 { "bio", n => { Bio = n.GetStringValue(); } },
                 { "dateOfBirth", n => { DateOfBirth = n.GetDateValue(); } },
                 { "fullName", n => { FullName = n.GetStringValue(); } },
-                { "gender", n => { Gender = n.GetObjectValue<global::ApiSdk.Models.Gender>(global::ApiSdk.Models.Gender.CreateFromDiscriminatorValue); } },
+                { "gender", n => { Gender = n.GetEnumValue<global::ApiSdk.Models.Gender>(); } },
                 { "preferredWorkCommuneCode", n => { PreferredWorkCommuneCode = n.GetStringValue(); } },
                 { "preferredWorkCommuneName", n => { PreferredWorkCommuneName = n.GetStringValue(); } },
             };
@@ -110,7 +104,7 @@ namespace ApiSdk.Models
             writer.WriteStringValue("bio", Bio);
             writer.WriteDateValue("dateOfBirth", DateOfBirth);
             writer.WriteStringValue("fullName", FullName);
-            writer.WriteObjectValue<global::ApiSdk.Models.Gender>("gender", Gender);
+            writer.WriteEnumValue<global::ApiSdk.Models.Gender>("gender", Gender);
             writer.WriteStringValue("preferredWorkCommuneCode", PreferredWorkCommuneCode);
             writer.WriteStringValue("preferredWorkCommuneName", PreferredWorkCommuneName);
             writer.WriteAdditionalData(AdditionalData);

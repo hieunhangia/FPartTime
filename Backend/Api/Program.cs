@@ -2,6 +2,7 @@ using System.Text;
 using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
 using Api;
+using Api.Middlewares;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.HttpOverrides;
@@ -55,10 +56,13 @@ builder.Services.AddOpenApi(options =>
 {
     options.AddSchemaTransformer((schema, context, _) =>
     {
-        if (context.JsonTypeInfo.Type.IsEnum)
+        var rawType = context.JsonTypeInfo.Type;
+        var underlyingType = Nullable.GetUnderlyingType(rawType);
+        var type = underlyingType ?? rawType;
+        if (type.IsEnum)
         {
-            schema.Type = JsonSchemaType.String;
-            schema.Enum = [.. Enum.GetNames(context.JsonTypeInfo.Type).Select(name => JsonValue.Create(name))];
+            schema.Type = underlyingType != null ? JsonSchemaType.String | JsonSchemaType.Null : JsonSchemaType.String;
+            schema.Enum = [.. Enum.GetNames(type).Select(name => JsonValue.Create(name))];
         }
 
         return Task.CompletedTask;
@@ -82,6 +86,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseAuthentication();
+app.UseUserLockoutChecking();
 app.UseAuthorization();
 
 app.MapControllers();

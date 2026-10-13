@@ -1,0 +1,175 @@
+@page
+@model Frontend.Pages.Employer.Job.IndexModel
+@{
+    ViewData["Title"] = "Quản lý công việc";
+}
+
+<div class="container my-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="mb-0">Danh sách công việc đã đăng</h2>
+    </div>
+
+    <div class="card mb-4 shadow-sm">
+        <div class="card-body">
+            <form method="get" class="row g-3 align-items-center">
+                <div class="col-md-4">
+                    <label asp-for="Keyword" class="form-label fw-bold">Từ khóa tiêu đề:</label>
+                    <input asp-for="Keyword" class="form-control" placeholder="Nhập tiêu đề công việc..."/>
+                </div>
+                <div class="col-md-3">
+                    <label asp-for="StatusFilter" class="form-label fw-bold">Trạng thái:</label>
+                    <select asp-for="StatusFilter" class="form-select">
+                        <option value="">-- Tất cả --</option>
+                        <option value="Active">Đang mở</option>
+                        <option value="Closed">Đã đóng</option>
+                        <option value="Hidden">Bị ẩn bởi Admin</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label asp-for="OrderBy" class="form-label fw-bold">Sắp xếp:</label>
+                    <select asp-for="OrderBy" class="form-select">
+                        <option value="CreatedAt_Desc">Mới nhất (Ngày tạo giảm dần)</option>
+                        <option value="CreatedAt_Asc">Cũ nhất (Ngày tạo tăng dần)</option>
+                        <option value="Title_Asc">Tiêu đề (A - Z)</option>
+                        <option value="Title_Desc">Tiêu đề (Z - A)</option>
+                    </select>
+                </div>
+                <div class="col-md-2 d-flex align-items-end">
+                    <div class="w-100">
+                        <label class="form-label d-block invisible">Thao tác</label>
+                        <button type="submit" class="btn btn-primary me-2">Lọc</button>
+                        <a asp-page="./Index" class="btn btn-outline-secondary">Xóa lọc</a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <p class="text-muted mb-0">Tìm thấy <strong>@Model.TotalCount</strong> công việc
+            (Trang @Model.PageNumber / @Model.TotalPages)</p>
+    </div>
+
+    @if (Model.Jobs.Count == 0)
+    {
+        <div class="alert alert-light border text-center py-5" role="alert">
+            <p class="mb-0">Không tìm thấy công việc nào.</p>
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-hover align-middle shadow-sm">
+                <thead class="table-light">
+                <tr>
+                    <th>Tiêu đề công việc</th>
+                    <th>Ngành nghề</th>
+                    <th>Địa điểm</th>
+                    <th>Mức lương</th>
+                    <th>Ngày tạo</th>
+                    <th>Trạng thái</th>
+                    <th class="text-end">Thao tác</th>
+                </tr>
+                </thead>
+                <tbody>
+                @foreach (var job in Model.Jobs)
+                {
+                    var (statusLabel, statusCss) = Model.GetStatusDisplay(job.Status);
+                    var location = string.Join(", ", new[] { job.CommuneName, job.ProvinceName }.Where(s => !string.IsNullOrWhiteSpace(s)));
+                    <tr>
+                        <td class="fw-bold">@job.Title</td>
+                        <td>@(job.IndustryName ?? "-")</td>
+                        <td>@(string.IsNullOrWhiteSpace(location) ? "-" : location)</td>
+                        <td>@Model.FormatMaxSalary(job.JobSalaries)</td>
+                        <td>@(job.CreatedAt?.ToLocalTime().ToString("dd/MM/yyyy HH:mm") ?? "-")</td>
+                        <td><span class="badge @statusCss">@statusLabel</span></td>
+                        <td class="text-end">
+                            @if (job.Id is not null)
+                            {
+                                <a asp-page="./Detail" asp-route-id="@job.Id" class="btn btn-sm btn-outline-primary">Xem
+                                    chi tiết</a>
+                            }
+                        </td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+
+        @if (Model.TotalPages > 1)
+        {
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-center gap-3 mt-4">
+                <nav aria-label="Page navigation">
+                    <ul class="pagination mb-0 flex-wrap justify-content-center">
+                        <li class="page-item @(Model.PageNumber <= 1 ? "disabled" : "")">
+                            <a class="page-link" asp-page="./Index"
+                               asp-route-Keyword="@Model.Keyword"
+                               asp-route-StatusFilter="@Model.StatusFilter"
+                               asp-route-OrderBy="@Model.OrderBy"
+                               asp-route-PageNumber="1"
+                               title="Về trang đầu tiên">&laquo; Đầu</a>
+                        </li>
+                        <li class="page-item @(Model.PageNumber <= 1 ? "disabled" : "")">
+                            <a class="page-link" asp-page="./Index"
+                               asp-route-Keyword="@Model.Keyword"
+                               asp-route-StatusFilter="@Model.StatusFilter"
+                               asp-route-OrderBy="@Model.OrderBy"
+                               asp-route-PageNumber="@(Model.PageNumber - 1)"
+                               title="Trang trước">&lsaquo; Trước</a>
+                        </li>
+
+                        @for (var i = 1; i <= Model.TotalPages; i++)
+                        {
+                            if (i == 1 || i == Model.TotalPages || (i >= Model.PageNumber - 2 && i <= Model.PageNumber + 2))
+                            {
+                                <li class="page-item @(i == Model.PageNumber ? "active" : "")">
+
+                                    @{
+                                        var i1 = i;
+                                    }
+                                    <a class="page-link" asp-page="./Index"
+                                       asp-route-Keyword="@Model.Keyword"
+                                       asp-route-StatusFilter="@Model.StatusFilter"
+                                       asp-route-OrderBy="@Model.OrderBy"
+                                       asp-route-PageNumber="@i1">@i1</a>
+                                </li>
+                            }
+                            else if (i == Model.PageNumber - 3 || i == Model.PageNumber + 3)
+                            {
+                                <li class="page-item disabled"><span class="page-link">...</span></li>
+                            }
+                        }
+
+                        <li class="page-item @(Model.PageNumber >= Model.TotalPages ? "disabled" : "")">
+                            <a class="page-link" asp-page="./Index"
+                               asp-route-Keyword="@Model.Keyword"
+                               asp-route-StatusFilter="@Model.StatusFilter"
+                               asp-route-OrderBy="@Model.OrderBy"
+                               asp-route-PageNumber="@(Model.PageNumber + 1)"
+                               title="Trang sau">Sau &rsaquo;</a>
+                        </li>
+                        <li class="page-item @(Model.PageNumber >= Model.TotalPages ? "disabled" : "")">
+                            <a class="page-link" asp-page="./Index"
+                               asp-route-Keyword="@Model.Keyword"
+                               asp-route-StatusFilter="@Model.StatusFilter"
+                               asp-route-OrderBy="@Model.OrderBy"
+                               asp-route-PageNumber="@Model.TotalPages"
+                               title="Xuống trang cuối cùng">Cuối &raquo;</a>
+                        </li>
+                    </ul>
+                </nav>
+
+                <form method="get" class="d-flex align-items-center gap-2">
+                    <input type="hidden" name="Keyword" value="@Model.Keyword"/>
+                    <input type="hidden" name="StatusFilter" value="@Model.StatusFilter"/>
+                    <input type="hidden" name="OrderBy" value="@Model.OrderBy"/>
+                    <label for="jumpPageNumber" class="text-muted small text-nowrap mb-0">Nhảy đến trang:</label>
+                    <input type="number" id="jumpPageNumber" name="PageNumber"
+                           min="1" max="@Model.TotalPages" value="@Model.PageNumber"
+                           class="form-control form-control-sm text-center" style="width: 70px;"/>
+                    <button type="submit" class="btn btn-sm btn-outline-primary">Đi</button>
+                </form>
+            </div>
+        }
+    }
+</div>

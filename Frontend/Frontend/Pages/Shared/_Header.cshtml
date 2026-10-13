@@ -74,7 +74,7 @@
                         }
                         @if (User.IsInRole(Role.Employer))
                         {
-                            <li><a class="dropdown-item" href="#">Quản lý công việc</a></li>
+                            <li><a class="dropdown-item" asp-page="/Employer/Job/Index">Quản lý công việc</a></li>
                         }
                         @if (User.IsInRole(Role.Censor))
                         {

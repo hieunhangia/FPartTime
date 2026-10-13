@@ -16,7 +16,7 @@ public class IndexModel(ApiClient apiClient) : PageModel
     public List<EmployerRegistrationViewDto> Registrations { get; private set; } = [];
 
     [BindProperty(SupportsGet = true)]
-    public int? StatusFilter { get; set; }
+    public EmployerRegistrationRequestStatus? StatusFilter { get; set; }
 
     public async Task<IActionResult> OnGetAsync()
     {
