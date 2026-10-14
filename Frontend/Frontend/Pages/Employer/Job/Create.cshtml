@@ -124,9 +124,13 @@
 
                 <div class="row">
                     <div class="col-md-6 mb-0">
-                        <label asp-for="Form.ExpiryAt" class="form-label fw-semibold">Hạn nhận hồ sơ</label>
-                        <input asp-for="Form.ExpiryAt" class="form-control" type="date"/>
-                        <div class="form-text">Ngày hết hạn phải lớn hơn ngày hiện tại.</div>
+                        @{
+                            var minExpiryDate = DateTime.UtcNow.AddDays(1).ToString("yyyy-MM-dd");
+                            var maxExpiryDate = DateTime.UtcNow.AddDays(Frontend.Constants.BusinessRuleConstants.Jobs.MaxJobExpiryDays).ToString("yyyy-MM-dd");
+                        }
+                        <label asp-for="Form.ExpiryAt" class="form-label fw-semibold">Hạn nhận hồ sơ <span class="text-danger">*</span></label>
+                        <input asp-for="Form.ExpiryAt" class="form-control" type="date" min="@minExpiryDate" max="@maxExpiryDate"/>
+                        <div class="form-text">Hạn nhận hồ sơ tối đa trong vòng @Frontend.Constants.BusinessRuleConstants.Jobs.MaxJobExpiryDays ngày kể từ hôm nay.</div>
                         <span asp-validation-for="Form.ExpiryAt" class="text-danger"></span>
                     </div>
                 </div>

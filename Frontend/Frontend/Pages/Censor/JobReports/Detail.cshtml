@@ -61,7 +61,7 @@
                             </dd>
 
                             <dt class="col-sm-4 text-muted">Hạn ứng tuyển:</dt>
-                            <dd class="col-sm-8">@(Model.Report.JobExpiryAt?.ToString() ?? "Không thời hạn")</dd>
+                            <dd class="col-sm-8">@(Model.Report.JobExpiryAt != null ? $"{Model.Report.JobExpiryAt.Value.Day:D2}/{Model.Report.JobExpiryAt.Value.Month:D2}/{Model.Report.JobExpiryAt.Value.Year}" : "-")</dd>
 
                             <dt class="col-sm-4 text-muted">Ngày đăng tin:</dt>
                             <dd class="col-sm-8">@(Model.Report.JobCreatedAt?.ToLocalTime().ToString("dd/MM/yyyy HH:mm") ?? "-")</dd>

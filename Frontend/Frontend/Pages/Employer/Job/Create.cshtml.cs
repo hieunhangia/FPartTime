@@ -28,6 +28,8 @@ public class CreateModel(ApiClient apiClient) : PageModel
     {
         await LoadInitialDataAsync();
 
+        Form.ExpiryAt ??= DateOnly.FromDateTime(DateTime.UtcNow.AddDays(30));
+
         if (Form.JobSchedules.Count == 0)
         {
             Form.JobSchedules.Add(new JobScheduleInputModel
@@ -89,7 +91,7 @@ public class CreateModel(ApiClient apiClient) : PageModel
 
         try
         {
-            var body = new CreateJobRequestDto
+            var body = new CreateUpdateJobRequestDto
             {
                 Title = Form.Title.Trim(),
                 Description = Form.Description.Trim(),
@@ -152,9 +154,18 @@ public class CreateModel(ApiClient apiClient) : PageModel
         }
 
         // 2. Kiểm tra ngày hết hạn
-        if (Form.ExpiryAt.HasValue && Form.ExpiryAt.Value <= DateOnly.FromDateTime(DateTime.UtcNow))
+        if (Form.ExpiryAt.HasValue)
         {
-            ModelState.AddModelError("Form.ExpiryAt", "Ngày hết hạn phải lớn hơn ngày hiện tại.");
+            var today = DateOnly.FromDateTime(DateTime.UtcNow);
+            if (Form.ExpiryAt.Value <= today)
+            {
+                ModelState.AddModelError("Form.ExpiryAt", "Hạn nhận hồ sơ phải lớn hơn ngày hiện tại.");
+            }
+            else if (Form.ExpiryAt.Value > today.AddDays(BusinessRuleConstants.Jobs.MaxJobExpiryDays))
+            {
+                ModelState.AddModelError("Form.ExpiryAt",
+                    $"Hạn nhận hồ sơ không được vượt quá {BusinessRuleConstants.Jobs.MaxJobExpiryDays} ngày kể từ hôm nay.");
+            }
         }
 
         // 3. Kiểm tra lịch làm việc (JobSchedules)
@@ -356,6 +367,7 @@ public class CreateModel(ApiClient apiClient) : PageModel
         [Display(Name = "Tuổi tối đa")]
         public int? MaxAgeRequirement { get; set; }
 
+        [Required(ErrorMessage = "Hạn nhận hồ sơ là bắt buộc.")]
         [DataType(DataType.Date)]
         [Display(Name = "Hạn nhận hồ sơ")]
         public DateOnly? ExpiryAt { get; set; }

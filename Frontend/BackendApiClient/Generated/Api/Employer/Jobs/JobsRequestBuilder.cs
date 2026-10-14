@@ -89,14 +89,15 @@ namespace ApiSdk.Api.Employer.Jobs
         /// <exception cref="global::ApiSdk.Models.ProblemDetails">When receiving a 400 status code</exception>
         /// <exception cref="global::ApiSdk.Models.ProblemDetails">When receiving a 401 status code</exception>
         /// <exception cref="global::ApiSdk.Models.ProblemDetails">When receiving a 403 status code</exception>
+        /// <exception cref="global::ApiSdk.Models.ProblemDetails">When receiving a 404 status code</exception>
         /// <exception cref="global::ApiSdk.Models.ProblemDetails">When receiving a 500 status code</exception>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
-        public async Task<global::ApiSdk.Models.JobDetailResponseDto?> PostAsync(global::ApiSdk.Models.CreateJobRequestDto body, Action<RequestConfiguration<DefaultQueryParameters>>? requestConfiguration = default, CancellationToken cancellationToken = default)
+        public async Task<global::ApiSdk.Models.JobDetailResponseDto?> PostAsync(global::ApiSdk.Models.CreateUpdateJobRequestDto body, Action<RequestConfiguration<DefaultQueryParameters>>? requestConfiguration = default, CancellationToken cancellationToken = default)
         {
 #nullable restore
 #else
-        public async Task<global::ApiSdk.Models.JobDetailResponseDto> PostAsync(global::ApiSdk.Models.CreateJobRequestDto body, Action<RequestConfiguration<DefaultQueryParameters>> requestConfiguration = default, CancellationToken cancellationToken = default)
+        public async Task<global::ApiSdk.Models.JobDetailResponseDto> PostAsync(global::ApiSdk.Models.CreateUpdateJobRequestDto body, Action<RequestConfiguration<DefaultQueryParameters>> requestConfiguration = default, CancellationToken cancellationToken = default)
         {
 #endif
             if(ReferenceEquals(body, null)) throw new ArgumentNullException(nameof(body));
@@ -106,6 +107,7 @@ namespace ApiSdk.Api.Employer.Jobs
                 { "400", global::ApiSdk.Models.ProblemDetails.CreateFromDiscriminatorValue },
                 { "401", global::ApiSdk.Models.ProblemDetails.CreateFromDiscriminatorValue },
                 { "403", global::ApiSdk.Models.ProblemDetails.CreateFromDiscriminatorValue },
+                { "404", global::ApiSdk.Models.ProblemDetails.CreateFromDiscriminatorValue },
                 { "500", global::ApiSdk.Models.ProblemDetails.CreateFromDiscriminatorValue },
             };
             return await RequestAdapter.SendAsync<global::ApiSdk.Models.JobDetailResponseDto>(requestInfo, global::ApiSdk.Models.JobDetailResponseDto.CreateFromDiscriminatorValue, errorMapping, cancellationToken).ConfigureAwait(false);
@@ -131,11 +133,11 @@ namespace ApiSdk.Api.Employer.Jobs
         /// <param name="requestConfiguration">Configuration for the request such as headers, query parameters, and middleware options.</param>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
-        public RequestInformation ToPostRequestInformation(global::ApiSdk.Models.CreateJobRequestDto body, Action<RequestConfiguration<DefaultQueryParameters>>? requestConfiguration = default)
+        public RequestInformation ToPostRequestInformation(global::ApiSdk.Models.CreateUpdateJobRequestDto body, Action<RequestConfiguration<DefaultQueryParameters>>? requestConfiguration = default)
         {
 #nullable restore
 #else
-        public RequestInformation ToPostRequestInformation(global::ApiSdk.Models.CreateJobRequestDto body, Action<RequestConfiguration<DefaultQueryParameters>> requestConfiguration = default)
+        public RequestInformation ToPostRequestInformation(global::ApiSdk.Models.CreateUpdateJobRequestDto body, Action<RequestConfiguration<DefaultQueryParameters>> requestConfiguration = default)
         {
 #endif
             if(ReferenceEquals(body, null)) throw new ArgumentNullException(nameof(body));

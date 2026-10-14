@@ -108,5 +108,6 @@ public static class BusinessRuleConstants
         public const int MaxVacanciesPerJob = 1000;
         public const int MaxJobSchedulesPerJob = 30;
         public const int MaxJobSalariesPerJob = 10;
+        public const int MaxJobExpiryDays = 90;
     }
 }

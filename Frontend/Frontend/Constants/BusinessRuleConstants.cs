@@ -48,5 +48,6 @@ public static class BusinessRuleConstants
         public const decimal MaxSalaryAmount = 500000000;
         public const int MinAge = 15;
         public const int MaxAge = 100;
+        public const int MaxJobExpiryDays = 90;
     }
 }

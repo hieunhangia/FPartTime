@@ -50,6 +50,7 @@ namespace ApiSdk.Api.Employer.Jobs.Applications.Item
         /// <param name="requestConfiguration">Configuration for the request such as headers, query parameters, and middleware options.</param>
         /// <exception cref="global::ApiSdk.Models.ProblemDetails">When receiving a 401 status code</exception>
         /// <exception cref="global::ApiSdk.Models.ProblemDetails">When receiving a 403 status code</exception>
+        /// <exception cref="global::ApiSdk.Models.ProblemDetails">When receiving a 404 status code</exception>
         /// <exception cref="global::ApiSdk.Models.ProblemDetails">When receiving a 500 status code</exception>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
@@ -65,6 +66,7 @@ namespace ApiSdk.Api.Employer.Jobs.Applications.Item
             {
                 { "401", global::ApiSdk.Models.ProblemDetails.CreateFromDiscriminatorValue },
                 { "403", global::ApiSdk.Models.ProblemDetails.CreateFromDiscriminatorValue },
+                { "404", global::ApiSdk.Models.ProblemDetails.CreateFromDiscriminatorValue },
                 { "500", global::ApiSdk.Models.ProblemDetails.CreateFromDiscriminatorValue },
             };
             return await RequestAdapter.SendAsync<global::ApiSdk.Models.JobApplicationDetailResponseDto>(requestInfo, global::ApiSdk.Models.JobApplicationDetailResponseDto.CreateFromDiscriminatorValue, errorMapping, cancellationToken).ConfigureAwait(false);

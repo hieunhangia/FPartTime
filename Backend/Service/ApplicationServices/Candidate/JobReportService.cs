@@ -17,9 +17,14 @@ public class JobReportService(ApplicationDbContext dbContext)
     {
         var userId = user.GetUserId();
 
+        if (!dto.JobId.HasValue)
+        {
+            throw new BadRequestException("Mã tin tuyển dụng không được để trống.");
+        }
+
         var job = await dbContext.Jobs
             .AsNoTracking()
-            .FirstOrDefaultAsync(j => j.Id == dto.JobId)
+            .FirstOrDefaultAsync(j => j.Id == dto.JobId.Value)
             ?? throw new NotFoundException("Không tìm thấy tin tuyển dụng.");
 
         if (job.EmployerId == userId)
@@ -35,7 +40,7 @@ public class JobReportService(ApplicationDbContext dbContext)
         }
 
         var hasPendingReport = await dbContext.JobReports.AnyAsync(r =>
-            r.JobId == dto.JobId &&
+            r.JobId == dto.JobId.Value &&
             r.ReporterId == userId &&
             r.Status == JobReportStatus.Pending);
 
@@ -44,7 +49,7 @@ public class JobReportService(ApplicationDbContext dbContext)
             throw new ConflictException("Bạn đã gửi báo cáo cho tin tuyển dụng này và đang chờ xử lý.");
         }
 
-        var trimmedReason = dto.Reason?.Trim();
+        var trimmedReason = dto.Reason.Trim();
         if (string.IsNullOrWhiteSpace(trimmedReason))
         {
             throw new BadRequestException("Lý do báo cáo không được để trống.");
@@ -53,7 +58,7 @@ public class JobReportService(ApplicationDbContext dbContext)
         var report = new JobReport
         {
             Id = Guid.NewGuid(),
-            JobId = dto.JobId,
+            JobId = dto.JobId.Value,
             ReporterId = userId,
             Reason = trimmedReason,
             Status = JobReportStatus.Pending,
@@ -99,18 +104,18 @@ public class JobReportService(ApplicationDbContext dbContext)
 public class CreateJobReportDto
 {
     [Required(ErrorMessage = "Mã tin tuyển dụng không được để trống.")]
-    public required Guid JobId { get; set; }
+    public Guid? JobId { get; set; }
 
     [Required(ErrorMessage = "Lý do báo cáo không được để trống.")]
-    [StringLength(BusinessRuleConstants.Models.JobReport.ReasonMaxLength, ErrorMessage = "Lý do báo cáo không được vượt quá 500 ký tự.")]
-    public required string Reason { get; set; }
+    [MaxLength(BusinessRuleConstants.Models.JobReport.ReasonMaxLength, ErrorMessage = "Lý do báo cáo không được vượt quá 500 ký tự.")]
+    public string Reason { get; set; } = string.Empty;
 }
 
 public class ReportJobReasonDto
 {
     [Required(ErrorMessage = "Lý do báo cáo không được để trống.")]
-    [StringLength(BusinessRuleConstants.Models.JobReport.ReasonMaxLength, ErrorMessage = "Lý do báo cáo không được vượt quá 500 ký tự.")]
-    public required string Reason { get; set; }
+    [MaxLength(BusinessRuleConstants.Models.JobReport.ReasonMaxLength, ErrorMessage = "Lý do báo cáo không được vượt quá 500 ký tự.")]
+    public string Reason { get; set; } = string.Empty;
 }
 
 public class JobReportResponseDto

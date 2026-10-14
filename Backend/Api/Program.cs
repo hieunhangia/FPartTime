@@ -44,7 +44,9 @@ builder.Services.AddRepositoryLevelServices(builder.Configuration);
 builder.Services.AddServiceLevelServices(builder.Configuration);
 
 builder.Services.AddControllers()
-    .AddJsonOptions(options => { options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()); })
+    .AddJsonOptions(options => options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter(
+        namingPolicy: null,
+        allowIntegerValues: false)))
     .AddOData(options => options.Select().Filter().OrderBy().SetMaxTop(100).Count());
 
 builder.Services.AddMemoryCache();

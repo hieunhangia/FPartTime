@@ -44,7 +44,7 @@
                     <div class="col-sm-4">
                         <small class="text-muted d-block">Hạn nộp</small>
                         <span class="fw-bold">
-                            @(job.ExpiryAt?.ToString() ?? "Linh hoạt")
+                            @(job.ExpiryAt != null ? $"{job.ExpiryAt.Value.Day:D2}/{job.ExpiryAt.Value.Month:D2}/{job.ExpiryAt.Value.Year}" : "-")
                         </span>
                     </div>
                     <div class="col-sm-4">
