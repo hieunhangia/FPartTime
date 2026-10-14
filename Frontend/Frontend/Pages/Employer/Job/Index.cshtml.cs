@@ -118,7 +118,7 @@ public class IndexModel(ApiClient apiClient) : PageModel
     {
         JobStatus.Active => ("Đang mở", "bg-success"),
         JobStatus.Closed => ("Đã đóng", "bg-secondary"),
-        JobStatus.Hidden => ("Bị ẩn bởi Admin", "bg-warning text-dark"),
+        JobStatus.AdminHidden => ("Bị ẩn bởi Admin", "bg-warning text-dark"),
         _ => (status?.ToString() ?? "-", "bg-secondary")
     };
 

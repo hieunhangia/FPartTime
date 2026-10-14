@@ -14,9 +14,19 @@ public class DataSeeder(ApplicationDbContext db)
     {
         Console.WriteLine("🌱 Bắt đầu quá trình nạp dữ liệu (Seed Data)...");
 
-        await SeedRolesAsync();
-        await SeedUsersAsync();
-        await SeedSampleSqlDataAsync();
+        try
+        {
+            await SeedSqlFileIfEmptyAsync(() => db.Provinces.AnyAsync(), "address.sql");
+            await SeedRolesAsync();
+            await SeedUsersAsync();
+            await SeedSqlFileIfEmptyAsync(() => db.Notifications.AnyAsync(), "notification.sql");
+            await SeedSqlFileIfEmptyAsync(() => db.Jobs.AnyAsync(), "job.sql");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"❌ Lỗi khi nạp dữ liệu: {ex.StackTrace}");
+            throw;
+        }
 
         Console.WriteLine("✅ Nạp dữ liệu hoàn tất thành công!");
     }
@@ -96,7 +106,44 @@ public class DataSeeder(ApplicationDbContext db)
 
         if (roleNames.Contains(Role.Candidate) && !await db.Candidates.AnyAsync(c => c.UserId == user.Id))
         {
-            db.Candidates.Add(new CandidateProfile { UserId = user.Id });
+            db.Candidates.Add(new CandidateProfile
+            {
+                UserId = user.Id,
+                AvatarFilePath = BusinessRuleConstants.DefaultAvatarFilePath,
+                Bio = "Ứng viên mẫu",
+                FullName = $"Ứng viên {user.UserName}",
+                DateOfBirth = new DateOnly(1990, 1, 1),
+                Gender = Gender.Male,
+                PreferredWorkCommuneCode = "16279",
+                PreferredWorkSchedules = new List<CandidateSchedule>
+                {
+                    new()
+                    {
+                        DayOfWeek = DayOfWeek.Monday, StartTime = new TimeOnly(9, 0, 0),
+                        EndTime = new TimeOnly(17, 0, 0)
+                    },
+                    new()
+                    {
+                        DayOfWeek = DayOfWeek.Tuesday, StartTime = new TimeOnly(9, 0, 0),
+                        EndTime = new TimeOnly(17, 0, 0)
+                    },
+                    new()
+                    {
+                        DayOfWeek = DayOfWeek.Wednesday, StartTime = new TimeOnly(9, 0, 0),
+                        EndTime = new TimeOnly(17, 0, 0)
+                    },
+                    new()
+                    {
+                        DayOfWeek = DayOfWeek.Thursday, StartTime = new TimeOnly(9, 0, 0),
+                        EndTime = new TimeOnly(17, 0, 0)
+                    },
+                    new()
+                    {
+                        DayOfWeek = DayOfWeek.Friday, StartTime = new TimeOnly(9, 0, 0),
+                        EndTime = new TimeOnly(17, 0, 0)
+                    }
+                }
+            });
         }
 
         if (roleNames.Contains(Role.Employer) && !await db.Employers.AnyAsync(e => e.UserId == user.Id))
@@ -104,10 +151,14 @@ public class DataSeeder(ApplicationDbContext db)
             db.Employers.Add(new EmployerProfile
             {
                 UserId = user.Id,
-                CompanyName = user.UserName ?? string.Empty,
+                LogoFilePath = BusinessRuleConstants.DefaultEmployerLogoFilePath,
+                CompanyName = $"Công ty {user.UserName}",
                 MaxActivePosts = BusinessRuleConstants.Employers.DefaultMaxActivePosts,
-                TaxCode = user.UserName ?? string.Empty,
-                VerificationDocumentFilePath = $"employer-registrations/{user.UserName}.pdf"
+                TaxCode = $"TAX-{user.UserName}",
+                VerificationDocumentFilePath =
+                    $"{BusinessRuleConstants.ObjectStorage.EmployerRegistration.BasePath}/{BusinessRuleConstants.ObjectStorage.EmployerRegistration.Document}/{user.UserName}.pdf",
+                ContactPhone = user.PhoneNumber,
+                Description = "Công ty mẫu"
             });
         }
 
@@ -117,18 +168,6 @@ public class DataSeeder(ApplicationDbContext db)
         }
 
         await db.SaveChangesAsync();
-    }
-
-    private async Task SeedSampleSqlDataAsync()
-    {
-        // 1. Address SQL (Provinces & Communes)
-        await SeedSqlFileIfEmptyAsync(() => db.Provinces.AnyAsync(), "address.sql");
-
-        // 2. Notification SQL
-        await SeedSqlFileIfEmptyAsync(() => db.Notifications.AnyAsync(), "notification.sql");
-
-        // 3. Job SQL
-        await SeedSqlFileIfEmptyAsync(() => db.Jobs.AnyAsync(), "job.sql");
     }
 
     private async Task SeedSqlFileIfEmptyAsync(Func<Task<bool>> hasDataAsync, string fileName)

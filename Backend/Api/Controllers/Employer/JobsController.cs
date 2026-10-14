@@ -27,14 +27,6 @@ public class JobsController(JobService jobService) : ControllerBase
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status500InternalServerError)]
     public async Task<IActionResult> GetJobDetail(Guid id) => Ok(await jobService.GetJobDetailAsync(User, id));
 
-    [HttpGet("applications/{id:guid}")]
-    [ProducesResponseType<JobApplicationDetailResponseDto>(StatusCodes.Status200OK)]
-    [ProducesResponseType<ProblemDetails>(StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType<ProblemDetails>(StatusCodes.Status403Forbidden)]
-    [ProducesResponseType<ProblemDetails>(StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> GetJobApplicationDetail(Guid id) =>
-        Ok(await jobService.GetJobApplicationDetailAsync(User, id));
-
     [HttpGet("posts-quota")]
     [ProducesResponseType<PostsQuotaResponseDto>(StatusCodes.Status200OK)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status401Unauthorized)]
@@ -71,4 +63,30 @@ public class JobsController(JobService jobService) : ControllerBase
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status500InternalServerError)]
     public async Task<IActionResult> ReopenJob(Guid id) => Ok(await jobService.ReopenJobAsync(User, id));
+
+    [HttpGet("applications/{id:guid}")]
+    [ProducesResponseType<JobApplicationDetailResponseDto>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status500InternalServerError)]
+    public async Task<IActionResult> GetJobApplicationDetail(Guid id) =>
+        Ok(await jobService.GetJobApplicationDetailAsync(User, id));
+
+    [HttpPut("applications/{id:guid}/accept")]
+    [ProducesResponseType<JobApplicationDetailResponseDto>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status500InternalServerError)]
+    public async Task<IActionResult> AcceptJobApplication(Guid id) => Ok(await jobService.AcceptJobApplicationAsync(User, id));
+
+    [HttpPut("applications/{id:guid}/reject")]
+    [ProducesResponseType<JobApplicationDetailResponseDto>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status500InternalServerError)]
+    public async Task<IActionResult> RejectJobApplication(Guid id) => Ok(await jobService.RejectJobApplicationAsync(User, id));
 }

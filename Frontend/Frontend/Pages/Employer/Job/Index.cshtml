@@ -76,7 +76,7 @@
                 <thead class="table-light">
                 <tr>
                     <th>Tiêu đề công việc</th>
-                    <th>Ngành nghề</th>
+                    <th>Số ứng viên</th>
                     <th>Địa điểm</th>
                     <th>Mức lương</th>
                     <th>Ngày tạo</th>
@@ -91,7 +91,7 @@
                     var location = string.Join(", ", new[] { job.CommuneName, job.ProvinceName }.Where(s => !string.IsNullOrWhiteSpace(s)));
                     <tr>
                         <td class="fw-bold">@job.Title</td>
-                        <td>@(job.IndustryName ?? "-")</td>
+                        <td>@(job.ApplicationCount ?? 0)</td>
                         <td>@(string.IsNullOrWhiteSpace(location) ? "-" : location)</td>
                         <td>@Model.FormatMaxSalary(job.JobSalaries)</td>
                         <td>@(job.CreatedAt?.ToLocalTime().ToString("dd/MM/yyyy HH:mm") ?? "-")</td>

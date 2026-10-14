@@ -76,7 +76,10 @@ public class IdentityService(
         {
             UserName = dto.PhoneNumber,
             PhoneNumber = dto.PhoneNumber,
-            CandidateProfile = new CandidateProfile()
+            CandidateProfile = new CandidateProfile
+            {
+                AvatarFilePath = BusinessRuleConstants.DefaultAvatarFilePath
+            }
         };
         ThrowIfIdentityResultFailed(await userManager.CreateAsync(user, dto.Password));
 

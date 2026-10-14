@@ -83,7 +83,7 @@ public class DetailModel(ApiClient apiClient) : PageModel
     {
         JobStatus.Active => ("Đang mở", "bg-success"),
         JobStatus.Closed => ("Đã đóng", "bg-secondary"),
-        JobStatus.Hidden => ("Bị ẩn bởi Admin", "bg-warning text-dark"),
+        JobStatus.AdminHidden => ("Bị ẩn bởi Admin", "bg-warning text-dark"),
         _ => (status?.ToString() ?? "-", "bg-secondary")
     };
 
@@ -124,6 +124,30 @@ public class DetailModel(ApiClient apiClient) : PageModel
         JobSalaryTimeUnit.Project => "Dự án",
         _ => unit?.ToString() ?? "-"
     };
+
+    public string FormatSalary(double? amount, int? quantity, JobSalaryTimeUnit? unit)
+    {
+        if (!amount.HasValue)
+        {
+            return "-";
+        }
+
+        var amountText = amount.Value.ToString("N0", new CultureInfo("vi-VN"));
+        
+        var unitText = unit switch
+        {
+            JobSalaryTimeUnit.Hour => "giờ",
+            JobSalaryTimeUnit.Session => "ca",
+            JobSalaryTimeUnit.Day => "ngày",
+            JobSalaryTimeUnit.Week => "tuần",
+            JobSalaryTimeUnit.Month => "tháng",
+            JobSalaryTimeUnit.Project => "dự án",
+            _ => unit?.ToString().ToLower() ?? "tháng"
+        };
+
+        var quantityText = quantity is > 1 ? $"{quantity} " : "";
+        return $"{amountText} VND/{quantityText}{unitText}";
+    }
 
     public string FormatSalaryRate(int? quantity, JobSalaryTimeUnit? unit)
     {

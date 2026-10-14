@@ -34,5 +34,5 @@ public enum JobStatus
 {
     Active,
     Closed,
-    Hidden
+    AdminHidden
 }

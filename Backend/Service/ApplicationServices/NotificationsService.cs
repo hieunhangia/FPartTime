@@ -21,7 +21,7 @@ public class NotificationsService(ApplicationDbContext dbContext)
         await dbContext.SaveChangesAsync();
     }
 
-    public async Task CreateNotificationAsync(List<Guid> userIds, string title, string content)
+    public async Task CreateNotificationsAsync(List<Guid> userIds, string title, string content)
     {
         dbContext.Notifications.AddRange(userIds.Select(userId => new Notification
         {

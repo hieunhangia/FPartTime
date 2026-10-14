@@ -6,11 +6,15 @@ using Repository.Constants;
 using Repository.Models.Jobs;
 using Riok.Mapperly.Abstractions;
 using Service.Extensions;
+using Service.ExternalServices;
 using Service.HttpErrorExceptions;
 
 namespace Service.ApplicationServices.Employer;
 
-public class JobService(ApplicationDbContext context)
+public class JobService(
+    ApplicationDbContext context,
+    NotificationsService notificationsService,
+    CloudflareR2StorageService cloudflareR2StorageService)
 {
     public IQueryable<JobSummaryResponseDto> GetMyCreatedJobsQueryable(ClaimsPrincipal user) =>
         context.Jobs.AsNoTracking()
@@ -22,12 +26,6 @@ public class JobService(ApplicationDbContext context)
             .Where(j => j.Id == jobId && j.EmployerId == user.GetUserId())
             .ProjectToDetailDto()
             .FirstOrDefaultAsync();
-
-    public async Task<JobApplicationDetailResponseDto?> GetJobApplicationDetailAsync(ClaimsPrincipal user,
-        Guid jobApplicationId) => await context.JobApplications.AsNoTracking()
-        .Where(ja => ja.Id == jobApplicationId && ja.Job!.EmployerId == user.GetUserId())
-        .ProjectToDetailDto()
-        .FirstOrDefaultAsync();
 
     public async Task<PostsQuotaResponseDto> GetPostsQuotaAsync(ClaimsPrincipal user)
     {
@@ -175,6 +173,19 @@ public class JobService(ApplicationDbContext context)
 
         job.Status = JobStatus.Closed;
         await context.SaveChangesAsync();
+
+        var applicantsToNotify = await context.JobApplications
+            .Where(ja => ja.JobId == job.Id && ja.Status == JobApplicationStatus.Pending)
+            .Select(ja => ja.CandidateId)
+            .ToListAsync();
+        if (applicantsToNotify.Count > 0)
+        {
+            await notificationsService.CreateNotificationsAsync(applicantsToNotify,
+                "Công việc bạn đã ứng tuyển đã được đóng.",
+                $"Công việc '{job.Title}' mà bạn đã ứng tuyển trước đây đã được đóng. Vui lòng kiểm tra lại thông tin."
+            );
+        }
+
         return await GetJobDetailAsync(user, job.Id) ??
                throw new NotFoundException("Không tìm thấy công việc vừa đóng.");
     }
@@ -192,6 +203,11 @@ public class JobService(ApplicationDbContext context)
             throw new BadRequestException("Chỉ có thể mở lại các công việc đã đóng.");
         }
 
+        if (job.ExpiryAt.HasValue && job.ExpiryAt.Value < DateOnly.FromDateTime(DateTime.UtcNow))
+        {
+            throw new BadRequestException("Không thể mở lại công việc đã hết hạn.");
+        }
+
         var employer = await context.Employers.AsNoTracking().FirstOrDefaultAsync(e => e.UserId == user.GetUserId());
         if (employer == null)
         {
@@ -207,8 +223,106 @@ public class JobService(ApplicationDbContext context)
 
         job.Status = JobStatus.Active;
         await context.SaveChangesAsync();
+
+        var applicantsToNotify = await context.JobApplications
+            .Where(ja => ja.JobId == job.Id && ja.Status == JobApplicationStatus.Pending)
+            .Select(ja => ja.CandidateId)
+            .ToListAsync();
+        if (applicantsToNotify.Count > 0)
+        {
+            await notificationsService.CreateNotificationsAsync(applicantsToNotify,
+                "Công việc bạn đã ứng tuyển đã được mở lại.",
+                $"Công việc '{job.Title}' mà bạn đã ứng tuyển trước đây đã được mở lại. Hãy kiểm tra và cập nhật hồ sơ ứng tuyển của bạn nếu cần thiết."
+            );
+        }
+
         return await GetJobDetailAsync(user, job.Id) ??
                throw new NotFoundException("Không tìm thấy công việc vừa mở lại.");
+    }
+
+    public async Task<JobApplicationDetailResponseDto?> GetJobApplicationDetailAsync(ClaimsPrincipal user,
+        Guid jobApplicationId)
+    {
+        var jobApplicationDto = await context.JobApplications.AsNoTracking()
+            .Where(ja => ja.Id == jobApplicationId && ja.Job!.EmployerId == user.GetUserId())
+            .ProjectToDetailDto()
+            .FirstOrDefaultAsync();
+
+        if (jobApplicationDto != null && !string.IsNullOrEmpty(jobApplicationDto.CandidateAvatarUrl))
+        {
+            jobApplicationDto.CandidateAvatarUrl =
+                cloudflareR2StorageService.GetPublicUrl(jobApplicationDto.CandidateAvatarUrl);
+        }
+
+        return jobApplicationDto;
+    }
+
+    public async Task<JobApplicationDetailResponseDto> AcceptJobApplicationAsync(ClaimsPrincipal user,
+        Guid jobApplicationId)
+    {
+        var jobApplication = await context.JobApplications
+            .Include(ja => ja.Job)
+            .FirstOrDefaultAsync(ja => ja.Id == jobApplicationId && ja.Job!.EmployerId == user.GetUserId());
+
+        if (jobApplication == null)
+        {
+            throw new NotFoundException("Không tìm thấy hồ sơ ứng tuyển.");
+        }
+
+        if (jobApplication.Job!.Status != JobStatus.Active)
+        {
+            throw new BadRequestException("Chỉ có thể chấp nhận hồ sơ ứng tuyển cho các công việc đang hoạt động.");
+        }
+
+        if (jobApplication.Status != JobApplicationStatus.Pending)
+        {
+            throw new BadRequestException("Chỉ có thể chấp nhận các hồ sơ ứng tuyển đang chờ xử lý.");
+        }
+
+        jobApplication.Status = JobApplicationStatus.Accepted;
+        await context.SaveChangesAsync();
+
+        await notificationsService.CreateNotificationAsync(jobApplication.CandidateId,
+            "Hồ sơ ứng tuyển đã được chấp nhận.",
+            $"Hồ sơ ứng tuyển của bạn cho công việc '{jobApplication.Job!.Title}' đã được chấp nhận. Hãy chuẩn bị cho bước tiếp theo trong quá trình tuyển dụng."
+        );
+
+        return await GetJobApplicationDetailAsync(user, jobApplication.Id) ??
+               throw new NotFoundException("Không tìm thấy hồ sơ ứng tuyển vừa chấp nhận.");
+    }
+
+    public async Task<JobApplicationDetailResponseDto> RejectJobApplicationAsync(ClaimsPrincipal user,
+        Guid jobApplicationId)
+    {
+        var jobApplication = await context.JobApplications
+            .Include(ja => ja.Job)
+            .FirstOrDefaultAsync(ja => ja.Id == jobApplicationId && ja.Job!.EmployerId == user.GetUserId());
+
+        if (jobApplication == null)
+        {
+            throw new NotFoundException("Không tìm thấy hồ sơ ứng tuyển.");
+        }
+
+        if (jobApplication.Job!.Status == JobStatus.AdminHidden)
+        {
+            throw new BadRequestException("Không thể từ chối hồ sơ ứng tuyển cho các công việc đã bị ẩn.");
+        }
+
+        if (jobApplication.Status != JobApplicationStatus.Pending)
+        {
+            throw new BadRequestException("Chỉ có thể từ chối các hồ sơ ứng tuyển đang chờ xử lý.");
+        }
+
+        jobApplication.Status = JobApplicationStatus.Rejected;
+        await context.SaveChangesAsync();
+
+        await notificationsService.CreateNotificationAsync(jobApplication.CandidateId,
+            "Hồ sơ ứng tuyển đã bị từ chối.",
+            $"Hồ sơ ứng tuyển của bạn cho công việc '{jobApplication.Job!.Title}' đã bị từ chối. Hãy kiểm tra lại thông tin và cải thiện hồ sơ của bạn cho các cơ hội tiếp theo."
+        );
+
+        return await GetJobApplicationDetailAsync(user, jobApplication.Id) ??
+               throw new NotFoundException("Không tìm thấy hồ sơ ứng tuyển vừa từ chối.");
     }
 }
 
@@ -218,6 +332,7 @@ public static partial class JobMapper
     [MapProperty($"{nameof(Job.Commune)}.{nameof(Job.Commune.Name)}", nameof(JobSummaryResponseDto.CommuneName))]
     [MapProperty($"{nameof(Job.Commune)}.{nameof(Job.Commune.Province)}.{nameof(Job.Commune.Province.Name)}",
         nameof(JobSummaryResponseDto.ProvinceName))]
+    [MapProperty($"{nameof(Job.JobApplications)}.{nameof(Job.JobApplications.Count)}", nameof(JobSummaryResponseDto.ApplicationCount))]
     private static partial JobSummaryResponseDto MapToSummaryDto(Job job);
 
     public static partial IQueryable<JobSummaryResponseDto> ProjectToSummaryDto(this IQueryable<Job> job);
@@ -256,10 +371,10 @@ public class JobSummaryResponseDto
 {
     public required Guid Id { get; set; }
     public required string Title { get; set; }
-    public required string IndustryName { get; set; }
     public required string DetailAddress { get; set; }
     public required string CommuneName { get; set; }
     public required string ProvinceName { get; set; }
+    public required int ApplicationCount { get; set; }
     public DateTime CreatedAt { get; set; }
     public required JobStatus Status { get; set; }
     public required List<JobSalaryResponseDto> JobSalaries { get; set; }
@@ -284,22 +399,6 @@ public class JobDetailResponseDto
     public required List<JobScheduleResponseDto> JobSchedules { get; set; }
     public required List<JobSalaryResponseDto> JobSalaries { get; set; }
     public required List<JobApplicationSummaryResponseDto> JobApplications { get; set; }
-}
-
-public class JobApplicationDetailResponseDto
-{
-    public required Guid Id { get; set; }
-    public required string CandidateAvatarUrl { get; set; }
-    public required string CandidateBio { get; set; }
-    public required string CandidateFullName { get; set; }
-    public required string CandidatePhoneNumber { get; set; }
-    public required DateOnly? CandidateDateOfBirth { get; set; }
-    public required Gender? CandidateGender { get; set; }
-    public required string CandidatePreferredWorkCommuneName { get; set; }
-    public required string CandidatePreferredWorkProvinceName { get; set; }
-    public required List<JobScheduleResponseDto> CandidatePreferredWorkSchedules { get; set; }
-    public required JobApplicationStatus Status { get; set; }
-    public required DateTime AppliedAt { get; set; }
 }
 
 public class PostsQuotaResponseDto
@@ -402,8 +501,24 @@ public class JobSalaryResponseDto
 public class JobApplicationSummaryResponseDto
 {
     public required Guid Id { get; set; }
-    public required string CandidateFullName { get; set; }
+    public string? CandidateFullName { get; set; }
     public required string CandidatePhoneNumber { get; set; }
+    public required JobApplicationStatus Status { get; set; }
+    public required DateTime AppliedAt { get; set; }
+}
+
+public class JobApplicationDetailResponseDto
+{
+    public required Guid Id { get; set; }
+    public string? CandidateAvatarUrl { get; set; }
+    public string? CandidateBio { get; set; }
+    public string? CandidateFullName { get; set; }
+    public required string CandidatePhoneNumber { get; set; }
+    public DateOnly? CandidateDateOfBirth { get; set; }
+    public Gender? CandidateGender { get; set; }
+    public string? CandidatePreferredWorkCommuneName { get; set; }
+    public string? CandidatePreferredWorkProvinceName { get; set; }
+    public required List<JobScheduleResponseDto> CandidatePreferredWorkSchedules { get; set; }
     public required JobApplicationStatus Status { get; set; }
     public required DateTime AppliedAt { get; set; }
 }

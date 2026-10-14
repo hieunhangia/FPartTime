@@ -19,19 +19,19 @@ public static class DependencyInjection
         services.AddSingleton<JsonWebTokenHandler>();
         services.AddScoped<IdentityService>();
         services.AddScoped<NotificationsService>();
-        
+
         // Public Services
         services.AddScoped<AddressService>();
         services.AddScoped<IndustryService>();
-        
+
         // Candidate Services
         services.AddScoped<ApplicationServices.Candidate.EmployerRegistrationService>();
-        
-        // Censor Services
-        services.AddScoped<EmployerRegistrationService>();
-        
+
         // Employer Services
         services.AddScoped<JobService>();
+
+        // Censor Services
+        services.AddScoped<EmployerRegistrationService>();
 
         services.AddScoped<SmsSenderService>();
         services.AddScoped<CandidateProfileService>();
