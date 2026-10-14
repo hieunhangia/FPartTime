@@ -1,0 +1,65 @@
+@page
+@using ApiSdk.Models
+@model Frontend.Pages.Censor.JobReports.IndexModel
+@{
+    ViewData["Title"] = "Danh sách báo cáo tin tuyển dụng";
+}
+
+<div class="container my-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="mb-0">Danh sách báo cáo tin tuyển dụng</h2>
+    </div>
+
+    <!-- Bộ lọc trạng thái đơn giản -->
+    <div class="card mb-3 shadow-sm">
+        <div class="card-body py-2">
+            <form method="get" class="row g-2 align-items-center">
+                <div class="col-auto">
+                    <label asp-for="StatusFilter" class="col-form-label fw-semibold small">Lọc theo trạng thái:</label>
+                </div>
+                <div class="col-auto">
+                    <select asp-for="StatusFilter" class="form-select form-select-sm">
+                        <option value="">-- Tất cả --</option>
+                        <option value="Pending">Chờ xử lý</option>
+                        <option value="Resolved">Đã giải quyết</option>
+                        <option value="Dismissed">Đã bỏ qua</option>
+                    </select>
+                </div>
+                <div class="col-auto">
+                    <button type="submit" class="btn btn-primary btn-sm">Lọc</button>
+                    <a asp-page="./Index" class="btn btn-outline-secondary btn-sm">Xóa lọc</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    @if (Model.Reports.Count == 0)
+    {
+        <p class="text-muted">Chưa có báo cáo nào.</p>
+    }
+    else
+    {
+        <div class="list-group">
+            @foreach (var report in Model.Reports)
+            {
+                var (statusLabel, statusCss) = Model.GetStatusDisplay(report.Status);
+                <a asp-page="./Detail" asp-route-id="@report.Id" class="list-group-item list-group-item-action py-3">
+                    <div class="d-flex w-100 justify-content-between align-items-center mb-1">
+                        <h5 class="mb-0 text-primary">@report.JobTitle</h5>
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="badge @statusCss">@statusLabel</span>
+                            <small class="text-muted">@(report.CreatedAt?.ToLocalTime().ToString("dd/MM/yyyy HH:mm") ?? "-")</small>
+                        </div>
+                    </div>
+                    <p class="mb-1 text-dark">
+                        @(report.EmployerCompanyName ?? "Nhà tuyển dụng") | Người báo cáo: @(report.ReporterName ?? report.ReporterEmail ?? "Ứng viên")
+                    </p>
+                    <small class="text-danger">
+                        Lý do: @report.Reason
+                    </small>
+                </a>
+            }
+        </div>
+    }
+</div>
+

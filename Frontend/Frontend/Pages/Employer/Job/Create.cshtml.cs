@@ -117,7 +117,7 @@ public class CreateModel(ApiClient apiClient) : PageModel
                 }).ToList()
             };
 
-            var createdJob = await apiClient.Api.Jobs.PostAsync(body);
+            var createdJob = await apiClient.Api.Employer.Jobs.PostAsync(body);
             if (createdJob?.Id is null)
             {
                 TempData.SetErrorMessage("Không thể tạo công việc. Vui lòng kiểm tra lại thông tin và thử lại.");
@@ -268,7 +268,7 @@ public class CreateModel(ApiClient apiClient) : PageModel
     {
         try
         {
-            PostsQuota = await apiClient.Api.Jobs.PostsQuota.GetAsync();
+            PostsQuota = await apiClient.Api.Employer.Jobs.PostsQuota.GetAsync();
         }
         catch
         {

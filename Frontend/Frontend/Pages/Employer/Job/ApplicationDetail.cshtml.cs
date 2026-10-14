@@ -21,7 +21,7 @@ public class ApplicationDetailModel(ApiClient apiClient) : PageModel
     {
         try
         {
-            Application = await apiClient.Api.Jobs.Applications[id].GetAsync();
+            Application = await apiClient.Api.Employer.Jobs.Applications[id].GetAsync();
             if (Application == null)
             {
                 TempData.SetErrorMessage("Không tìm thấy thông tin đơn ứng tuyển.");
@@ -46,7 +46,7 @@ public class ApplicationDetailModel(ApiClient apiClient) : PageModel
     {
         try
         {
-            await apiClient.Api.Jobs.Applications[id].Accept.PutAsync();
+            await apiClient.Api.Employer.Jobs.Applications[id].Accept.PutAsync();
             TempData.SetSuccessMessage("Đã chấp nhận đơn ứng tuyển thành công.");
         }
         catch (ApiException ex)
@@ -65,7 +65,7 @@ public class ApplicationDetailModel(ApiClient apiClient) : PageModel
     {
         try
         {
-            await apiClient.Api.Jobs.Applications[id].Reject.PutAsync();
+            await apiClient.Api.Employer.Jobs.Applications[id].Reject.PutAsync();
             TempData.SetSuccessMessage("Đã từ chối đơn ứng tuyển.");
         }
         catch (ApiException ex)

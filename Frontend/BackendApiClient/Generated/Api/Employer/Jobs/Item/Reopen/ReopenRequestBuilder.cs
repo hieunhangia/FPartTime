@@ -9,31 +9,31 @@ using System.IO;
 using System.Threading.Tasks;
 using System.Threading;
 using System;
-namespace ApiSdk.Api.Jobs.Applications.Item.Accept
+namespace ApiSdk.Api.Employer.Jobs.Item.Reopen
 {
     /// <summary>
-    /// Builds and executes requests for operations under \api\Jobs\applications\{id}\accept
+    /// Builds and executes requests for operations under \api\employer\Jobs\{id}\reopen
     /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("Kiota", "1.0.0")]
-    public partial class AcceptRequestBuilder : BaseRequestBuilder
+    public partial class ReopenRequestBuilder : BaseRequestBuilder
     {
         /// <summary>
-        /// Instantiates a new <see cref="global::ApiSdk.Api.Jobs.Applications.Item.Accept.AcceptRequestBuilder"/> and sets the default values.
+        /// Instantiates a new <see cref="global::ApiSdk.Api.Employer.Jobs.Item.Reopen.ReopenRequestBuilder"/> and sets the default values.
         /// </summary>
         /// <param name="pathParameters">Path parameters for the request</param>
         /// <param name="requestAdapter">The request adapter to use to execute the requests.</param>
-        public AcceptRequestBuilder(Dictionary<string, object> pathParameters, IRequestAdapter requestAdapter) : base(requestAdapter, "{+baseurl}/api/Jobs/applications/{id}/accept", pathParameters)
+        public ReopenRequestBuilder(Dictionary<string, object> pathParameters, IRequestAdapter requestAdapter) : base(requestAdapter, "{+baseurl}/api/employer/Jobs/{id}/reopen", pathParameters)
         {
         }
         /// <summary>
-        /// Instantiates a new <see cref="global::ApiSdk.Api.Jobs.Applications.Item.Accept.AcceptRequestBuilder"/> and sets the default values.
+        /// Instantiates a new <see cref="global::ApiSdk.Api.Employer.Jobs.Item.Reopen.ReopenRequestBuilder"/> and sets the default values.
         /// </summary>
         /// <param name="rawUrl">The raw URL to use for the request builder.</param>
         /// <param name="requestAdapter">The request adapter to use to execute the requests.</param>
-        public AcceptRequestBuilder(string rawUrl, IRequestAdapter requestAdapter) : base(requestAdapter, "{+baseurl}/api/Jobs/applications/{id}/accept", rawUrl)
+        public ReopenRequestBuilder(string rawUrl, IRequestAdapter requestAdapter) : base(requestAdapter, "{+baseurl}/api/employer/Jobs/{id}/reopen", rawUrl)
         {
         }
-        /// <returns>A <see cref="global::ApiSdk.Models.JobApplicationDetailResponseDto"/></returns>
+        /// <returns>A <see cref="global::ApiSdk.Models.JobDetailResponseDto"/></returns>
         /// <param name="cancellationToken">Cancellation token to use when cancelling requests</param>
         /// <param name="requestConfiguration">Configuration for the request such as headers, query parameters, and middleware options.</param>
         /// <exception cref="global::ApiSdk.Models.ProblemDetails">When receiving a 400 status code</exception>
@@ -43,11 +43,11 @@ namespace ApiSdk.Api.Jobs.Applications.Item.Accept
         /// <exception cref="global::ApiSdk.Models.ProblemDetails">When receiving a 500 status code</exception>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
-        public async Task<global::ApiSdk.Models.JobApplicationDetailResponseDto?> PutAsync(Action<RequestConfiguration<DefaultQueryParameters>>? requestConfiguration = default, CancellationToken cancellationToken = default)
+        public async Task<global::ApiSdk.Models.JobDetailResponseDto?> PutAsync(Action<RequestConfiguration<DefaultQueryParameters>>? requestConfiguration = default, CancellationToken cancellationToken = default)
         {
 #nullable restore
 #else
-        public async Task<global::ApiSdk.Models.JobApplicationDetailResponseDto> PutAsync(Action<RequestConfiguration<DefaultQueryParameters>> requestConfiguration = default, CancellationToken cancellationToken = default)
+        public async Task<global::ApiSdk.Models.JobDetailResponseDto> PutAsync(Action<RequestConfiguration<DefaultQueryParameters>> requestConfiguration = default, CancellationToken cancellationToken = default)
         {
 #endif
             var requestInfo = ToPutRequestInformation(requestConfiguration);
@@ -59,7 +59,7 @@ namespace ApiSdk.Api.Jobs.Applications.Item.Accept
                 { "404", global::ApiSdk.Models.ProblemDetails.CreateFromDiscriminatorValue },
                 { "500", global::ApiSdk.Models.ProblemDetails.CreateFromDiscriminatorValue },
             };
-            return await RequestAdapter.SendAsync<global::ApiSdk.Models.JobApplicationDetailResponseDto>(requestInfo, global::ApiSdk.Models.JobApplicationDetailResponseDto.CreateFromDiscriminatorValue, errorMapping, cancellationToken).ConfigureAwait(false);
+            return await RequestAdapter.SendAsync<global::ApiSdk.Models.JobDetailResponseDto>(requestInfo, global::ApiSdk.Models.JobDetailResponseDto.CreateFromDiscriminatorValue, errorMapping, cancellationToken).ConfigureAwait(false);
         }
         /// <returns>A <see cref="RequestInformation"/></returns>
         /// <param name="requestConfiguration">Configuration for the request such as headers, query parameters, and middleware options.</param>
@@ -80,11 +80,11 @@ namespace ApiSdk.Api.Jobs.Applications.Item.Accept
         /// <summary>
         /// Returns a request builder with the provided arbitrary URL. Using this method means any other path or query parameters are ignored.
         /// </summary>
-        /// <returns>A <see cref="global::ApiSdk.Api.Jobs.Applications.Item.Accept.AcceptRequestBuilder"/></returns>
+        /// <returns>A <see cref="global::ApiSdk.Api.Employer.Jobs.Item.Reopen.ReopenRequestBuilder"/></returns>
         /// <param name="rawUrl">The raw URL to use for the request builder.</param>
-        public global::ApiSdk.Api.Jobs.Applications.Item.Accept.AcceptRequestBuilder WithUrl(string rawUrl)
+        public global::ApiSdk.Api.Employer.Jobs.Item.Reopen.ReopenRequestBuilder WithUrl(string rawUrl)
         {
-            return new global::ApiSdk.Api.Jobs.Applications.Item.Accept.AcceptRequestBuilder(rawUrl, RequestAdapter);
+            return new global::ApiSdk.Api.Employer.Jobs.Item.Reopen.ReopenRequestBuilder(rawUrl, RequestAdapter);
         }
     }
 }

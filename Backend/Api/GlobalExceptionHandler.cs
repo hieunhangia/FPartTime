@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.OData;
 using Service.HttpErrorExceptions;
 
 namespace Api;
@@ -21,6 +22,11 @@ public class GlobalExceptionHandler(ILogger<GlobalExceptionHandler> logger)
                 badHttpRequest.StatusCode,
                 "Bad Request",
                 badHttpRequest.Message
+            ),
+            ODataException oDataException => (
+                StatusCodes.Status400BadRequest,
+                "Bad Request",
+                oDataException.Message
             ),
             UnauthorizedAccessException => (
                 StatusCodes.Status401Unauthorized,

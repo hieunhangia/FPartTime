@@ -43,7 +43,7 @@ public class IndexModel(ApiClient apiClient) : PageModel
 
         try
         {
-            PostsQuota = await apiClient.Api.Jobs.PostsQuota.GetAsync();
+            PostsQuota = await apiClient.Api.Employer.Jobs.PostsQuota.GetAsync();
         }
         catch
         {

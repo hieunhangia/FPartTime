@@ -16,6 +16,8 @@ namespace ApiSdk.Models
         public IDictionary<string, object> AdditionalData { get; set; }
         /// <summary>The amount property</summary>
         public double? Amount { get; set; }
+        /// <summary>The id property</summary>
+        public Guid? Id { get; set; }
         /// <summary>The timeQuantity property</summary>
         public int? TimeQuantity { get; set; }
         /// <summary>The timeUnit property</summary>
@@ -46,6 +48,7 @@ namespace ApiSdk.Models
             return new Dictionary<string, Action<IParseNode>>
             {
                 { "amount", n => { Amount = n.GetDoubleValue(); } },
+                { "id", n => { Id = n.GetGuidValue(); } },
                 { "timeQuantity", n => { TimeQuantity = n.GetIntValue(); } },
                 { "timeUnit", n => { TimeUnit = n.GetEnumValue<global::ApiSdk.Models.JobSalaryTimeUnit>(); } },
             };
@@ -58,6 +61,7 @@ namespace ApiSdk.Models
         {
             if(ReferenceEquals(writer, null)) throw new ArgumentNullException(nameof(writer));
             writer.WriteDoubleValue("amount", Amount);
+            writer.WriteGuidValue("id", Id);
             writer.WriteIntValue("timeQuantity", TimeQuantity);
             writer.WriteEnumValue<global::ApiSdk.Models.JobSalaryTimeUnit>("timeUnit", TimeUnit);
             writer.WriteAdditionalData(AdditionalData);

@@ -1,0 +1,123 @@
+@page "{id:guid}"
+@using ApiSdk.Models
+@model Frontend.Pages.Censor.JobReports.DetailModel
+@{
+    ViewData["Title"] = "Chi tiết báo cáo tin tuyển dụng";
+}
+
+<div class="container my-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="mb-0">Chi tiết báo cáo tin tuyển dụng</h2>
+        <a asp-page="./Index" class="btn btn-outline-secondary">Quay lại danh sách</a>
+    </div>
+
+    @if (Model.Report != null)
+    {
+        var (statusLabel, statusCss) = Model.GetStatusDisplay(Model.Report.Status);
+
+        <div class="card mb-4 shadow-sm border-danger border-opacity-25">
+            <div class="card-header bg-danger bg-opacity-10 d-flex justify-content-between align-items-center">
+                <h5 class="mb-0 text-danger fw-bold">Thông tin báo cáo</h5>
+                <div class="d-flex align-items-center gap-2">
+                    <span class="badge @statusCss">@statusLabel</span>
+                    <small class="text-muted">Ngày gửi: @(Model.Report.CreatedAt?.ToLocalTime().ToString("dd/MM/yyyy HH:mm") ?? "-")</small>
+                </div>
+            </div>
+            <div class="card-body">
+                <h6 class="fw-bold text-dark">Lý do báo cáo từ ứng viên:</h6>
+                <div class="alert alert-light border text-danger fw-medium p-3 mb-0" style="white-space: pre-wrap;">
+                    @Model.Report.Reason
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <!-- Thông tin tin tuyển dụng bị báo cáo -->
+            <div class="col-md-7">
+                <div class="card shadow-sm h-100">
+                    <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                        <h5 class="card-title mb-0">Tin tuyển dụng bị báo cáo</h5>
+                        @if (Model.Report.JobId.HasValue)
+                        {
+                            <a asp-page="/Public/JobDetail" asp-route-id="@Model.Report.JobId" target="_blank" class="btn btn-sm btn-outline-primary">
+                                Xem tin tuyển dụng
+                            </a>
+                        }
+                    </div>
+                    <div class="card-body">
+                        <dl class="row mb-0">
+                            <dt class="col-sm-4 text-muted">Tiêu đề:</dt>
+                            <dd class="col-sm-8 fw-semibold text-primary">@Model.Report.JobTitle</dd>
+
+                            <dt class="col-sm-4 text-muted">Công ty:</dt>
+                            <dd class="col-sm-8">@(Model.Report.EmployerCompanyName ?? "Nhà tuyển dụng")</dd>
+
+                            <dt class="col-sm-4 text-muted">SĐT công ty:</dt>
+                            <dd class="col-sm-8">@(Model.Report.EmployerContactPhone ?? "-")</dd>
+
+                            <dt class="col-sm-4 text-muted">Địa chỉ làm việc:</dt>
+                            <dd class="col-sm-8">
+                                @(string.Join(", ", new[] { Model.Report.JobDetailAddress, Model.Report.JobCommuneName, Model.Report.JobProvinceName }.Where(s => !string.IsNullOrWhiteSpace(s))))
+                            </dd>
+
+                            <dt class="col-sm-4 text-muted">Hạn ứng tuyển:</dt>
+                            <dd class="col-sm-8">@(Model.Report.JobExpiryAt?.ToString() ?? "Không thời hạn")</dd>
+
+                            <dt class="col-sm-4 text-muted">Ngày đăng tin:</dt>
+                            <dd class="col-sm-8">@(Model.Report.JobCreatedAt?.ToLocalTime().ToString("dd/MM/yyyy HH:mm") ?? "-")</dd>
+
+                            @if (!string.IsNullOrWhiteSpace(Model.Report.JobDescription))
+                            {
+                                <dt class="col-12 text-muted mt-2">Mô tả công việc:</dt>
+                                <dd class="col-12 mt-1">
+                                    <div class="p-3 bg-light rounded small" style="white-space: pre-wrap; max-height: 250px; overflow-y: auto;">
+                                        @Model.Report.JobDescription
+                                    </div>
+                                </dd>
+                            }
+                        </dl>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Thông tin ứng viên và kiểm duyệt viên -->
+            <div class="col-md-5">
+                <!-- Thông tin ứng viên báo cáo -->
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-light">
+                        <h5 class="card-title mb-0">Người gửi báo cáo</h5>
+                    </div>
+                    <div class="card-body">
+                        <dl class="row mb-0">
+                            <dt class="col-sm-4 text-muted">Họ tên:</dt>
+                            <dd class="col-sm-8 fw-semibold">@(Model.Report.ReporterName ?? "Ứng viên")</dd>
+
+                            <dt class="col-sm-4 text-muted">Email:</dt>
+                            <dd class="col-sm-8">@(Model.Report.ReporterEmail ?? "-")</dd>
+
+                            <dt class="col-sm-4 text-muted">Số điện thoại:</dt>
+                            <dd class="col-sm-8">@(Model.Report.ReporterPhoneNumber ?? "-")</dd>
+                        </dl>
+                    </div>
+                </div>
+
+                <!-- Thông tin xử lý nếu đã xử lý -->
+                @if (Model.Report.Status != JobReportStatus.Pending && Model.Report.ResolverId.HasValue)
+                {
+                    <div class="card shadow-sm">
+                        <div class="card-header bg-light">
+                            <h5 class="card-title mb-0">Thông tin xử lý</h5>
+                        </div>
+                        <div class="card-body">
+                            <dl class="row mb-0">
+                                <dt class="col-sm-5 text-muted">Người xử lý:</dt>
+                                <dd class="col-sm-7">@(Model.Report.ResolverName ?? Model.Report.ResolverEmail ?? "-")</dd>
+                            </dl>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+</div>
+

@@ -23,18 +23,21 @@ public static class DependencyInjection
         // Public Services
         services.AddScoped<AddressService>();
         services.AddScoped<IndustryService>();
+        services.AddScoped<ApplicationServices.Public.JobService>();
 
         // Candidate Services
         services.AddScoped<ApplicationServices.Candidate.EmployerRegistrationService>();
 
         // Employer Services
-        services.AddScoped<JobService>();
+        services.AddScoped<ApplicationServices.Employer.JobService>();
 
         // Censor Services
         services.AddScoped<EmployerRegistrationService>();
 
         services.AddScoped<SmsSenderService>();
         services.AddScoped<CandidateProfileService>();
+        services.AddScoped<JobReportService>();
+        services.AddScoped<ApplicationServices.Censor.JobReportService>();
         var r2Settings = configuration.GetSection("R2Settings");
         services.AddSingleton<IAmazonS3>(new AmazonS3Client(r2Settings["AccessKey"], r2Settings["SecretKey"],
             new AmazonS3Config { ServiceURL = r2Settings["ServiceURL"] }

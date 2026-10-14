@@ -9,7 +9,7 @@
         </div>
 
         <nav class="header-nav">
-            <a href="#">Tìm việc làm</a>
+            <a asp-page="/Public/Index">Tìm việc làm</a>
             @if (User.IsInRole(Role.Candidate))
             {
                 <a href="/Candidate/EmployerRegistrations/MyRegistrations">Trở thành nhà tuyển dụng</a>
@@ -80,6 +80,7 @@
                         {
                             <li><a class="dropdown-item" asp-page="/Censor/EmployerRegistrations/Index">Quản lý đơn đăng
                                     ký nhà tuyển dụng</a></li>
+                            <li><a class="dropdown-item" asp-page="/Censor/JobReports/Index">Quản lý báo cáo tin tuyển dụng</a></li>
                         }
                         @if (User.IsInRole(Role.Manager))
                         {

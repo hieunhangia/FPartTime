@@ -20,7 +20,7 @@ public class DetailModel(ApiClient apiClient) : PageModel
     {
         try
         {
-            Job = await apiClient.Api.Jobs[id].GetAsync();
+            Job = await apiClient.Api.Employer.Jobs[id].GetAsync();
             if (Job == null)
             {
                 TempData.SetErrorMessage("Không tìm thấy thông tin công việc.");
@@ -45,7 +45,7 @@ public class DetailModel(ApiClient apiClient) : PageModel
     {
         try
         {
-            await apiClient.Api.Jobs[id].Close.PutAsync();
+            await apiClient.Api.Employer.Jobs[id].Close.PutAsync();
             TempData.SetSuccessMessage("Đã đóng bài đăng công việc thành công.");
         }
         catch (ApiException ex)
@@ -64,7 +64,7 @@ public class DetailModel(ApiClient apiClient) : PageModel
     {
         try
         {
-            await apiClient.Api.Jobs[id].Reopen.PutAsync();
+            await apiClient.Api.Employer.Jobs[id].Reopen.PutAsync();
             TempData.SetSuccessMessage("Đã mở lại bài đăng công việc thành công.");
         }
         catch (ApiException ex)

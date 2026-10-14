@@ -1,0 +1,140 @@
+@page "/jobs/{id:guid}"
+@model JobDetailModel
+@{
+    var job = Model.Job;
+    ViewData["Title"] = "Chi tiết việc làm";
+}
+
+<div class="container my-4" style="max-width: 900px;">
+    <!-- Nút quay lại -->
+    <div class="mb-3">
+        <a asp-page="/Public/Index" class="btn btn-outline-secondary btn-sm">
+            &larr; Quay lại danh sách việc làm
+        </a>
+    </div>
+
+    @if (job != null)
+    {
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-body p-4">
+                <!-- Tiêu đề & Nút báo cáo -->
+                <div class="d-flex justify-content-between align-items-start gap-3 mb-3">
+                    <div>
+                        <h2 class="fw-bold mb-1">@job.Title</h2>
+                        <h5 class="text-muted mb-2">@(job.EmployerCompanyName ?? "Nhà tuyển dụng")</h5>
+                        <div class="text-secondary small">
+                            📍 @JobDetailModel.FormatFullAddress(job)
+                        </div>
+                    </div>
+                    <button type="button" class="btn btn-outline-danger btn-sm text-nowrap" data-bs-toggle="modal" data-bs-target="#reportJobModal">
+                        🚩 Báo cáo tin
+                    </button>
+                </div>
+
+                <hr class="my-3" />
+
+                <!-- Tóm tắt nhanh: Lương, Hạn nộp, Liên hệ -->
+                <div class="row g-3 bg-light p-3 rounded mb-4">
+                    <div class="col-sm-4">
+                        <small class="text-muted d-block">Mức lương</small>
+                        <span class="fw-bold text-success">
+                            @(job.Salaries is { Count: > 0 } ? JobDetailModel.FormatSalary(job.Salaries[0]) : "Thỏa thuận")
+                        </span>
+                    </div>
+                    <div class="col-sm-4">
+                        <small class="text-muted d-block">Hạn nộp</small>
+                        <span class="fw-bold">
+                            @(job.ExpiryAt?.ToString() ?? "Linh hoạt")
+                        </span>
+                    </div>
+                    <div class="col-sm-4">
+                        <small class="text-muted d-block">Liên hệ ứng tuyển</small>
+                        @if (!string.IsNullOrWhiteSpace(job.EmployerContactPhone))
+                        {
+                            <a href="tel:@job.EmployerContactPhone" class="fw-bold text-primary text-decoration-none">
+                                📞 @job.EmployerContactPhone
+                            </a>
+                        }
+                        else
+                        {
+                            <span class="text-muted">Chưa cung cấp SĐT</span>
+                        }
+                    </div>
+                </div>
+
+                <!-- Mô tả công việc -->
+                <div class="mb-4">
+                    <h5 class="fw-bold mb-2">Mô tả công việc</h5>
+                    <div class="text-dark" style="white-space: pre-wrap; line-height: 1.6;">@job.Description</div>
+                </div>
+
+                <!-- Yêu cầu ứng viên -->
+                <div class="mb-4">
+                    <h5 class="fw-bold mb-2">Yêu cầu ứng viên</h5>
+                    <ul class="list-unstyled mb-0 ps-1">
+                        <li class="mb-1">• <strong>Số lượng tuyển:</strong> @(job.VacancyCount.HasValue ? $"{job.VacancyCount} người" : "Không giới hạn")</li>
+                        <li class="mb-1">• <strong>Độ tuổi:</strong> @JobDetailModel.FormatAgeRequirement(job.MinAgeRequirement, job.MaxAgeRequirement)</li>
+                        <li class="mb-1">• <strong>Giới tính:</strong> @JobDetailModel.FormatGenderRequirement(job.GenderRequirement)</li>
+                    </ul>
+                </div>
+
+                <!-- Lịch làm việc / Ca làm (nếu có) -->
+                @if (job.Schedules is { Count: > 0 })
+                {
+                    <div class="mb-3">
+                        <h5 class="fw-bold mb-2">Lịch làm việc</h5>
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-sm mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Thứ</th>
+                                        <th>Bắt đầu</th>
+                                        <th>Kết thúc</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var s in job.Schedules)
+                                    {
+                                        <tr>
+                                            <td>@JobDetailModel.FormatDayOfWeek(s.DayOfWeek)</td>
+                                            <td>@JobDetailModel.FormatTime(s.StartTime)</td>
+                                            <td>@JobDetailModel.FormatTime(s.EndTime)</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- Modal Báo cáo đơn giản -->
+        <div class="modal fade" id="reportJobModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <form method="post" asp-page-handler="ReportJob" asp-route-id="@job.Id">
+                        <div class="modal-header">
+                            <h5 class="modal-title text-danger fw-bold">Báo cáo tin tuyển dụng</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+                        </div>
+                        <div class="modal-body">
+                            <p class="text-muted small mb-3">
+                                Bạn đang báo cáo tin: <strong>@job.Title</strong>
+                            </p>
+                            <div class="mb-3">
+                                <label asp-for="ReportInput.Reason" class="form-label fw-semibold">Lý do báo cáo:</label>
+                                <textarea asp-for="ReportInput.Reason" class="form-control" rows="4" placeholder="Nhập lý do bạn muốn báo cáo tin này (tối đa 500 ký tự)..." required maxlength="500"></textarea>
+                                <span asp-validation-for="ReportInput.Reason" class="text-danger small"></span>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                            <button type="submit" class="btn btn-danger">Gửi báo cáo</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    }
+</div>

@@ -8,7 +8,7 @@ using Service.ApplicationServices.Employer;
 namespace Api.Controllers.Employer;
 
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/employer/[controller]")]
 [Authorize(Roles = Role.Employer)]
 public class JobsController(JobService jobService) : ControllerBase
 {
