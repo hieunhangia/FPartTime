@@ -5,6 +5,7 @@ using Microsoft.IdentityModel.JsonWebTokens;
 using Service.ApplicationServices;
 using Service.ApplicationServices.Candidate;
 using Service.ApplicationServices.Employer;
+using Service.ApplicationServices.Public;
 using Service.BackgroundServices;
 using Service.ExternalServices;
 using EmployerRegistrationService = Service.ApplicationServices.Censor.EmployerRegistrationService;
@@ -18,8 +19,18 @@ public static class DependencyInjection
         services.AddSingleton<JsonWebTokenHandler>();
         services.AddScoped<IdentityService>();
         services.AddScoped<NotificationsService>();
+        
+        // Public Services
+        services.AddScoped<AddressService>();
+        services.AddScoped<IndustryService>();
+        
+        // Candidate Services
         services.AddScoped<ApplicationServices.Candidate.EmployerRegistrationService>();
+        
+        // Censor Services
         services.AddScoped<EmployerRegistrationService>();
+        
+        // Employer Services
         services.AddScoped<JobService>();
 
         services.AddScoped<SmsSenderService>();

@@ -29,6 +29,22 @@ public class JobService(ApplicationDbContext context)
         .ProjectToDetailDto()
         .FirstOrDefaultAsync();
 
+    public async Task<PostsQuotaResponseDto> GetPostsQuotaAsync(ClaimsPrincipal user)
+    {
+        var employer = await context.Employers.AsNoTracking().FirstOrDefaultAsync(e => e.UserId == user.GetUserId());
+        if (employer == null)
+        {
+            throw new ForbiddenException("Bạn không có quyền thực hiện hành động này.");
+        }
+
+        return new PostsQuotaResponseDto
+        {
+            MaxActivePosts = employer.MaxActivePosts,
+            CurrentActivePosts =
+                await context.Jobs.CountAsync(j => j.EmployerId == user.GetUserId() && j.Status == JobStatus.Active)
+        };
+    }
+
     public async Task<JobDetailResponseDto> CreateJobAsync(ClaimsPrincipal user,
         CreateJobRequestDto createJobRequestDto)
     {
@@ -143,6 +159,57 @@ public class JobService(ApplicationDbContext context)
             _ => dayOfWeek.ToString()
         };
     }
+
+    public async Task<JobDetailResponseDto> CloseJobAsync(ClaimsPrincipal user, Guid jobId)
+    {
+        var job = await context.Jobs.FirstOrDefaultAsync(j => j.Id == jobId && j.EmployerId == user.GetUserId());
+        if (job == null)
+        {
+            throw new NotFoundException("Không tìm thấy công việc.");
+        }
+
+        if (job.Status != JobStatus.Active)
+        {
+            throw new BadRequestException("Chỉ có thể đóng các công việc đang hoạt động.");
+        }
+
+        job.Status = JobStatus.Closed;
+        await context.SaveChangesAsync();
+        return await GetJobDetailAsync(user, job.Id) ??
+               throw new NotFoundException("Không tìm thấy công việc vừa đóng.");
+    }
+
+    public async Task<JobDetailResponseDto> ReopenJobAsync(ClaimsPrincipal user, Guid jobId)
+    {
+        var job = await context.Jobs.FirstOrDefaultAsync(j => j.Id == jobId && j.EmployerId == user.GetUserId());
+        if (job == null)
+        {
+            throw new NotFoundException("Không tìm thấy công việc.");
+        }
+
+        if (job.Status != JobStatus.Closed)
+        {
+            throw new BadRequestException("Chỉ có thể mở lại các công việc đã đóng.");
+        }
+
+        var employer = await context.Employers.AsNoTracking().FirstOrDefaultAsync(e => e.UserId == user.GetUserId());
+        if (employer == null)
+        {
+            throw new ForbiddenException("Bạn không có quyền thực hiện hành động này.");
+        }
+
+        if (employer.MaxActivePosts <=
+            await context.Jobs.CountAsync(j => j.EmployerId == user.GetUserId() && j.Status == JobStatus.Active))
+        {
+            throw new BadRequestException(
+                $"Bạn đã đạt giới hạn số lượng bài đăng công việc đang hoạt động ({employer.MaxActivePosts}). Vui lòng hủy một bài đăng công việc đang hoạt động trước khi mở lại bài đăng này.");
+        }
+
+        job.Status = JobStatus.Active;
+        await context.SaveChangesAsync();
+        return await GetJobDetailAsync(user, job.Id) ??
+               throw new NotFoundException("Không tìm thấy công việc vừa mở lại.");
+    }
 }
 
 [Mapper(RequiredMappingStrategy = RequiredMappingStrategy.Target)]
@@ -233,6 +300,12 @@ public class JobApplicationDetailResponseDto
     public required List<JobScheduleResponseDto> CandidatePreferredWorkSchedules { get; set; }
     public required JobApplicationStatus Status { get; set; }
     public required DateTime AppliedAt { get; set; }
+}
+
+public class PostsQuotaResponseDto
+{
+    public required int MaxActivePosts { get; set; }
+    public required int CurrentActivePosts { get; set; }
 }
 
 public class CreateJobRequestDto

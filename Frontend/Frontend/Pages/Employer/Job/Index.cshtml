@@ -6,7 +6,20 @@
 
 <div class="container my-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="mb-0">Danh sách công việc đã đăng</h2>
+        <div>
+            <h2 class="mb-1">Danh sách công việc đã đăng</h2>
+            @if (Model.PostsQuota != null)
+            {
+                <span class="text-muted small">
+                    Bài đăng đang mở: <strong>@Model.PostsQuota.CurrentActivePosts</strong> / @Model.PostsQuota.MaxActivePosts bài
+                </span>
+            }
+        </div>
+        <div>
+            <a asp-page="./Create" class="btn btn-primary">
+                + Tạo mới công việc
+            </a>
+        </div>
     </div>
 
     <div class="card mb-4 shadow-sm">
@@ -86,8 +99,8 @@
                         <td class="text-end">
                             @if (job.Id is not null)
                             {
-                                <a asp-page="./Detail" asp-route-id="@job.Id" class="btn btn-sm btn-outline-primary">Xem
-                                    chi tiết</a>
+                                <a asp-page="./Detail" asp-route-id="@job.Id"
+                                   class="btn btn-sm btn-outline-primary">Xem chi tiết</a>
                             }
                         </td>
                     </tr>

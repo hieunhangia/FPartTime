@@ -30,6 +30,8 @@ public class IndexModel(ApiClient apiClient) : PageModel
 
     public int TotalPages { get; private set; } = 1;
 
+    public PostsQuotaResponseDto? PostsQuota { get; private set; }
+
     public async Task<IActionResult> OnGetAsync()
     {
         if (PageNumber < 1)
@@ -38,6 +40,15 @@ public class IndexModel(ApiClient apiClient) : PageModel
         }
 
         var skip = (PageNumber - 1) * PageSize;
+
+        try
+        {
+            PostsQuota = await apiClient.Api.Jobs.PostsQuota.GetAsync();
+        }
+        catch
+        {
+            PostsQuota = null;
+        }
 
         try
         {

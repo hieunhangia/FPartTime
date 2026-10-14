@@ -14,7 +14,23 @@
                 <span class="badge @statusCss">@statusLabel</span>
             }
         </div>
-        <a asp-page="./Index" class="btn btn-outline-secondary">Quay lại danh sách</a>
+        <div class="d-flex gap-2">
+            @if (Model.Job?.Status == ApiSdk.Models.JobStatus.Active)
+            {
+                <form method="post" asp-page-handler="CloseJob" asp-route-id="@Model.Job.Id"
+                      onsubmit="return confirm('Bạn có chắc chắn muốn đóng bài đăng này? Sau khi đóng, bài đăng sẽ không nhận thêm hồ sơ.');">
+                    <button type="submit" class="btn btn-outline-danger">Đóng bài đăng</button>
+                </form>
+            }
+            @if (Model.Job?.Status == ApiSdk.Models.JobStatus.Closed)
+            {
+                <form method="post" asp-page-handler="ReopenJob" asp-route-id="@Model.Job.Id"
+                      onsubmit="return confirm('Bạn có chắc chắn muốn mở lại bài đăng này? Sau khi mở lại, ứng viên có thể tiếp tục nộp hồ sơ.');">
+                    <button type="submit" class="btn btn-outline-success">Mở lại bài đăng</button>
+                </form>
+            }
+            <a asp-page="Index" class="btn btn-outline-secondary">Quay lại danh sách</a>
+        </div>
     </div>
 
     @if (Model.Job != null)
@@ -47,21 +63,21 @@
                             <div class="table-responsive">
                                 <table class="table table-bordered mb-0">
                                     <thead class="table-light">
-                                        <tr>
-                                            <th>Thứ trong tuần</th>
-                                            <th>Giờ bắt đầu</th>
-                                            <th>Giờ kết thúc</th>
-                                        </tr>
+                                    <tr>
+                                        <th>Thứ trong tuần</th>
+                                        <th>Giờ bắt đầu</th>
+                                        <th>Giờ kết thúc</th>
+                                    </tr>
                                     </thead>
                                     <tbody>
-                                        @foreach (var schedule in Model.Job.JobSchedules)
-                                        {
-                                            <tr>
-                                                <td>@Model.GetDayOfWeekDisplay(schedule.DayOfWeek)</td>
-                                                <td>@Model.FormatTime(schedule.StartTime)</td>
-                                                <td>@Model.FormatTime(schedule.EndTime)</td>
-                                            </tr>
-                                        }
+                                    @foreach (var schedule in Model.Job.JobSchedules)
+                                    {
+                                        <tr>
+                                            <td>@Model.GetDayOfWeekDisplay(schedule.DayOfWeek)</td>
+                                            <td>@Model.FormatTime(schedule.StartTime)</td>
+                                            <td>@Model.FormatTime(schedule.EndTime)</td>
+                                        </tr>
+                                    }
                                     </tbody>
                                 </table>
                             </div>
@@ -84,24 +100,24 @@
                             <div class="table-responsive">
                                 <table class="table table-hover align-middle mb-0">
                                     <thead class="table-light">
-                                        <tr>
-                                            <th>Họ và tên ứng viên</th>
-                                            <th>Số điện thoại</th>
-                                            <th>Ngày nộp đơn</th>
-                                            <th>Trạng thái đơn</th>
-                                        </tr>
+                                    <tr>
+                                        <th>Họ và tên ứng viên</th>
+                                        <th>Số điện thoại</th>
+                                        <th>Ngày nộp đơn</th>
+                                        <th>Trạng thái đơn</th>
+                                    </tr>
                                     </thead>
                                     <tbody>
-                                        @foreach (var app in Model.Job.JobApplications)
-                                        {
-                                            var (appStatusLabel, appStatusCss) = Model.GetApplicationStatusDisplay(app.Status);
-                                            <tr>
-                                                <td>@(app.CandidateFullName ?? "-")</td>
-                                                <td>@(app.CandidatePhoneNumber ?? "-")</td>
-                                                <td>@(app.AppliedAt?.ToLocalTime().ToString("dd/MM/yyyy HH:mm") ?? "-")</td>
-                                                <td><span class="badge @appStatusCss">@appStatusLabel</span></td>
-                                            </tr>
-                                        }
+                                    @foreach (var app in Model.Job.JobApplications)
+                                    {
+                                        var (appStatusLabel, appStatusCss) = Model.GetApplicationStatusDisplay(app.Status);
+                                        <tr>
+                                            <td>@(app.CandidateFullName ?? "-")</td>
+                                            <td>@(app.CandidatePhoneNumber ?? "-")</td>
+                                            <td>@(app.AppliedAt?.ToLocalTime().ToString("dd/MM/yyyy HH:mm") ?? "-")</td>
+                                            <td><span class="badge @appStatusCss">@appStatusLabel</span></td>
+                                        </tr>
+                                    }
                                     </tbody>
                                 </table>
                             </div>
@@ -175,14 +191,15 @@
                         <h5 class="card-title mb-0">Mức lương</h5>
                     </div>
                     <div class="card-body">
-                        @if (Model.Job.JobSalaries != null && Model.Job.JobSalaries.Count > 0)
+                        @if (Model.Job.JobSalaries is { Count: > 0 })
                         {
                             <ul class="list-group list-group-flush">
                                 @foreach (var salary in Model.Job.JobSalaries)
                                 {
                                     <li class="list-group-item d-flex justify-content-between align-items-center px-0">
                                         <span>Theo @Model.FormatSalaryRate(salary.TimeQuantity, salary.TimeUnit)</span>
-                                        <span class="fw-bold text-success">@Model.FormatSalaryAmount(salary.Amount)</span>
+                                        <span
+                                            class="fw-bold text-success">@Model.FormatSalaryAmount(salary.Amount)</span>
                                     </li>
                                 }
                             </ul>

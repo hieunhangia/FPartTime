@@ -24,21 +24,59 @@ public class DetailModel(ApiClient apiClient) : PageModel
             if (Job == null)
             {
                 TempData.SetErrorMessage("Không tìm thấy thông tin công việc.");
-                return RedirectToPage("./Index");
+                return RedirectToPage("Index");
             }
         }
         catch (ApiException ex)
         {
             TempData.SetErrorMessage(ex.ToFriendlyErrorMessage());
-            return RedirectToPage("./Index");
+            return RedirectToPage("Index");
         }
         catch
         {
             TempData.SetErrorMessage("Đã xảy ra lỗi khi tải thông tin chi tiết công việc.");
-            return RedirectToPage("./Index");
+            return RedirectToPage("Index");
         }
 
         return Page();
+    }
+
+    public async Task<IActionResult> OnPostCloseJobAsync(Guid id)
+    {
+        try
+        {
+            await apiClient.Api.Jobs[id].Close.PutAsync();
+            TempData.SetSuccessMessage("Đã đóng bài đăng công việc thành công.");
+        }
+        catch (ApiException ex)
+        {
+            TempData.SetErrorMessage(ex.ToFriendlyErrorMessage());
+        }
+        catch
+        {
+            TempData.SetErrorMessage("Đã xảy ra lỗi khi đóng bài đăng công việc.");
+        }
+
+        return RedirectToPage(new { id });
+    }
+
+    public async Task<IActionResult> OnPostReopenJobAsync(Guid id)
+    {
+        try
+        {
+            await apiClient.Api.Jobs[id].Reopen.PutAsync();
+            TempData.SetSuccessMessage("Đã mở lại bài đăng công việc thành công.");
+        }
+        catch (ApiException ex)
+        {
+            TempData.SetErrorMessage(ex.ToFriendlyErrorMessage());
+        }
+        catch
+        {
+            TempData.SetErrorMessage("Đã xảy ra lỗi khi mở lại bài đăng công việc.");
+        }
+
+        return RedirectToPage(new { id });
     }
 
     public (string Label, string CssClass) GetStatusDisplay(JobStatus? status) => status switch

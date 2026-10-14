@@ -1,0 +1,504 @@
+@page
+@using ApiSdk.Models
+@model Frontend.Pages.Employer.Job.CreateModel
+@{
+    ViewData["Title"] = "Tạo mới bài đăng công việc";
+}
+
+<div class="container my-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="mb-1">Tạo mới bài đăng công việc</h2>
+            <p class="text-muted mb-0">Điền đầy đủ thông tin để đăng tuyển dụng vị trí làm việc bán thời gian</p>
+        </div>
+        <div>
+            <a asp-page="./Index" class="btn btn-outline-secondary">Quay lại danh sách</a>
+        </div>
+    </div>
+
+    @if (Model.IsQuotaExceeded)
+    {
+        <div class="alert alert-warning d-flex justify-content-between align-items-center mb-4 shadow-sm" role="alert">
+            <div>
+                <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                <strong>Hạn mức bài đăng:</strong> Bạn đã đạt tối đa số bài đăng đang mở
+                (@Model.PostsQuota?.CurrentActivePosts / @Model.PostsQuota?.MaxActivePosts bài). Vui lòng đóng một bài
+                đăng cũ trước khi tạo bài mới.
+            </div>
+            <a asp-page="./Index" class="btn btn-sm btn-outline-dark">Quản lý bài đăng</a>
+        </div>
+    }
+    else if (Model.PostsQuota != null)
+    {
+        <div class="alert alert-light border d-flex justify-content-between align-items-center mb-4 py-2 px-3">
+            <span class="text-muted small">
+                Bài đăng đang mở: <strong>@Model.PostsQuota.CurrentActivePosts</strong> / @Model.PostsQuota.MaxActivePosts bài
+            </span>
+            <span
+                class="badge bg-success-subtle text-success border border-success-subtle">Còn @(Model.PostsQuota.MaxActivePosts - Model.PostsQuota.CurrentActivePosts) lượt đăng</span>
+        </div>
+    }
+
+    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+    <form method="post" id="createJobForm">
+        <!-- 1. Thông tin công việc -->
+        <div class="card mb-4 shadow-sm">
+            <div class="card-header bg-white fw-bold">
+                1. Thông tin công việc
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label asp-for="Form.Title" class="form-label fw-semibold">Tiêu đề công việc <span
+                            class="text-danger">*</span></label>
+                    <input asp-for="Form.Title" class="form-control"
+                           placeholder="Ví dụ: Nhân viên phục vụ quán cà phê ca tối..." autofocus/>
+                    <span asp-validation-for="Form.Title" class="text-danger"></span>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="Form.IndustryId" class="form-label fw-semibold">Ngành nghề <span
+                                class="text-danger">*</span></label>
+                        <select asp-for="Form.IndustryId" class="form-select">
+                            <option value="">-- Chọn ngành nghề --</option>
+                            @foreach (var industry in Model.Industries)
+                            {
+                                <option value="@industry.Id">@industry.Name</option>
+                            }
+                        </select>
+                        <span asp-validation-for="Form.IndustryId" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="Form.VacancyCount" class="form-label fw-semibold">Số lượng tuyển dụng
+                            (người)</label>
+                        <input asp-for="Form.VacancyCount" class="form-control" type="number" min="1" max="1000"
+                               placeholder="Để trống nếu không giới hạn"/>
+                        <div class="form-text">Tối đa 1,000 người.</div>
+                        <span asp-validation-for="Form.VacancyCount" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="mb-0">
+                    <label asp-for="Form.Description" class="form-label fw-semibold">Mô tả công việc <span
+                            class="text-danger">*</span></label>
+                    <textarea asp-for="Form.Description" class="form-control" rows="4"
+                              placeholder="Mô tả chi tiết các nhiệm vụ, yêu cầu công việc, quyền lợi..."></textarea>
+                    <span asp-validation-for="Form.Description" class="text-danger"></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. Yêu cầu ứng viên & Hạn nộp -->
+        <div class="card mb-4 shadow-sm">
+            <div class="card-header bg-white fw-bold">
+                2. Yêu cầu ứng viên & Thời hạn
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <label asp-for="Form.GenderRequirement" class="form-label fw-semibold">Yêu cầu giới tính</label>
+                        <select asp-for="Form.GenderRequirement" class="form-select">
+                            <option value="">Không yêu cầu</option>
+                            <option value="Male">Nam</option>
+                            <option value="Female">Nữ</option>
+                        </select>
+                        <span asp-validation-for="Form.GenderRequirement" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-4 mb-3">
+                        <label asp-for="Form.MinAgeRequirement" class="form-label fw-semibold">Tuổi tối thiểu</label>
+                        <input asp-for="Form.MinAgeRequirement" class="form-control" type="number" min="15" max="100"
+                               placeholder="Tối thiểu 15"/>
+                        <span asp-validation-for="Form.MinAgeRequirement" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-4 mb-3">
+                        <label asp-for="Form.MaxAgeRequirement" class="form-label fw-semibold">Tuổi tối đa</label>
+                        <input asp-for="Form.MaxAgeRequirement" class="form-control" type="number" min="15" max="100"
+                               placeholder="Tối đa 100"/>
+                        <span asp-validation-for="Form.MaxAgeRequirement" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-0">
+                        <label asp-for="Form.ExpiryAt" class="form-label fw-semibold">Hạn nhận hồ sơ</label>
+                        <input asp-for="Form.ExpiryAt" class="form-control" type="date"/>
+                        <div class="form-text">Ngày hết hạn phải lớn hơn ngày hiện tại.</div>
+                        <span asp-validation-for="Form.ExpiryAt" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. Địa điểm làm việc -->
+        <div class="card mb-4 shadow-sm">
+            <div class="card-header bg-white fw-bold">
+                3. Địa điểm làm việc
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="Form.ProvinceCode" class="form-label fw-semibold">Tỉnh / Thành phố <span
+                                class="text-danger">*</span></label>
+                        <select id="provinceSelect" asp-for="Form.ProvinceCode" class="form-select">
+                            <option value="">-- Chọn Tỉnh / Thành phố --</option>
+                            @foreach (var province in Model.Provinces)
+                            {
+                                <option value="@province.Code">@province.Name</option>
+                            }
+                        </select>
+                        <span asp-validation-for="Form.ProvinceCode" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="Form.CommuneCode" class="form-label fw-semibold">Xã / Phường <span
+                                class="text-danger">*</span></label>
+                        <select id="communeSelect" asp-for="Form.CommuneCode" class="form-select">
+                            <option value="">-- Chọn Xã / Phường --</option>
+                            @foreach (var commune in Model.Communes)
+                            {
+                                <option value="@commune.Code">@commune.Name</option>
+                            }
+                        </select>
+                        <span asp-validation-for="Form.CommuneCode" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="mb-0">
+                    <label asp-for="Form.DetailAddress" class="form-label fw-semibold">Địa chỉ chi tiết <span
+                            class="text-danger">*</span></label>
+                    <input asp-for="Form.DetailAddress" class="form-control"
+                           placeholder="Số nhà, tên tòa nhà, tên đường..."/>
+                    <span asp-validation-for="Form.DetailAddress" class="text-danger"></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. Lịch làm việc / Ca làm việc -->
+        <div class="card mb-4 shadow-sm">
+            <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                <span class="fw-bold">4. Lịch làm việc (Ca làm việc) <span class="text-danger">*</span></span>
+                <button type="button" id="btnAddSchedule" class="btn btn-sm btn-outline-primary">
+                    + Thêm ca làm việc
+                </button>
+            </div>
+            <div class="card-body">
+                <p class="text-muted small mb-3">
+                    Mỗi ca làm việc phải kéo dài tối thiểu 30 phút, giờ kết thúc lớn hơn giờ bắt đầu và không chồng chéo
+                    khung giờ trong cùng ngày.
+                </p>
+                <span asp-validation-for="Form.JobSchedules" class="text-danger d-block mb-3"></span>
+
+                <div class="table-responsive">
+                    <table class="table table-bordered align-middle mb-0">
+                        <thead class="table-light">
+                        <tr>
+                            <th style="width: 35%;">Thứ trong tuần</th>
+                            <th style="width: 25%;">Giờ bắt đầu</th>
+                            <th style="width: 25%;">Giờ kết thúc</th>
+                            <th style="width: 15%;" class="text-center">Thao tác</th>
+                        </tr>
+                        </thead>
+                        <tbody id="schedulesTableBody">
+                        @for (var i = 0; i < Model.Form.JobSchedules.Count; i++)
+                        {
+                            <tr class="schedule-row">
+                                <td>
+                                    <select name="Form.JobSchedules[@i].DayOfWeek" class="form-select schedule-day">
+
+                                        @{
+                                            var i1 = i;
+                                        }
+                                        <option value="Monday"
+                                                selected="@(Model.Form.JobSchedules[i1].DayOfWeek == DayOfWeekObject.Monday)">
+                                            Thứ Hai
+                                        </option>
+                                        <option value="Tuesday"
+                                                selected="@(Model.Form.JobSchedules[i1].DayOfWeek == DayOfWeekObject.Tuesday)">
+                                            Thứ Ba
+                                        </option>
+                                        <option value="Wednesday"
+                                                selected="@(Model.Form.JobSchedules[i1].DayOfWeek == DayOfWeekObject.Wednesday)">
+                                            Thứ Tư
+                                        </option>
+                                        <option value="Thursday"
+                                                selected="@(Model.Form.JobSchedules[i1].DayOfWeek == DayOfWeekObject.Thursday)">
+                                            Thứ Năm
+                                        </option>
+                                        <option value="Friday"
+                                                selected="@(Model.Form.JobSchedules[i1].DayOfWeek == DayOfWeekObject.Friday)">
+                                            Thứ Sáu
+                                        </option>
+                                        <option value="Saturday"
+                                                selected="@(Model.Form.JobSchedules[i1].DayOfWeek == DayOfWeekObject.Saturday)">
+                                            Thứ Bảy
+                                        </option>
+                                        <option value="Sunday"
+                                                selected="@(Model.Form.JobSchedules[i1].DayOfWeek == DayOfWeekObject.Sunday)">
+                                            Chủ Nhật
+                                        </option>
+                                    </select>
+                                </td>
+                                <td>
+                                    <input type="time" name="Form.JobSchedules[@i].StartTime"
+                                           class="form-control schedule-start"
+                                           value="@Model.Form.JobSchedules[i].StartTime.ToString("HH:mm")" required/>
+                                </td>
+                                <td>
+                                    <input type="time" name="Form.JobSchedules[@i].EndTime"
+                                           class="form-control schedule-end"
+                                           value="@Model.Form.JobSchedules[i].EndTime.ToString("HH:mm")" required/>
+                                </td>
+                                <td class="text-center">
+                                    <button type="button" class="btn btn-outline-danger btn-sm btn-remove-schedule">
+                                        Xóa
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- 5. Mức lương -->
+        <div class="card mb-4 shadow-sm">
+            <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                <span class="fw-bold">5. Mức lương <span class="text-danger">*</span></span>
+                <button type="button" id="btnAddSalary" class="btn btn-sm btn-outline-primary">
+                    + Thêm mức lương
+                </button>
+            </div>
+            <div class="card-body">
+                <p class="text-muted small mb-3">
+                    Số tiền từ 1,000 đến 500,000,000 VNĐ, không chứa số lẻ thập phân. Giới hạn số lượng tương ứng với
+                    đơn vị: Giờ (&le; 24), Ngày (&le; 31), Tuần (&le; 52), Tháng (&le; 12), Buổi (&le; 2), Dự án (&le;
+                    1).
+                </p>
+                <span asp-validation-for="Form.JobSalaries" class="text-danger d-block mb-3"></span>
+
+                <div class="table-responsive">
+                    <table class="table table-bordered align-middle mb-0">
+                        <thead class="table-light">
+                        <tr>
+                            <th style="width: 40%;">Số tiền (VNĐ)</th>
+                            <th style="width: 25%;">Số lượng</th>
+                            <th style="width: 25%;">Đơn vị tính</th>
+                            <th style="width: 10%;" class="text-center">Thao tác</th>
+                        </tr>
+                        </thead>
+                        <tbody id="salariesTableBody">
+                        @for (var i = 0; i < Model.Form.JobSalaries.Count; i++)
+                        {
+                            <tr class="salary-row">
+                                <td>
+                                    <div class="input-group">
+                                        <input type="number" name="Form.JobSalaries[@i].Amount"
+                                               class="form-control salary-amount" step="1" min="1000" max="500000000"
+                                               value="@Model.Form.JobSalaries[i].Amount.ToString("0")" required/>
+                                        <span class="input-group-text">VNĐ</span>
+                                    </div>
+                                </td>
+                                <td>
+                                    <input type="number" name="Form.JobSalaries[@i].TimeQuantity"
+                                           class="form-control salary-quantity" min="1" max="1000"
+                                           value="@Model.Form.JobSalaries[i].TimeQuantity" required/>
+                                </td>
+                                <td>
+                                    <select name="Form.JobSalaries[@i].TimeUnit" class="form-select salary-unit">
+
+                                        @{
+                                            var i1 = i;
+                                        }
+                                        <option value="Hour"
+                                                selected="@(Model.Form.JobSalaries[i1].TimeUnit == JobSalaryTimeUnit.Hour)">
+                                            Giờ
+                                        </option>
+                                        <option value="Session"
+                                                selected="@(Model.Form.JobSalaries[i1].TimeUnit == JobSalaryTimeUnit.Session)">
+                                            Buổi / Ca
+                                        </option>
+                                        <option value="Day"
+                                                selected="@(Model.Form.JobSalaries[i1].TimeUnit == JobSalaryTimeUnit.Day)">
+                                            Ngày
+                                        </option>
+                                        <option value="Week"
+                                                selected="@(Model.Form.JobSalaries[i1].TimeUnit == JobSalaryTimeUnit.Week)">
+                                            Tuần
+                                        </option>
+                                        <option value="Month"
+                                                selected="@(Model.Form.JobSalaries[i1].TimeUnit == JobSalaryTimeUnit.Month)">
+                                            Tháng
+                                        </option>
+                                        <option value="Project"
+                                                selected="@(Model.Form.JobSalaries[i1].TimeUnit == JobSalaryTimeUnit.Project)">
+                                            Dự án
+                                        </option>
+                                    </select>
+                                </td>
+                                <td class="text-center">
+                                    <button type="button" class="btn btn-outline-danger btn-sm btn-remove-salary">Xóa
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="d-flex justify-content-between align-items-center mb-5">
+            <a asp-page="./Index" class="btn btn-outline-secondary">Hủy bỏ</a>
+            <button type="submit" class="btn btn-primary px-4" @(Model.IsQuotaExceeded ? "disabled" : "")>
+                Tạo bài đăng công việc
+            </button>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial"/>
+    <script>
+        $(document).ready(function () {
+            // 1. Cascading dropdown Tỉnh/Thành phố -> Xã/Phường
+            $('#provinceSelect').on('change', function () {
+                const provinceCode = $(this).val();
+                const $communeSelect = $('#communeSelect');
+
+                $communeSelect.empty().append('<option value="">-- Chọn Xã / Phường --</option>');
+
+                if (!provinceCode) {
+                    return;
+                }
+
+                $communeSelect.prop('disabled', true);
+                fetch(`?handler=Communes&provinceCode=${encodeURIComponent(provinceCode)}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (Array.isArray(data)) {
+                            data.forEach(item => {
+                                $communeSelect.append(`<option value="${item.code}">${item.name}</option>`);
+                            });
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error fetching communes:', error);
+                    })
+                    .finally(() => {
+                        $communeSelect.prop('disabled', false);
+                    });
+            });
+
+            // 2. Thêm / Xóa dòng ca làm việc
+            $('#btnAddSchedule').on('click', function () {
+                const rowCount = $('#schedulesTableBody tr').length;
+                if (rowCount >= 30) {
+                    alert('Bạn chỉ có thể tạo tối đa 30 ca làm việc.');
+                    return;
+                }
+
+                const newRow = `
+                    <tr class="schedule-row">
+                        <td>
+                            <select name="Form.JobSchedules[${rowCount}].DayOfWeek" class="form-select schedule-day">
+                                <option value="Monday" selected>Thứ Hai</option>
+                                <option value="Tuesday">Thứ Ba</option>
+                                <option value="Wednesday">Thứ Tư</option>
+                                <option value="Thursday">Thứ Năm</option>
+                                <option value="Friday">Thứ Sáu</option>
+                                <option value="Saturday">Thứ Bảy</option>
+                                <option value="Sunday">Chủ Nhật</option>
+                            </select>
+                        </td>
+                        <td>
+                            <input type="time" name="Form.JobSchedules[${rowCount}].StartTime" class="form-control schedule-start" value="08:00" required />
+                        </td>
+                        <td>
+                            <input type="time" name="Form.JobSchedules[${rowCount}].EndTime" class="form-control schedule-end" value="12:00" required />
+                        </td>
+                        <td class="text-center">
+                            <button type="button" class="btn btn-outline-danger btn-sm btn-remove-schedule">Xóa</button>
+                        </td>
+                    </tr>
+                `;
+                $('#schedulesTableBody').append(newRow);
+            });
+
+            $(document).on('click', '.btn-remove-schedule', function () {
+                if ($('#schedulesTableBody tr').length <= 1) {
+                    alert('Cần có ít nhất một ca làm việc.');
+                    return;
+                }
+                $(this).closest('tr').remove();
+                reindexSchedules();
+            });
+
+            function reindexSchedules() {
+                $('#schedulesTableBody tr').each(function (index) {
+                    $(this).find('.schedule-day').attr('name', `Form.JobSchedules[${index}].DayOfWeek`);
+                    $(this).find('.schedule-start').attr('name', `Form.JobSchedules[${index}].StartTime`);
+                    $(this).find('.schedule-end').attr('name', `Form.JobSchedules[${index}].EndTime`);
+                });
+            }
+
+            // 3. Thêm / Xóa dòng mức lương
+            $('#btnAddSalary').on('click', function () {
+                const rowCount = $('#salariesTableBody tr').length;
+                if (rowCount >= 10) {
+                    alert('Bạn chỉ có thể tạo tối đa 10 mức lương.');
+                    return;
+                }
+
+                const newRow = `
+                    <tr class="salary-row">
+                        <td>
+                            <div class="input-group">
+                                <input type="number" name="Form.JobSalaries[${rowCount}].Amount" class="form-control salary-amount" step="1" min="1000" max="500000000" value="30000" required />
+                                <span class="input-group-text">VNĐ</span>
+                            </div>
+                        </td>
+                        <td>
+                            <input type="number" name="Form.JobSalaries[${rowCount}].TimeQuantity" class="form-control salary-quantity" min="1" max="1000" value="1" required />
+                        </td>
+                        <td>
+                            <select name="Form.JobSalaries[${rowCount}].TimeUnit" class="form-select salary-unit">
+                                <option value="Hour" selected>Giờ</option>
+                                <option value="Session">Buổi / Ca</option>
+                                <option value="Day">Ngày</option>
+                                <option value="Week">Tuần</option>
+                                <option value="Month">Tháng</option>
+                                <option value="Project">Dự án</option>
+                            </select>
+                        </td>
+                        <td class="text-center">
+                            <button type="button" class="btn btn-outline-danger btn-sm btn-remove-salary">Xóa</button>
+                        </td>
+                    </tr>
+                `;
+                $('#salariesTableBody').append(newRow);
+            });
+
+            $(document).on('click', '.btn-remove-salary', function () {
+                if ($('#salariesTableBody tr').length <= 1) {
+                    alert('Cần có ít nhất một mức lương.');
+                    return;
+                }
+                $(this).closest('tr').remove();
+                reindexSalaries();
+            });
+
+            function reindexSalaries() {
+                $('#salariesTableBody tr').each(function (index) {
+                    $(this).find('.salary-amount').attr('name', `Form.JobSalaries[${index}].Amount`);
+                    $(this).find('.salary-quantity').attr('name', `Form.JobSalaries[${index}].TimeQuantity`);
+                    $(this).find('.salary-unit').attr('name', `Form.JobSalaries[${index}].TimeUnit`);
+                });
+            }
+        });
+    </script>
+}

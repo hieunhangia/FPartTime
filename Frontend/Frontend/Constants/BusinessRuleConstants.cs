@@ -18,9 +18,35 @@ public static class BusinessRuleConstants
         public const string PasswordRegex = @"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^a-zA-Z\d]).{6,}$";
         public const string OtpRegex = @"^\d{6}$";
     }
-    
+
     public static class SystemHealth
     {
         public const int CacheDuration = 3;
+    }
+
+    public static class Models
+    {
+        public static class Commune
+        {
+            public const int CodeMaxLength = 10;
+        }
+
+        public static class Job
+        {
+            public const int TitleMaxLength = 200;
+            public const int DescriptionMaxLength = 1000;
+            public const int DetailAddressMaxLength = 200;
+        }
+    }
+
+    public static class Jobs
+    {
+        public const int MaxVacanciesPerJob = 1000;
+        public const int MaxJobSchedulesPerJob = 30;
+        public const int MaxJobSalariesPerJob = 10;
+        public const decimal MinSalaryAmount = 1000;
+        public const decimal MaxSalaryAmount = 500000000;
+        public const int MinAge = 15;
+        public const int MaxAge = 100;
     }
 }

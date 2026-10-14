@@ -2,6 +2,7 @@
 #pragma warning disable CS0618
 using ApiSdk.Api.Jobs.Applications;
 using ApiSdk.Api.Jobs.Item;
+using ApiSdk.Api.Jobs.PostsQuota;
 using ApiSdk.Models;
 using Microsoft.Kiota.Abstractions.Extensions;
 using Microsoft.Kiota.Abstractions.Serialization;
@@ -23,6 +24,11 @@ namespace ApiSdk.Api.Jobs
         public global::ApiSdk.Api.Jobs.Applications.ApplicationsRequestBuilder Applications
         {
             get => new global::ApiSdk.Api.Jobs.Applications.ApplicationsRequestBuilder(PathParameters, RequestAdapter);
+        }
+        /// <summary>The postsQuota property</summary>
+        public global::ApiSdk.Api.Jobs.PostsQuota.PostsQuotaRequestBuilder PostsQuota
+        {
+            get => new global::ApiSdk.Api.Jobs.PostsQuota.PostsQuotaRequestBuilder(PathParameters, RequestAdapter);
         }
         /// <summary>Gets an item from the ApiSdk.api.Jobs.item collection</summary>
         /// <param name="position">Unique identifier of the item</param>
