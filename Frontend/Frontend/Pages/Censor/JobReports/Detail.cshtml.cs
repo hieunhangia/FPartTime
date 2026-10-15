@@ -40,6 +40,40 @@ public class DetailModel(ApiClient apiClient) : PageModel
         return Page();
     }
 
+    public Task<IActionResult> OnPostLockJobAsync(Guid id) =>
+        ProcessReportAsync(id,
+            () => apiClient.Api.Censor.JobReports[id].LockJob.PutAsync(),
+            "Đã ẩn bài đăng.");
+
+    public Task<IActionResult> OnPostLockEmployerAsync(Guid id) =>
+        ProcessReportAsync(id,
+            () => apiClient.Api.Censor.JobReports[id].LockEmployer.PutAsync(),
+            "Đã khóa người đăng bài.");
+
+    public Task<IActionResult> OnPostRejectAsync(Guid id) =>
+        ProcessReportAsync(id,
+            () => apiClient.Api.Censor.JobReports[id].Reject.PutAsync(),
+            "Đã từ chối báo cáo.");
+
+    private async Task<IActionResult> ProcessReportAsync(Guid id, Func<Task> action, string successMessage)
+    {
+        try
+        {
+            await action();
+            TempData.SetSuccessMessage(successMessage);
+        }
+        catch (ApiException ex)
+        {
+            TempData.SetErrorMessage(ex.ToFriendlyErrorMessage());
+        }
+        catch
+        {
+            TempData.SetErrorMessage("Đã xảy ra lỗi khi xử lý báo cáo.");
+        }
+
+        return RedirectToPage("./Detail", new { id });
+    }
+
     public (string Label, string CssClass) GetStatusDisplay(JobReportStatus? status) => status switch
     {
         JobReportStatus.Pending => ("Chờ xử lý", "bg-warning text-dark"),
