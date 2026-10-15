@@ -79,15 +79,14 @@ public class JobScheduleResponseDto
 public static partial class JobMapper
 {
     public static partial IQueryable<JobResponseDto> ProjectToDto(this IQueryable<Job> jobs);
-
-    [MapProperty("Commune.Name", nameof(JobResponseDto.CommuneName))]
-    [MapProperty("Commune.ProvinceCode", nameof(JobResponseDto.ProvinceCode))]
-    [MapProperty("Commune.Province.Name", nameof(JobResponseDto.ProvinceName))]
-    [MapProperty("Employer.CompanyName", nameof(JobResponseDto.EmployerCompanyName))]
-    [MapProperty("Employer.LogoFilePath", nameof(JobResponseDto.EmployerLogoFilePath))]
-    [MapProperty("Employer.ContactPhone", nameof(JobResponseDto.EmployerContactPhone))]
-    [MapProperty("Employer.Description", nameof(JobResponseDto.EmployerDescription))]
-    [MapProperty("Industry.Name", nameof(JobResponseDto.IndustryName))]
+    [MapProperty($"{nameof(Job.Commune)}.{nameof(Job.Commune.Name)}", nameof(JobResponseDto.CommuneName))]
+    [MapProperty($"{nameof(Job.Commune)}.{nameof(Job.Commune.ProvinceCode)}", nameof(JobResponseDto.ProvinceCode))]
+    [MapProperty($"{nameof(Job.Commune)}.{nameof(Job.Commune.Province)}.{nameof(Job.Commune.Province.Name)}", nameof(JobResponseDto.ProvinceName))]
+    [MapProperty($"{nameof(Job.Employer)}.{nameof(Job.Employer.CompanyName)}", nameof(JobResponseDto.EmployerCompanyName))]
+    [MapProperty($"{nameof(Job.Employer)}.{nameof(Job.Employer.LogoFilePath)}", nameof(JobResponseDto.EmployerLogoFilePath))]
+    [MapProperty($"{nameof(Job.Employer)}.{nameof(Job.Employer.ContactPhone)}", nameof(JobResponseDto.EmployerContactPhone))]
+    [MapProperty($"{nameof(Job.Employer)}.{nameof(Job.Employer.Description)}", nameof(JobResponseDto.EmployerDescription))]
+    [MapProperty($"{nameof(Job.Industry)}.{nameof(Job.Industry.Name)}", nameof(JobResponseDto.IndustryName))]
     [MapProperty(nameof(Job.JobSalaries), nameof(JobResponseDto.Salaries))]
     [MapProperty(nameof(Job.JobSchedules), nameof(JobResponseDto.Schedules))]
     public static partial JobResponseDto MapToDto(this Job job);
