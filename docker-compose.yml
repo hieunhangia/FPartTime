@@ -48,6 +48,7 @@ services:
       - R2Settings__PresignedGetExpirySeconds=${R2_PRESIGNED_GET_EXPIRY_SECONDS}
       - SystemHealthCheck__HeaderName=${HEALTH_CHECK_HEADER}
       - SystemHealthCheck__ApiKey=${HEALTH_CHECK_API_KEY}
+      - Sentry__Dsn=${SENTRY_DSN}
     depends_on:
       - database
     networks:

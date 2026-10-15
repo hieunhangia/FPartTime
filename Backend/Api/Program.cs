@@ -19,6 +19,15 @@ builder.Configuration.AddJsonFile("appsettings.secret.json", optional: true, rel
 
 // Add services to the container.
 
+builder.WebHost.UseSentry(options =>
+{
+    var sentrySection = builder.Configuration.GetSection("Sentry");
+    options.Dsn = sentrySection["Dsn"] ?? throw new InvalidOperationException("Sentry DSN is not configured.");
+    options.Environment = builder.Environment.EnvironmentName;
+    options.TracesSampleRate = sentrySection.GetValue<double?>("TracesSampleRate") ?? 1.0;
+    options.Debug = builder.Environment.IsDevelopment();
+});
+
 var jwtSettings = builder.Configuration.GetSection("JwtSettings");
 builder.Services.AddAuthentication(options =>
     {

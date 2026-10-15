@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.OData;
@@ -44,6 +45,16 @@ public class GlobalExceptionHandler(ILogger<GlobalExceptionHandler> logger)
         {
             logger.LogError(exception, "[{StatusCode}] Internal Server Error tại {Path}", statusCode,
                 httpContext.Request.Path);
+
+            SentrySdk.CaptureException(exception, scope =>
+            {
+                if (httpContext.User.Identity?.IsAuthenticated != true) return;
+                var userId = httpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (!string.IsNullOrEmpty(userId))
+                {
+                    scope.User = new SentryUser { Id = userId };
+                }
+            });
         }
 
         httpContext.Response.StatusCode = statusCode;
