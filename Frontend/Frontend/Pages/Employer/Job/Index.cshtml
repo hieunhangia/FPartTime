@@ -1,4 +1,5 @@
 @page
+@using ApiSdk.Models
 @model Frontend.Pages.Employer.Job.IndexModel
 @{
     ViewData["Title"] = "Quản lý công việc";
@@ -33,9 +34,9 @@
                     <label asp-for="StatusFilter" class="form-label fw-bold">Trạng thái:</label>
                     <select asp-for="StatusFilter" class="form-select">
                         <option value="">-- Tất cả --</option>
-                        <option value="Active">Đang mở</option>
-                        <option value="Closed">Đã đóng</option>
-                        <option value="Hidden">Bị ẩn bởi Admin</option>
+                        <option value="@JobStatus.Active">Đang mở</option>
+                        <option value="@JobStatus.Closed">Đã đóng</option>
+                        <option value="@JobStatus.AdminHidden">Bị ẩn bởi Admin</option>
                     </select>
                 </div>
                 <div class="col-md-3">

@@ -15,20 +15,12 @@ public class DataSeeder(ApplicationDbContext db)
     {
         Console.WriteLine("🌱 Bắt đầu quá trình nạp dữ liệu (Seed Data)...");
 
-        try
-        {
-            await SeedSqlFileIfEmptyAsync(() => db.Provinces.AnyAsync(), "address.sql");
-            await SeedRolesAsync();
-            await SeedUsersAsync();
-            await SeedSqlFileIfEmptyAsync(() => db.Notifications.AnyAsync(), "notification.sql");
-            await SeedSqlFileIfEmptyAsync(() => db.Jobs.AnyAsync(), "job.sql");
-            await SeedJobsAsync();
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"❌ Lỗi khi nạp dữ liệu: {ex.StackTrace}");
-            throw;
-        }
+        await SeedSqlFileIfEmptyAsync(() => db.Provinces.AnyAsync(), "address.sql");
+        await SeedRolesAsync();
+        await SeedUsersAsync();
+        await SeedSqlFileIfEmptyAsync(() => db.Notifications.AnyAsync(), "notification.sql");
+        await SeedSqlFileIfEmptyAsync(() => db.Jobs.AnyAsync(), "job.sql");
+        await SeedJobsAsync();
 
         Console.WriteLine("✅ Nạp dữ liệu hoàn tất thành công!");
     }
@@ -81,7 +73,7 @@ public class DataSeeder(ApplicationDbContext db)
                 PhoneNumber = phoneNumber,
                 NormalizedUserName = phoneNumber.ToUpperInvariant(),
                 SecurityStamp = Guid.NewGuid().ToString(),
-                ConcurrencyStamp = Guid.NewGuid().ToString()
+                LockoutEnabled = true
             };
             user.PasswordHash = _hasher.HashPassword(user, password);
 
@@ -234,14 +226,16 @@ public class DataSeeder(ApplicationDbContext db)
         var employer1 = employers[0];
         employer1.CompanyName = "The Coffee House";
         employer1.ContactPhone = "0901234567";
-        employer1.Description = "Chuỗi cà phê truyền cảm hứng tại Việt Nam với không gian làm việc thân thiện, năng động dành cho các bạn trẻ.";
+        employer1.Description =
+            "Chuỗi cà phê truyền cảm hứng tại Việt Nam với không gian làm việc thân thiện, năng động dành cho các bạn trẻ.";
 
         var employer2 = employers.Count > 1 ? employers[1] : employer1;
         if (employers.Count > 1)
         {
             employer2.CompanyName = "Circle K Việt Nam";
             employer2.ContactPhone = "0987654321";
-            employer2.Description = "Hệ thống chuỗi cửa hàng tiện lợi phục vụ 24/7 với môi trường làm việc chuyên nghiệp, ca làm linh hoạt.";
+            employer2.Description =
+                "Hệ thống chuỗi cửa hàng tiện lợi phục vụ 24/7 với môi trường làm việc chuyên nghiệp, ca làm linh hoạt.";
         }
 
         await db.SaveChangesAsync();

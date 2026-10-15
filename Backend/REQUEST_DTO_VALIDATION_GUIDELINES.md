@@ -37,7 +37,8 @@ Một HTTP Request đi qua 2 bước trước khi vào Controller/Service:
 `[MinLength]`, `[MaxLength]` và `[Length]` (.NET 8+) đều **trả về hợp lệ khi value là `null`** (mã nguồn .NET ghi rõ: dùng `[Required]` để đảm bảo giá trị không null). Vì vậy:
 
 - Một collection bắt buộc **phải có cả `[Required]` lẫn `[Length]`/`[MinLength]`**.
-- Khởi tạo `= []` **không** bảo vệ được trường hợp client gửi tường minh `"items": null`: `System.Text.Json` mặc định không kiểm tra nullable annotation nên property vẫn được gán `null`.
+- Khởi tạo `= []` **không** ngăn `System.Text.Json` gán `null` khi client gửi tường minh `"items": null` (STJ mặc định không kiểm tra nullable annotation). Nếu NRT bật và property khai báo non-nullable, implicit `[Required]` (mục 1.4) sẽ chặn giá trị này nhưng với thông báo tiếng Anh mặc định; `null` chỉ lọt hoàn toàn khi NRT tắt, khi bật cờ `SuppressImplicitRequiredAttributeForNonNullableReferenceTypes`, hoặc khi property khai báo `?`.
+- Vì vậy collection bắt buộc nên khai báo `?` và gắn `[Required(ErrorMessage = "...")]` tường minh, để có thông báo tùy chỉnh và phân biệt được "thiếu" với "rỗng".
 
 ### 1.4. Nullable Reference Types (NRT) và implicit `[Required]`
 
@@ -45,11 +46,12 @@ Khi project bật `<Nullable>enable</Nullable>`, MVC **tự động thêm `[Requ
 
 - Property optional kiểu reference **bắt buộc phải khai báo `?`** (`string?`, `AddressDto?`), nếu không sẽ bị coi là bắt buộc.
 - Thông báo của implicit `[Required]` là thông báo mặc định tiếng Anh, vì vậy trường bắt buộc vẫn phải gắn `[Required(ErrorMessage = "...")]` tường minh để có thông báo tùy chỉnh.
+- Implicit `[Required]` dùng `AllowEmptyStrings = true`, nên chuỗi rỗng `""` vẫn hợp lệ nếu không gắn `[Required]` tường minh.
 - Implicit `[Required]` **không áp dụng cho Value Type**, nên các quy tắc `T?` ở dưới vẫn luôn cần thiết.
 
 ### 1.5. Enum nhận được giá trị ngoài phạm vi
 
-`System.Text.Json` mặc định chấp nhận số nguyên bất kỳ cho enum (ví dụ `"gender": 99`). Giá trị này pass `[Required]` và pass deserialization. Cần thêm `[EnumDataType(typeof(TEnum))]` (hoặc kiểm tra `Enum.IsDefined` ở Service), hoặc cấu hình `JsonStringEnumConverter` với `allowIntegerValues: false`. Với enum gắn `[Flags]`, kiểm tra theo logic riêng thay vì `[EnumDataType]`.
+`System.Text.Json` mặc định chấp nhận số nguyên bất kỳ cho enum (ví dụ `"gender": 99`). Giá trị này pass `[Required]` và pass deserialization. Cần thêm `[EnumDataType(typeof(TEnum))]` (hoặc kiểm tra `Enum.IsDefined` ở Service), hoặc cấu hình `JsonStringEnumConverter` với `allowIntegerValues: false`. `[EnumDataType]` có xử lý riêng cho enum gắn `[Flags]` (hợp lệ nếu là tổ hợp các cờ đã định nghĩa); lưu ý giá trị `0` bị coi là không hợp lệ nếu enum không có member bằng 0.
 
 ---
 
@@ -71,8 +73,8 @@ Trước khi viết bất kỳ thuộc tính nào trong Request DTO, **bắt bu�
 | **Reference Type (File upload)** | `IFormFile` | `null` | **Có** |
 
 > 💡 **Cách nhận biết nhanh trong IDE:** Hover chuột vào tên kiểu dữ liệu:
-> - Thấy từ khóa **`struct`** hoặc **`enum`** → **Value Type**.
-> - Thấy từ khóa **`class`**, **`record`** hoặc **`interface`** → **Reference Type**.
+> - Thấy từ khóa **`struct`**, **`record struct`** hoặc **`enum`** → **Value Type**.
+> - Thấy từ khóa **`class`**, **`record`** (record class) hoặc **`interface`** → **Reference Type**.
 
 ---
 
@@ -113,13 +115,15 @@ public Guid? IndustryId { get; set; }
 public JobSalaryTimeUnit? TimeUnit { get; set; }
 
 [Required(ErrorMessage = "Số tiền lương là bắt buộc.")]
-[Range(1_000, 500_000_000, ErrorMessage = "Số tiền phải từ 1,000 đến 500,000,000 VNĐ.")]
+[Range(typeof(decimal), "1000", "500000000", ErrorMessage = "Số tiền phải từ 1,000 đến 500,000,000 VNĐ.")]
 public decimal? Amount { get; set; }
 
 [Required(ErrorMessage = "Ngày trong tuần là bắt buộc.")]
 [EnumDataType(typeof(DayOfWeek), ErrorMessage = "Ngày trong tuần không hợp lệ.")]
 public DayOfWeek? DayOfWeek { get; set; }
 ```
+
+> **Lưu ý với `[Range]` trên `decimal`:** overload `Range(int, int)` ép giá trị về `int` bằng `Convert.ToInt32`, dẫn đến làm tròn ở biên (999,6 bị tròn thành 1000 nên lọt qua) và gây `OverflowException` (không được `RangeAttribute` bắt, có thể thành lỗi 500) khi giá trị vượt `int.MaxValue`. Với `decimal`, dùng `Range(typeof(decimal), "min", "max")`.
 
 ❌ **SAI (Cấm tuyệt đối):**
 
@@ -148,6 +152,22 @@ public Gender? GenderRequirement { get; set; }
 
 [Range(15, 100, ErrorMessage = "Tuổi tối thiểu phải từ 15 đến 100.")]
 public int? MinAgeRequirement { get; set; }
+```
+
+#### Trường hợp 1.3: Giá trị mặc định được gửi tường minh
+
+`T?` + `[Required]` chỉ bắt trường hợp client **không gửi** hoặc gửi `null`. Nếu client gửi tường minh `Guid.Empty` (`"00000000-0000-0000-0000-000000000000"`) hoặc `"0001-01-01"`, giá trị vẫn hợp lệ với `[Required]`. Khi các giá trị này không có ý nghĩa nghiệp vụ, dùng custom attribute hoặc kiểm tra ở Service:
+
+```csharp
+[AttributeUsage(AttributeTargets.Property | AttributeTargets.Parameter)]
+public sealed class NotEmptyGuidAttribute : ValidationAttribute
+{
+    public override bool IsValid(object? value) => value is null || (value is Guid g && g != Guid.Empty);
+}
+
+[Required(ErrorMessage = "Ngành nghề là bắt buộc.")]
+[NotEmptyGuid(ErrorMessage = "Ngành nghề không hợp lệ.")]
+public Guid? IndustryId { get; set; }
 ```
 
 ---
@@ -208,7 +228,8 @@ public List<JobScheduleRequestDto>? JobSchedules { get; set; }
 ❌ **SAI:**
 
 ```csharp
-// Thiếu [Required] → client gửi "jobSchedules": null vẫn pass [Length].
+// Thiếu [Required] tường minh → client gửi "jobSchedules": null chỉ bị implicit [Required] bắt (khi NRT bật) với thông báo tiếng Anh mặc định;
+// khi NRT tắt, null vẫn pass [Length].
 [Length(1, 10, ErrorMessage = "...")]
 public List<JobScheduleRequestDto> JobSchedules { get; set; } = [];
 
@@ -255,6 +276,8 @@ public IFormFile? CCCDFrontImage { get; set; }
 // ĐÚNG:
 public IFormFile? AvatarImage { get; set; }
 ```
+
+> DTO chứa `IFormFile` phải được nhận bằng `[FromForm]` trên tham số của action, vì `[ApiController]` mặc định suy luận tham số kiểu complex type là `[FromBody]`.
 
 ---
 
@@ -322,19 +345,25 @@ public class CreateCandidateProfileDto
 
 #### 5.3. Record và Constructor trong DTO
 
-1. `System.Text.Json` hỗ trợ constructor có tham số: nếu type chỉ có **đúng một public constructor có tham số** (trường hợp positional record), nó được dùng để deserialize. Chỉ cần gắn `[JsonConstructor]` khi có nhiều constructor và cần chỉ định rõ constructor nào được dùng.
-2. Với positional record, DataAnnotations phải dùng tiền tố `property:`:
+1. `System.Text.Json` dùng constructor public không tham số nếu type có. Constructor có tham số được dùng tự động khi nó là constructor public duy nhất (trường hợp positional record). Khi có nhiều constructor và cần chỉ định rõ constructor nào được dùng, gắn `[JsonConstructor]`.
+2. Với positional record, **MVC lấy validation từ tham số của primary constructor**, vì vậy DataAnnotations phải đặt trực tiếp trên tham số, **không** dùng tiền tố `property:`. Nếu đặt attribute validation trên property của record, MVC ném `InvalidOperationException` ("Record type '...' has validation metadata defined on property '...' that will be ignored...") khi validate.
 
    ```csharp
+   // ĐÚNG:
    public record AddressDto(
-       [property: Required(ErrorMessage = "Tên đường là bắt buộc.")] string Street,
-       [property: Required(ErrorMessage = "Thành phố là bắt buộc.")] string City
+       [Required(ErrorMessage = "Tên đường là bắt buộc.")] string Street,
+       [Required(ErrorMessage = "Thành phố là bắt buộc.")] string City
+   );
+
+   // SAI: MVC ném InvalidOperationException khi validate.
+   public record AddressDto(
+       [property: Required(ErrorMessage = "Tên đường là bắt buộc.")] string Street
    );
    ```
 
 3. Các quy tắc `T?` / `= string.Empty` / không `= new();` ở trên áp dụng tương tự cho record, nhưng cú pháp positional khiến việc đặt giá trị mặc định và attribute kém trực quan hơn.
 
-👉 **Khuyến nghị chuẩn:** Dùng `public class SomeRequestDto { public ... { get; set; } }` cho Request DTO để đồng nhất cú pháp, dễ áp dụng attribute và dễ review bằng checklist.
+👉 **Khuyến nghị chuẩn:** Dùng `public class SomeRequestDto { public ... { get; set; } }` cho Request DTO để đồng nhất cú pháp, tránh bẫy attribute trên record ở trên, dễ áp dụng attribute và dễ review bằng checklist.
 
 #### 5.4. Dictionary (`Dictionary<string, string>`)
 
@@ -370,12 +399,18 @@ private async Task ValidateAsync(CreateUpdateJobRequestDto dto)
         throw new BadRequestException("Ngành nghề là bắt buộc.");
     }
 
+    if (dto.IndustryId.Value == Guid.Empty)
+    {
+        throw new BadRequestException("Ngành nghề không hợp lệ.");
+    }
+
     if (dto.JobSchedules is null || dto.JobSchedules.Count == 0)
     {
         throw new BadRequestException("Phải có ít nhất 1 lịch làm việc.");
     }
 
-    var today = DateOnly.FromDateTime(DateTime.UtcNow);
+    // businessTimeZone: múi giờ nghiệp vụ của hệ thống (ví dụ UTC+7 cho Việt Nam)
+    var today = DateOnly.FromDateTime(TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, businessTimeZone));
     if (dto.ExpiryAt.Value <= today)
     {
         throw new BadRequestException("Hạn nhận hồ sơ phải lớn hơn ngày hiện tại.");
@@ -394,6 +429,10 @@ private async Task ValidateAsync(CreateUpdateJobRequestDto dto)
 - Nghĩa là nếu một giá trị `null` lọt qua tầng validate, Entity sẽ nhận `0001-01-01` / `Guid.Empty` / `0`, tái hiện đúng vấn đề ban đầu mà không có bất kỳ cảnh báo nào.
 - **Mapper không phải là lớp bảo vệ.** Việc đảm bảo giá trị khác `null` phải hoàn tất ở tầng DataAnnotations và Service Validation **trước** khi gọi mapper.
 - Có thể cấu hình mapper để ném lỗi khi gặp `null` ở các trường bắt buộc, hoặc viết map thủ công `source.ExpiryAt!.Value` sau khi đã validate.
+
+### 4.3. Lỗi parse JSON
+
+Lỗi định dạng phát sinh ở bước deserialize (ví dụ ngày sai định dạng, gửi `null` cho Value Type non-nullable, chuỗi không phải enum hợp lệ) do `System.Text.Json` ném ra, nên thông báo là tiếng Anh mặc định và không đi qua `ErrorMessage` của DataAnnotations. Nếu cần thông báo tiếng Việt cho các lỗi này, xử lý tập trung ở `ApiBehaviorOptions.InvalidModelStateResponseFactory` hoặc dùng `JsonConverter` tùy chỉnh.
 
 ---
 
@@ -416,8 +455,10 @@ Việc dùng `T?` + `[Required]` cho Value Type khiến schema OpenAPI vừa n�
 | `[Required] public required string Reason { get; set; }` | C# `required` làm `System.Text.Json` ném `JsonException` trước khi DataAnnotations chạy, mất `ErrorMessage` tùy chỉnh. | `[Required(ErrorMessage = "...")] public string Reason { get; set; } = string.Empty;` |
 | `public string Title { get; set; }` (không gán `= string.Empty`) | Cảnh báo biên dịch `CS8618`. | `[Required(ErrorMessage = "...")] public string Title { get; set; } = string.Empty;` |
 | `[Required] public List<ItemDto> Items { get; set; } = [];` | Client gửi `items: []` hoặc không gửi → vẫn pass `[Required]` vì `[] != null`. | `[Required(ErrorMessage = "...")] [Length(1, Max, ErrorMessage = "...")] public List<ItemDto>? Items { get; set; }` |
-| `[Length(1, Max)] public List<ItemDto> Items { get; set; } = [];` | Client gửi `items: null` → property thành `null`, `[Length]` bỏ qua `null` nên vẫn pass. | `[Required(ErrorMessage = "...")] [Length(1, Max, ErrorMessage = "...")] public List<ItemDto>? Items { get; set; }` |
-| `[Required] public decimal Amount { get; set; }` | Client không gửi → nhận `0m`, pass `[Required]`. | `[Required(ErrorMessage = "...")] [Range(1, Max)] public decimal? Amount { get; set; }` |
+| `[Length(1, Max)] public List<ItemDto> Items { get; set; } = [];` | Client gửi `items: null` → property thành `null`, `[Length]` bỏ qua `null`. Khi NRT bật, implicit `[Required]` chặn nhưng với thông báo tiếng Anh mặc định; khi NRT tắt, `null` pass hoàn toàn. | `[Required(ErrorMessage = "...")] [Length(1, Max, ErrorMessage = "...")] public List<ItemDto>? Items { get; set; }` |
+| `[Required] public decimal Amount { get; set; }` | Client không gửi → nhận `0m`, pass `[Required]`. | `[Required(ErrorMessage = "...")] [Range(typeof(decimal), "1", "Max")] public decimal? Amount { get; set; }` |
+| `[Range(1, 1000)] public decimal? Amount { get; set; }` | Giá trị bị ép về `int`: làm tròn ở biên; giá trị lớn hơn `int.MaxValue` gây `OverflowException` không được bắt, có thể thành lỗi 500. | `[Range(typeof(decimal), "1", "1000")] public decimal? Amount { get; set; }` |
+| `public record AddressDto([property: Required] string Street);` | MVC ném `InvalidOperationException` vì validation đặt trên property của record. | `public record AddressDto([Required(ErrorMessage = "...")] string Street);` hoặc dùng `class`. |
 | `public AddressDto Address { get; set; } = new();` | Khởi tạo sẵn instance rỗng → nếu client không gửi trường cha, validator vẫn đi vào trong báo lỗi hàng loạt trường con, hoặc biến object tùy chọn thành luôn bị validate bắt buộc. | Bắt buộc: `[Required] public AddressDto? Address { get; set; }`<br>Tùy chọn: `public AddressDto? Address { get; set; }` (không bao giờ gán `= new()`). |
 | `public AddressDto Address { get; set; }` (NRT bật, không `?`) | MVC tự thêm implicit `[Required]` với thông báo mặc định tiếng Anh; object tùy chọn trở thành bắt buộc. | Bắt buộc: `[Required(ErrorMessage = "...")] public AddressDto? Address { get; set; }`<br>Tùy chọn: `public AddressDto? Address { get; set; }` |
 
@@ -437,6 +478,10 @@ Mỗi khi sinh hoặc review một file Request DTO, duyệt qua checklist này 
 - [ ] **8. Collection tùy chọn:** Đã khởi tạo `= [];` (hoặc khai báo `?` nếu chấp nhận `null`) và có `[MaxLength]` chặn số lượng chưa?
 - [ ] **9. Object con (Custom Class / Nested DTO):** Đã khai báo Nullable (`T?`) và **TUYỆT ĐỐI KHÔNG** khởi tạo `= new();` chưa? (Bắt buộc thì thêm `[Required]`, tùy chọn thì không thêm.)
 - [ ] **10. NRT:** Mọi property reference type tùy chọn đã có `?` để tránh implicit `[Required]` chưa?
-- [ ] **11. Thông báo lỗi:** Mọi `ErrorMessage` đã được viết thân thiện với người dùng (tiếng Việt có dấu) chưa?
+- [ ] **11. Thông báo lỗi:** Mọi `ErrorMessage` đã được viết thân thiện với người dùng (tiếng Việt có dấu) chưa? (Lỗi parse JSON xem mục 4.3.)
 - [ ] **12. Tầng Service:** Logic nghiệp vụ đã truy cập an toàn bằng `.HasValue` / `.Value` / kiểm tra `null` collection chưa?
 - [ ] **13. Mapper:** Đã đảm bảo không có giá trị `null` nào của trường bắt buộc được mapper chuyển thành `default(T)` một cách im lặng chưa?
+- [ ] **14. Range:** Với `decimal`, đã dùng `[Range(typeof(decimal), "min", "max")]` thay vì `Range(int, int)` chưa?
+- [ ] **15. Giá trị mặc định tường minh:** Với `Guid`/ngày bắt buộc, đã chặn `Guid.Empty` / `0001-01-01` (custom attribute hoặc Service) khi chúng không hợp lệ chưa?
+- [ ] **16. Record:** Nếu dùng positional record, attribute validation đã đặt trên tham số constructor (không dùng `property:`) chưa?
+- [ ] **17. IFormFile:** DTO chứa `IFormFile` đã được nhận bằng `[FromForm]` chưa?

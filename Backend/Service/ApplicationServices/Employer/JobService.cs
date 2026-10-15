@@ -320,7 +320,8 @@ public class JobService(
         var maxExpiryDate = today.AddDays(BusinessRuleConstants.Jobs.MaxJobExpiryDays);
         if (createUpdateJobRequestDto.ExpiryAt.Value > maxExpiryDate)
         {
-            throw new BadRequestException($"Hạn nhận hồ sơ không được vượt quá {BusinessRuleConstants.Jobs.MaxJobExpiryDays} ngày kể từ ngày tạo hoặc chỉnh sửa (tối đa đến ngày {maxExpiryDate:dd/MM/yyyy}).");
+            throw new BadRequestException(
+                $"Hạn nhận hồ sơ không được vượt quá {BusinessRuleConstants.Jobs.MaxJobExpiryDays} ngày kể từ ngày tạo hoặc chỉnh sửa (tối đa đến ngày {maxExpiryDate:dd/MM/yyyy}).");
         }
 
         if (createUpdateJobRequestDto.JobSchedules is null || createUpdateJobRequestDto.JobSchedules.Count == 0)
@@ -330,6 +331,11 @@ public class JobService(
 
         foreach (var schedule in createUpdateJobRequestDto.JobSchedules)
         {
+            if (schedule is null)
+            {
+                throw new BadRequestException("Lịch làm việc không được chứa giá trị rỗng.");
+            }
+
             if (!schedule.DayOfWeek.HasValue)
             {
                 throw new BadRequestException("Ngày trong tuần là bắt buộc.");
@@ -385,6 +391,11 @@ public class JobService(
 
         foreach (var salary in createUpdateJobRequestDto.JobSalaries)
         {
+            if (salary is null)
+            {
+                throw new BadRequestException("Thông tin lương không được chứa giá trị rỗng.");
+            }
+
             if (!salary.Amount.HasValue)
             {
                 throw new BadRequestException("Số tiền là bắt buộc.");
@@ -407,7 +418,8 @@ public class JobService(
 
             if (salary.Amount.Value % 1 != 0)
             {
-                throw new BadRequestException($"Số tiền lương ({salary.Amount.Value:N0}) không được chứa số lẻ thập phân.");
+                throw new BadRequestException(
+                    $"Số tiền lương ({salary.Amount.Value:N0}) không được chứa số lẻ thập phân.");
             }
 
             switch (salary.TimeUnit.Value)
@@ -438,6 +450,11 @@ public class JobService(
         if (!createUpdateJobRequestDto.IndustryId.HasValue)
         {
             throw new BadRequestException("Ngành nghề là bắt buộc.");
+        }
+
+        if (createUpdateJobRequestDto.IndustryId.Value == Guid.Empty)
+        {
+            throw new BadRequestException("Ngành nghề không hợp lệ.");
         }
 
         if (!await context.Industries.AnyAsync(i => i.Id == createUpdateJobRequestDto.IndustryId.Value))
@@ -505,8 +522,10 @@ public static partial class JobMapper
     public static partial IQueryable<JobApplicationDetailResponseDto> ProjectToDetailDto(
         this IQueryable<JobApplication> jobApplication);
 
+    [MapperRequiredMapping(RequiredMappingStrategy.Source)]
     public static partial Job MapToEntity(this CreateUpdateJobRequestDto createUpdateJobRequestDto, Guid employerId);
 
+    [MapperRequiredMapping(RequiredMappingStrategy.Source)]
     public static partial void MapToEntity(this CreateUpdateJobRequestDto createUpdateJobRequestDto, Job job);
 
     public static partial IQueryable<JobDetailForUpdateResponseDto> ProjectToDetailForUpdateDto(
@@ -643,7 +662,8 @@ public class JobScheduleRequestDto
 public class JobSalaryRequestDto
 {
     [Required(ErrorMessage = "Số tiền là bắt buộc.")]
-    [Range(1_000, 500_000_000, ErrorMessage = "Số tiền phải lớn hơn 1,000 và nhỏ hơn hoặc bằng 500,000,000.")]
+    [Range(typeof(decimal), "1000", "500000000",
+        ErrorMessage = "Số tiền phải lớn hơn hoặc bằng 1,000 và nhỏ hơn hoặc bằng 500,000,000.")]
     public decimal? Amount { get; set; }
 
     [Required(ErrorMessage = "Số lượng thời gian là bắt buộc.")]

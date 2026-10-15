@@ -134,7 +134,7 @@ BEGIN
     ('22222222-0000-0000-0000-000000000018',
      N'Video Editor dựng video ngắn TikTok / Reels theo ca',
      N'Cắt ghép video, chèn nhạc bắt trend, tạo hiệu ứng chữ và âm thanh cho các video ngắn giới thiệu sản phẩm. Yêu cầu biết sử dụng CapCut PC hoặc Premiere căn bản.',
-     2, NULL, 18, 26, '16279', N'Studio Media Nam Tiến, Xã Nông Cống', DATEADD(DAY, 36, GETUTCDATE()), 'Hidden', DATEADD(DAY, -16, GETUTCDATE()), @EmployerId, '11111111-0000-0000-0000-000000000009'),
+     2, NULL, 18, 26, '16279', N'Studio Media Nam Tiến, Xã Nông Cống', DATEADD(DAY, 36, GETUTCDATE()), 'AdminHidden', DATEADD(DAY, -16, GETUTCDATE()), @EmployerId, '11111111-0000-0000-0000-000000000009'),
 
     ('22222222-0000-0000-0000-000000000019',
      N'Trợ lý văn phòng kiêm sắp xếp tài liệu bán thời gian',
@@ -194,7 +194,7 @@ BEGIN
     ('22222222-0000-0000-0000-000000000030',
      N'Cứu hộ hồ bơi kiêm quản lý phòng thay đồ ca chiều',
      N'Quan sát nhắc nhở người bơi tuân thủ nội quy an toàn tại hồ bơi, cứu hộ xử lý sự cố kịp thời, kiểm tra vệ sinh và khóa tủ gửi đồ của khách bơi.',
-     1, 'Male', 19, 28, '16279', N'Khu liên hợp thể thao Nông Cống, Xã Nông Cống', DATEADD(DAY, 36, GETUTCDATE()), 'Hidden', DATEADD(DAY, -18, GETUTCDATE()), @EmployerId, '11111111-0000-0000-0000-000000000015'),
+     1, 'Male', 19, 28, '16279', N'Khu liên hợp thể thao Nông Cống, Xã Nông Cống', DATEADD(DAY, 36, GETUTCDATE()), 'AdminHidden', DATEADD(DAY, -18, GETUTCDATE()), @EmployerId, '11111111-0000-0000-0000-000000000015'),
 
     ('22222222-0000-0000-0000-000000000031',
      N'Cộng tác viên dịch thuật tài liệu Anh - Việt bán thời gian',

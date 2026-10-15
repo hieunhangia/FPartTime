@@ -17,7 +17,7 @@ namespace DbMigrator.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "10.0.12")
+                .HasAnnotation("ProductVersion", "10.0.13")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -233,7 +233,7 @@ namespace DbMigrator.Migrations
                     b.Property<Guid>("EmployerId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateOnly?>("ExpiryAt")
+                    b.Property<DateOnly>("ExpiryAt")
                         .HasColumnType("date");
 
                     b.Property<string>("GenderRequirement")

@@ -52,7 +52,7 @@ public class IndexModel(ApiClient apiClient) : PageModel
 
         try
         {
-            var result = await apiClient.Api.Jobs
+            var result = await apiClient.Api.Employer.Jobs
                 .GetPagedWithODataAsync<JobSummaryResponseDto, PagedResponseDtoOfJobSummaryResponseDto>(q =>
                 {
                     if (!string.IsNullOrWhiteSpace(Keyword) && StatusFilter.HasValue)

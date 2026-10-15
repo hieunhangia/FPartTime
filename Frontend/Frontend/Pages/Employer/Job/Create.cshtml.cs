@@ -105,18 +105,24 @@ public class CreateModel(ApiClient apiClient) : PageModel
                     : null,
                 CommuneCode = Form.CommuneCode,
                 DetailAddress = Form.DetailAddress.Trim(),
-                JobSchedules = Form.JobSchedules.Select(s => new JobScheduleRequestDto
-                {
-                    DayOfWeek = s.DayOfWeek,
-                    StartTime = new Time(s.StartTime.Hour, s.StartTime.Minute, 0),
-                    EndTime = new Time(s.EndTime.Hour, s.EndTime.Minute, 0)
-                }).ToList(),
-                JobSalaries = Form.JobSalaries.Select(s => new JobSalaryRequestDto
-                {
-                    Amount = (double)s.Amount,
-                    TimeQuantity = s.TimeQuantity,
-                    TimeUnit = s.TimeUnit
-                }).ToList()
+                JobSchedules =
+                [
+                    .. Form.JobSchedules.Select(s => new JobScheduleRequestDto
+                    {
+                        DayOfWeek = s.DayOfWeek,
+                        StartTime = new Time(s.StartTime.Hour, s.StartTime.Minute, 0),
+                        EndTime = new Time(s.EndTime.Hour, s.EndTime.Minute, 0)
+                    })
+                ],
+                JobSalaries =
+                [
+                    .. Form.JobSalaries.Select(s => new JobSalaryRequestDto
+                    {
+                        Amount = (double)s.Amount,
+                        TimeQuantity = s.TimeQuantity,
+                        TimeUnit = s.TimeUnit
+                    })
+                ]
             };
 
             var createdJob = await apiClient.Api.Employer.Jobs.PostAsync(body);

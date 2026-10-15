@@ -49,7 +49,7 @@ await using var db = new ApplicationDbContext(options);
 var shouldMigrate = isReset || isMigrate;
 
 Console.WriteLine("==================================================");
-Console.WriteLine("🚀 Bắt đầu FPartTime Database Tool (Pure DbContext)...");
+Console.WriteLine("🚀 Bắt đầu FPartTime Database Tool...");
 Console.WriteLine("==================================================");
 
 try
@@ -81,7 +81,7 @@ try
 catch (Exception ex)
 {
     Console.ForegroundColor = ConsoleColor.Red;
-    Console.WriteLine($"❌ Đã xảy ra lỗi: {ex.Message}");
+    Console.WriteLine($"❌ Đã xảy ra lỗi: {ex}");
     Console.ResetColor();
     Environment.ExitCode = 1;
 }

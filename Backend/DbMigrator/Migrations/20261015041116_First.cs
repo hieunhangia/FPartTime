@@ -304,7 +304,7 @@ namespace DbMigrator.Migrations
                     MaxAgeRequirement = table.Column<int>(type: "int", nullable: true),
                     CommuneCode = table.Column<string>(type: "nvarchar(10)", nullable: false),
                     DetailAddress = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
-                    ExpiryAt = table.Column<DateOnly>(type: "date", nullable: true),
+                    ExpiryAt = table.Column<DateOnly>(type: "date", nullable: false),
                     Status = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     EmployerId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),

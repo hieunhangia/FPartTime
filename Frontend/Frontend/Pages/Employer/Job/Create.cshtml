@@ -101,8 +101,8 @@
                         <label asp-for="Form.GenderRequirement" class="form-label fw-semibold">Yêu cầu giới tính</label>
                         <select asp-for="Form.GenderRequirement" class="form-select">
                             <option value="">Không yêu cầu</option>
-                            <option value="Male">Nam</option>
-                            <option value="Female">Nữ</option>
+                            <option value="@Gender.Male">Nam</option>
+                            <option value="@Gender.Female">Nữ</option>
                         </select>
                         <span asp-validation-for="Form.GenderRequirement" class="text-danger"></span>
                     </div>
@@ -126,11 +126,11 @@
                     <div class="col-md-6 mb-0">
                         @{
                             var minExpiryDate = DateTime.UtcNow.AddDays(1).ToString("yyyy-MM-dd");
-                            var maxExpiryDate = DateTime.UtcNow.AddDays(Frontend.Constants.BusinessRuleConstants.Jobs.MaxJobExpiryDays).ToString("yyyy-MM-dd");
+                            var maxExpiryDate = DateTime.UtcNow.AddDays(Constants.BusinessRuleConstants.Jobs.MaxJobExpiryDays).ToString("yyyy-MM-dd");
                         }
                         <label asp-for="Form.ExpiryAt" class="form-label fw-semibold">Hạn nhận hồ sơ <span class="text-danger">*</span></label>
                         <input asp-for="Form.ExpiryAt" class="form-control" type="date" min="@minExpiryDate" max="@maxExpiryDate"/>
-                        <div class="form-text">Hạn nhận hồ sơ tối đa trong vòng @Frontend.Constants.BusinessRuleConstants.Jobs.MaxJobExpiryDays ngày kể từ hôm nay.</div>
+                        <div class="form-text">Hạn nhận hồ sơ tối đa trong vòng @Constants.BusinessRuleConstants.Jobs.MaxJobExpiryDays ngày kể từ hôm nay.</div>
                         <span asp-validation-for="Form.ExpiryAt" class="text-danger"></span>
                     </div>
                 </div>
@@ -216,31 +216,31 @@
                                         @{
                                             var i1 = i;
                                         }
-                                        <option value="Monday"
+                                        <option value="@DayOfWeekObject.Monday"
                                                 selected="@(Model.Form.JobSchedules[i1].DayOfWeek == DayOfWeekObject.Monday)">
                                             Thứ Hai
                                         </option>
-                                        <option value="Tuesday"
+                                        <option value="@DayOfWeekObject.Tuesday"
                                                 selected="@(Model.Form.JobSchedules[i1].DayOfWeek == DayOfWeekObject.Tuesday)">
                                             Thứ Ba
                                         </option>
-                                        <option value="Wednesday"
+                                        <option value="@DayOfWeekObject.Wednesday"
                                                 selected="@(Model.Form.JobSchedules[i1].DayOfWeek == DayOfWeekObject.Wednesday)">
                                             Thứ Tư
                                         </option>
-                                        <option value="Thursday"
+                                        <option value="@DayOfWeekObject.Thursday"
                                                 selected="@(Model.Form.JobSchedules[i1].DayOfWeek == DayOfWeekObject.Thursday)">
                                             Thứ Năm
                                         </option>
-                                        <option value="Friday"
+                                        <option value="@DayOfWeekObject.Friday"
                                                 selected="@(Model.Form.JobSchedules[i1].DayOfWeek == DayOfWeekObject.Friday)">
                                             Thứ Sáu
                                         </option>
-                                        <option value="Saturday"
+                                        <option value="@DayOfWeekObject.Saturday"
                                                 selected="@(Model.Form.JobSchedules[i1].DayOfWeek == DayOfWeekObject.Saturday)">
                                             Thứ Bảy
                                         </option>
-                                        <option value="Sunday"
+                                        <option value="@DayOfWeekObject.Sunday"
                                                 selected="@(Model.Form.JobSchedules[i1].DayOfWeek == DayOfWeekObject.Sunday)">
                                             Chủ Nhật
                                         </option>
@@ -318,27 +318,27 @@
                                         @{
                                             var i1 = i;
                                         }
-                                        <option value="Hour"
+                                        <option value="@JobSalaryTimeUnit.Hour"
                                                 selected="@(Model.Form.JobSalaries[i1].TimeUnit == JobSalaryTimeUnit.Hour)">
                                             Giờ
                                         </option>
-                                        <option value="Session"
+                                        <option value="@JobSalaryTimeUnit.Session"
                                                 selected="@(Model.Form.JobSalaries[i1].TimeUnit == JobSalaryTimeUnit.Session)">
                                             Buổi / Ca
                                         </option>
-                                        <option value="Day"
+                                        <option value="@JobSalaryTimeUnit.Day"
                                                 selected="@(Model.Form.JobSalaries[i1].TimeUnit == JobSalaryTimeUnit.Day)">
                                             Ngày
                                         </option>
-                                        <option value="Week"
+                                        <option value="@JobSalaryTimeUnit.Week"
                                                 selected="@(Model.Form.JobSalaries[i1].TimeUnit == JobSalaryTimeUnit.Week)">
                                             Tuần
                                         </option>
-                                        <option value="Month"
+                                        <option value="@JobSalaryTimeUnit.Month"
                                                 selected="@(Model.Form.JobSalaries[i1].TimeUnit == JobSalaryTimeUnit.Month)">
                                             Tháng
                                         </option>
-                                        <option value="Project"
+                                        <option value="@JobSalaryTimeUnit.Project"
                                                 selected="@(Model.Form.JobSalaries[i1].TimeUnit == JobSalaryTimeUnit.Project)">
                                             Dự án
                                         </option>
@@ -410,13 +410,13 @@
                     <tr class="schedule-row">
                         <td>
                             <select name="Form.JobSchedules[${rowCount}].DayOfWeek" class="form-select schedule-day">
-                                <option value="Monday" selected>Thứ Hai</option>
-                                <option value="Tuesday">Thứ Ba</option>
-                                <option value="Wednesday">Thứ Tư</option>
-                                <option value="Thursday">Thứ Năm</option>
-                                <option value="Friday">Thứ Sáu</option>
-                                <option value="Saturday">Thứ Bảy</option>
-                                <option value="Sunday">Chủ Nhật</option>
+                                <option value="@DayOfWeekObject.Monday" selected>Thứ Hai</option>
+                                <option value="@DayOfWeekObject.Tuesday">Thứ Ba</option>
+                                <option value="@DayOfWeekObject.Wednesday">Thứ Tư</option>
+                                <option value="@DayOfWeekObject.Thursday">Thứ Năm</option>
+                                <option value="@DayOfWeekObject.Friday">Thứ Sáu</option>
+                                <option value="@DayOfWeekObject.Saturday">Thứ Bảy</option>
+                                <option value="@DayOfWeekObject.Sunday">Chủ Nhật</option>
                             </select>
                         </td>
                         <td>
@@ -471,12 +471,12 @@
                         </td>
                         <td>
                             <select name="Form.JobSalaries[${rowCount}].TimeUnit" class="form-select salary-unit">
-                                <option value="Hour" selected>Giờ</option>
-                                <option value="Session">Buổi / Ca</option>
-                                <option value="Day">Ngày</option>
-                                <option value="Week">Tuần</option>
-                                <option value="Month">Tháng</option>
-                                <option value="Project">Dự án</option>
+                                <option value="@JobSalaryTimeUnit.Hour" selected>Giờ</option>
+                                <option value="@JobSalaryTimeUnit.Session">Buổi / Ca</option>
+                                <option value="@JobSalaryTimeUnit.Day">Ngày</option>
+                                <option value="@JobSalaryTimeUnit.Week">Tuần</option>
+                                <option value="@JobSalaryTimeUnit.Month">Tháng</option>
+                                <option value="@JobSalaryTimeUnit.Project">Dự án</option>
                             </select>
                         </td>
                         <td class="text-center">

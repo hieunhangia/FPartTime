@@ -15,6 +15,7 @@ namespace Frontend.Pages.Employer.Job;
 public class DetailModel(ApiClient apiClient) : PageModel
 {
     public JobDetailResponseDto? Job { get; private set; }
+    public CanUpdateJobResponseDto? CanUpdateResult { get; private set; }
 
     public async Task<IActionResult> OnGetAsync(Guid id)
     {
@@ -25,6 +26,19 @@ public class DetailModel(ApiClient apiClient) : PageModel
             {
                 TempData.SetErrorMessage("Không tìm thấy thông tin công việc.");
                 return RedirectToPage("Index");
+            }
+
+            try
+            {
+                CanUpdateResult = await apiClient.Api.Employer.Jobs[id].CanUpdate.GetAsync();
+            }
+            catch
+            {
+                CanUpdateResult = new CanUpdateJobResponseDto
+                {
+                    CanUpdate = false,
+                    Reason = "Không thể kiểm tra trạng thái cập nhật của công việc."
+                };
             }
         }
         catch (ApiException ex)
