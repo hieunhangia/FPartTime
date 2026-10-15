@@ -27,7 +27,7 @@ namespace Api.Controllers.Candidate
         [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
         [ProducesResponseType<ProblemDetails>(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<CandidateProfileResponseDto>> EditMyProfile(
-        [FromBody] UpdateCandidateProfileDto request)
+        [FromForm] UpdateCandidateProfileDto request)
         {
             return Ok(await profileService.EditCandidateProfile(User, request));
         }

@@ -1,19 +1,23 @@
 ﻿using System.Security.Claims;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Repository;
 using Repository.Constants;
 using Repository.Models.Users;
 using Riok.Mapperly.Abstractions;
 using Service.Extensions;
+using Service.ExternalServices;
 using Service.HttpErrorExceptions;
 
 namespace Service.ApplicationServices.Candidate;
 
-public class CandidateProfileService(ApplicationDbContext dbContext)
+public class CandidateProfileService(ApplicationDbContext dbContext, CloudflareR2StorageService storage)
 {
+    private static readonly HashSet<string> AllowedImageExtensions = [".png", ".jpg", ".jpeg"];
     public async Task<CandidateProfileResponseDto> GetProfileAsync(ClaimsPrincipal user)
     {
         var userId = user.GetUserId();
+        
 
         var profile = await dbContext.Candidates
             .Include(c => c.PreferredWorkCommune)
@@ -23,8 +27,13 @@ public class CandidateProfileService(ApplicationDbContext dbContext)
         {
             throw new NotFoundException("Hồ sơ chưa được tạo.");
         }
+        var dto = profile.MapToDto();
+        if (!string.IsNullOrEmpty(profile.AvatarFilePath))
+        {
+            dto.AvatarFilePath = storage.GetPublicUrl(profile.AvatarFilePath);
+        }
 
-        return profile.MapToDto();
+        return dto;
     }
 
     public async Task<CandidateProfileResponseDto> EditCandidateProfile(
@@ -44,18 +53,48 @@ public class CandidateProfileService(ApplicationDbContext dbContext)
             }
         }
 
+        if (request.AvatarFilePath != null)
+        {
+            var extension = Path.GetExtension(request.AvatarFilePath.FileName).ToLowerInvariant();
+            if (!AllowedImageExtensions.Contains(extension))
+            {
+                throw new BadRequestException("Chỉ chấp nhận file ảnh định dạng .png, .jpg hoặc .jpeg.");
+            }
+
+            if (request.AvatarFilePath.Length > 5 * 1024 * 1024)
+            {
+                throw new BadRequestException("Dung lượng ảnh tối đa là 5MB.");
+            }
+        }
+
         var profile = await dbContext.Candidates
             .FirstOrDefaultAsync(c => c.UserId == userId);
 
         if (profile == null)
         {
             profile = new CandidateProfile { UserId = userId };
-            request.UpdateEntity(profile);
             dbContext.Candidates.Add(profile);
         }
-        else
+        request.UpdateEntity(profile);
+
+        if(request.AvatarFilePath != null && request.AvatarFilePath.Length > 0)
         {
-            request.UpdateEntity(profile);
+            if (!string.IsNullOrEmpty(profile.AvatarFilePath))
+            {
+                await storage.DeleteFileAsync(profile.AvatarFilePath, BucketType.Public);
+            }
+            var extension = Path.GetExtension(request.AvatarFilePath.FileName).ToLowerInvariant();
+            var newAvatarKey = $"candidate-avatars/{userId:N}_{Guid.NewGuid():N}{extension}";
+
+            await using var stream = request.AvatarFilePath.OpenReadStream();
+            await storage.UploadFileAsync(
+                newAvatarKey,
+                stream,
+                request.AvatarFilePath.ContentType,
+                BucketType.Public
+            );
+
+            profile.AvatarFilePath = newAvatarKey;
         }
 
         await dbContext.SaveChangesAsync();
@@ -67,7 +106,12 @@ public class CandidateProfileService(ApplicationDbContext dbContext)
                 .LoadAsync();
         }
 
-        return profile.MapToDto();
+        var dto = profile.MapToDto();
+        if (!string.IsNullOrEmpty(profile.AvatarFilePath))
+        {
+            dto.AvatarFilePath = storage.GetPublicUrl(profile.AvatarFilePath);
+        }
+        return dto;
     }
 }
 
@@ -84,7 +128,7 @@ public class CandidateProfileResponseDto
 
 public class UpdateCandidateProfileDto
 {
-    public string? AvatarFilePath { get; set; }
+    public IFormFile? AvatarFilePath { get; set; }
     public string? Bio { get; set; }
     public string? FullName { get; set; }
     public DateOnly? DateOfBirth { get; set; }
@@ -100,5 +144,6 @@ public static partial class CandidateProfileMapper
         nameof(CandidateProfileResponseDto.PreferredWorkCommuneName))]
     public static partial CandidateProfileResponseDto MapToDto(this CandidateProfile profile);
 
+    [MapperIgnoreTarget(nameof(CandidateProfile.AvatarFilePath))]
     public static partial void UpdateEntity(this UpdateCandidateProfileDto request, CandidateProfile profile);
 }
