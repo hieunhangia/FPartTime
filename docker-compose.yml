@@ -49,6 +49,9 @@ services:
       - SystemHealthCheck__HeaderName=${HEALTH_CHECK_HEADER}
       - SystemHealthCheck__ApiKey=${HEALTH_CHECK_API_KEY}
       - Sentry__Dsn=${SENTRY_DSN}
+      - PayOS__ClientId=${PAYOS_CLIENT_ID}
+      - PayOS__ApiKey=${PAYOS_API_KEY}
+      - PayOS__ChecksumKey=${PAYOS_CHECKSUM_KEY}
     depends_on:
       - database
     networks:

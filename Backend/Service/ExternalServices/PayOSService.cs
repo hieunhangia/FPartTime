@@ -1,7 +1,9 @@
+using System.ComponentModel.DataAnnotations;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using PayOS;
 using PayOS.Models;
 using PayOS.Models.V2.PaymentRequests;
+using PayOS.Models.Webhooks;
 
 namespace Service.ExternalServices;
 
@@ -35,6 +37,43 @@ public class PayOSService(PayOSClient payOSClient)
         {
             PaymentLinkId = response.PaymentLinkId,
             CheckoutUrl = response.CheckoutUrl
+        };
+    }
+
+    public async Task<PaymentWebhookDataRequest> VerifyWebhookAsync(PaymentWebhookRequest request)
+    {
+        var response = await payOSClient.Webhooks.VerifyAsync(new Webhook
+        {
+            Code = request.Code,
+            Description = request.Desc,
+            Success = request.Success,
+            Data = new WebhookData
+            {
+                OrderCode = request.Data.OrderCode,
+                Amount = request.Data.Amount,
+                Description = request.Data.Description,
+                AccountNumber = request.Data.AccountNumber,
+                Reference = request.Data.Reference,
+                TransactionDateTime = request.Data.TransactionDateTime,
+                Currency = request.Data.Currency,
+                PaymentLinkId = request.Data.PaymentLinkId,
+                Code = request.Data.Code,
+                Description2 = request.Data.Desc
+            },
+            Signature = request.Signature
+        });
+        return new PaymentWebhookDataRequest
+        {
+            OrderCode = response.OrderCode,
+            Amount = response.Amount,
+            Description = response.Description,
+            AccountNumber = response.AccountNumber,
+            Reference = response.Reference,
+            TransactionDateTime = response.TransactionDateTime,
+            Currency = response.Currency,
+            PaymentLinkId = response.PaymentLinkId,
+            Code = response.Code,
+            Desc = response.Description2
         };
     }
 }
@@ -86,4 +125,27 @@ public class CreatePaymentResponse
 {
     public required string PaymentLinkId { get; set; }
     public required string CheckoutUrl { get; set; }
+}
+
+public class PaymentWebhookRequest
+{
+    [Required] public string Code { get; set; } = string.Empty;
+    [Required] public string Desc { get; set; } = string.Empty;
+    [Required] public bool Success { get; set; }
+    [Required] public PaymentWebhookDataRequest Data { get; set; } = new();
+    [Required] public string Signature { get; set; } = string.Empty;
+}
+
+public class PaymentWebhookDataRequest
+{
+    [Required] public long OrderCode { get; set; }
+    [Required] public long Amount { get; set; }
+    [Required] public string Description { get; set; } = string.Empty;
+    [Required] public string AccountNumber { get; set; } = string.Empty;
+    [Required] public string Reference { get; set; } = string.Empty;
+    [Required] public string TransactionDateTime { get; set; } = string.Empty;
+    [Required] public string Currency { get; set; } = string.Empty;
+    [Required] public string PaymentLinkId { get; set; } = string.Empty;
+    [Required] public string Code { get; set; } = string.Empty;
+    [Required] public string Desc { get; set; } = string.Empty;
 }
