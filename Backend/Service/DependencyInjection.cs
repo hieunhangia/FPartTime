@@ -2,13 +2,12 @@ using Amazon.S3;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.JsonWebTokens;
+using PayOS;
 using Service.ApplicationServices;
 using Service.ApplicationServices.Candidate;
-using Service.ApplicationServices.Employer;
 using Service.ApplicationServices.Public;
 using Service.BackgroundServices;
 using Service.ExternalServices;
-using EmployerRegistrationService = Service.ApplicationServices.Censor.EmployerRegistrationService;
 
 namespace Service;
 
@@ -23,21 +22,24 @@ public static class DependencyInjection
         // Public Services
         services.AddScoped<AddressService>();
         services.AddScoped<IndustryService>();
-        services.AddScoped<ApplicationServices.Public.JobService>();
+        services.AddScoped<JobService>();
 
         // Candidate Services
-        services.AddScoped<ApplicationServices.Candidate.EmployerRegistrationService>();
+        services.AddScoped<CandidateProfileService>();
+        services.AddScoped<JobReportService>();
+        services.AddScoped<EmployerRegistrationService>();
 
         // Employer Services
         services.AddScoped<ApplicationServices.Employer.JobService>();
 
         // Censor Services
-        services.AddScoped<EmployerRegistrationService>();
-
-        services.AddScoped<SmsSenderService>();
-        services.AddScoped<CandidateProfileService>();
-        services.AddScoped<JobReportService>();
+        services.AddScoped<ApplicationServices.Censor.EmployerRegistrationService>();
         services.AddScoped<ApplicationServices.Censor.JobReportService>();
+
+        // Sms Sender Service
+        services.AddSingleton<SmsSenderService>();
+
+        // Cloudflare R2 Storage Service
         var r2Settings = configuration.GetSection("R2Settings");
         services.AddSingleton<IAmazonS3>(new AmazonS3Client(r2Settings["AccessKey"], r2Settings["SecretKey"],
             new AmazonS3Config { ServiceURL = r2Settings["ServiceURL"] }
@@ -45,6 +47,17 @@ public static class DependencyInjection
         services.AddSingleton<CloudflareR2StorageService>();
         services.AddHealthChecks().AddCheck<CloudflareR2HealthCheck>(name: "Cloudflare R2 Storage", tags: ["storage"]);
 
+        // PayOS Service
+        services.AddSingleton(new PayOSClient(new PayOSOptions
+        {
+            ClientId = configuration["PayOS:ClientId"],
+            ApiKey = configuration["PayOS:ApiKey"],
+            ChecksumKey = configuration["PayOS:ChecksumKey"]
+        }));
+        services.AddSingleton<PayOSService>();
+        services.AddHealthChecks().AddCheck<PayOSHealthCheck>(name: "PayOS Service", tags: ["payment"]);
+
+        // Background Services
         services.AddHostedService<ExpiredJobCleanupService>();
     }
 }

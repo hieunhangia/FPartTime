@@ -118,6 +118,7 @@ healthGroup.MapHealthChecks("/live", new HealthCheckOptions { Predicate = _ => f
 healthGroup.MapHealthChecks("/database",
     new HealthCheckOptions { Predicate = check => check.Tags.Contains("database") });
 healthGroup.MapHealthChecks("/storage", new HealthCheckOptions { Predicate = check => check.Tags.Contains("storage") });
+healthGroup.MapHealthChecks("/payment", new HealthCheckOptions { Predicate = check => check.Tags.Contains("payment") });
 healthGroup.MapHealthChecks("");
 
 app.Run();
