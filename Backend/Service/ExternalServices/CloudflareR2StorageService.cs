@@ -1,3 +1,4 @@
+using System.Net;
 using Amazon.S3;
 using Amazon.S3.Model;
 using Microsoft.Extensions.Configuration;
@@ -14,23 +15,19 @@ public class CloudflareR2StorageService(IAmazonS3 s3Client, IConfiguration confi
 
     private readonly string _publicDomain = configuration["R2Settings:PublicDomain"]!;
 
-    private string GetBucketName(BucketType bucketType) =>
-        bucketType == BucketType.Private ? _privateBucketName : _publicBucketName;
-
     public async Task UploadFileAsync(string filePath, Stream fileStream, string contentType,
         BucketType bucketType = BucketType.Public, CancellationToken cancellationToken = default)
     {
         try
         {
-            var request = new PutObjectRequest
+            await s3Client.PutObjectAsync(new PutObjectRequest
             {
                 BucketName = GetBucketName(bucketType),
                 Key = filePath,
                 InputStream = fileStream,
                 ContentType = contentType,
                 DisablePayloadSigning = true
-            };
-            await s3Client.PutObjectAsync(request, cancellationToken);
+            }, cancellationToken);
         }
         catch (Exception ex)
         {
@@ -38,63 +35,27 @@ public class CloudflareR2StorageService(IAmazonS3 s3Client, IConfiguration confi
         }
     }
 
-    public async Task<FileDownloadResult> DownloadFileAsync(string filePath, BucketType bucketType = BucketType.Public,
-        CancellationToken cancellationToken = default)
-    {
-        try
-        {
-            var request = new GetObjectRequest
-            {
-                BucketName = GetBucketName(bucketType),
-                Key = filePath
-            };
-            using var response = await s3Client.GetObjectAsync(request, cancellationToken);
-            var memoryStream = new MemoryStream();
-            await response.ResponseStream.CopyToAsync(memoryStream, cancellationToken);
-            memoryStream.Position = 0;
-
-            return new FileDownloadResult
-            {
-                FileStream = memoryStream,
-                ContentType = response.Headers.ContentType,
-                FileName = filePath.Split('/').Last()
-            };
-        }
-        catch (AmazonS3Exception ex) when (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
-        {
-            throw new BadRequestException("Tệp tin không tồn tại hoặc đã bị xóa.", ex);
-        }
-        catch (Exception ex)
-        {
-            throw new InternalServerErrorException("Đã xảy ra lỗi khi tải tệp tin.", ex);
-        }
-    }
-
     public async Task DeleteFileAsync(string filePath, BucketType bucketType = BucketType.Public,
-        CancellationToken cancellationToken = default)
-    {
-        var request = new DeleteObjectRequest
+        CancellationToken cancellationToken = default) =>
+        await s3Client.DeleteObjectAsync(new DeleteObjectRequest
         {
             BucketName = GetBucketName(bucketType),
             Key = filePath
-        };
-        await s3Client.DeleteObjectAsync(request, cancellationToken);
-    }
+        }, cancellationToken);
 
     public async Task<bool> FileExistsAsync(string filePath, BucketType bucketType = BucketType.Public,
         CancellationToken cancellationToken = default)
     {
         try
         {
-            var request = new GetObjectMetadataRequest
+            await s3Client.GetObjectMetadataAsync(new GetObjectMetadataRequest
             {
                 BucketName = GetBucketName(bucketType),
                 Key = filePath
-            };
-            await s3Client.GetObjectMetadataAsync(request, cancellationToken);
+            }, cancellationToken);
             return true;
         }
-        catch (AmazonS3Exception ex) when (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
+        catch (AmazonS3Exception ex) when (ex.StatusCode == HttpStatusCode.NotFound)
         {
             return false;
         }
@@ -110,26 +71,21 @@ public class CloudflareR2StorageService(IAmazonS3 s3Client, IConfiguration confi
     {
         try
         {
-            var request = new ListObjectsV2Request
+            var response = await s3Client.ListObjectsV2Async(new ListObjectsV2Request
             {
                 BucketName = GetBucketName(bucketType),
                 Prefix = prefix,
                 MaxKeys = maxItems,
                 ContinuationToken = continuationToken
-            };
-
-            var response = await s3Client.ListObjectsV2Async(request, cancellationToken);
-
-            var files = (response.S3Objects ?? []).Select(o => new FileMetadata
-            {
-                Key = o.Key,
-                Size = o.Size,
-                LastModified = o.LastModified
-            });
-
+            }, cancellationToken);
             return new PaginatedFileList
             {
-                Files = files,
+                Files = (response.S3Objects ?? []).Select(o => new FileMetadata
+                {
+                    Key = o.Key,
+                    Size = o.Size,
+                    LastModified = o.LastModified
+                }),
                 NextContinuationToken = response.NextContinuationToken
             };
         }
@@ -141,37 +97,37 @@ public class CloudflareR2StorageService(IAmazonS3 s3Client, IConfiguration confi
 
     public string GetPublicUrl(string filePath) => $"{_publicDomain}/{filePath}";
 
-    public Task<string> GeneratePresignedUrlAsync(string filePath, TimeSpan expiresIn) =>
-        s3Client.GetPreSignedURLAsync(new GetPreSignedUrlRequest
+    public async Task<string> GeneratePresignedUrlAsync(string filePath, TimeSpan expiresIn,
+        PresignedUrlOptions? options = null)
+    {
+        var request = new GetPreSignedUrlRequest
         {
             BucketName = _privateBucketName,
             Key = filePath,
             Expires = DateTime.UtcNow.Add(expiresIn),
             Verb = HttpVerb.GET
-        });
-    public Task<string> GeneratePresignedUrlAsync(string filePath, TimeSpan expiresIn, string contentType)
-    {
-        return s3Client.GetPreSignedURLAsync(new GetPreSignedUrlRequest
-        {
-            BucketName = _privateBucketName,
-            Key = filePath,
-            Expires = DateTime.UtcNow.Add(expiresIn),
-            Verb = HttpVerb.GET,
-            ResponseHeaderOverrides = new ResponseHeaderOverrides
-            {
-                ContentType = contentType,
-                ContentDisposition = "inline"
-            }
-        });
-    }
-}
+        };
 
-        
+        if (options != null)
+        {
+            request.ResponseHeaderOverrides = new ResponseHeaderOverrides
+            {
+                ContentType = options.ContentType,
+                ContentDisposition = options.ContentDisposition,
+                CacheControl = options.CacheControl
+            };
+        }
+
+        return await s3Client.GetPreSignedURLAsync(request);
+    }
+
+    private string GetBucketName(BucketType bucketType) =>
+        bucketType == BucketType.Private ? _privateBucketName : _publicBucketName;
+}
 
 public class CloudflareR2HealthCheck(IAmazonS3 s3Client, IConfiguration configuration) : IHealthCheck
 {
     private readonly string _publicBucketName = configuration["R2Settings:PublicBucketName"]!;
-    private readonly string _privateBucketName = configuration["R2Settings:PrivateBucketName"]!;
 
     public async Task<HealthCheckResult> CheckHealthAsync(HealthCheckContext context,
         CancellationToken cancellationToken = default)
@@ -180,8 +136,7 @@ public class CloudflareR2HealthCheck(IAmazonS3 s3Client, IConfiguration configur
         {
             using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
             cts.CancelAfter(3000);
-            await s3Client.GetBucketLocationAsync(_publicBucketName, cts.Token);
-            await s3Client.GetBucketLocationAsync(_privateBucketName, cts.Token);
+            await s3Client.HeadBucketAsync(new HeadBucketRequest { BucketName = _publicBucketName }, cts.Token);
             return HealthCheckResult.Healthy($"Kết nối thành công đến Cloudflare R2.");
         }
         catch (Exception ex)
@@ -197,19 +152,6 @@ public enum BucketType
     Private
 }
 
-public class FileDownloadResult : IDisposable
-{
-    public required Stream FileStream { get; set; }
-    public required string ContentType { get; set; }
-    public required string FileName { get; set; }
-
-    public void Dispose()
-    {
-        FileStream.Dispose();
-        GC.SuppressFinalize(this);
-    }
-}
-
 public class FileMetadata
 {
     public required string Key { get; set; }
@@ -223,3 +165,9 @@ public class PaginatedFileList
     public string? NextContinuationToken { get; set; }
     public bool HasNextPage => !string.IsNullOrEmpty(NextContinuationToken);
 }
+
+public record PresignedUrlOptions(
+    string? ContentType = null,
+    string? ContentDisposition = null,
+    string? CacheControl = null
+);

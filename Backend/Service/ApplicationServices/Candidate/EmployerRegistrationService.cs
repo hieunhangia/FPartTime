@@ -115,7 +115,7 @@ public class EmployerRegistrationService(
         if (request.DocumentPath.Contains(".pdf", StringComparison.OrdinalIgnoreCase))
         {
             imageUrl = await storageService.GeneratePresignedUrlAsync(request.DocumentPath, TimeSpan.FromMinutes(15),
-                "application/pdf");
+                new PresignedUrlOptions { ContentType = "application/pdf", ContentDisposition = "inline" });
         }
         else
         {
