@@ -2,7 +2,6 @@ using Amazon.S3;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.JsonWebTokens;
-using PayOS;
 using Service.ApplicationServices;
 using Service.ApplicationServices.Candidate;
 using Service.ApplicationServices.Public;
@@ -13,7 +12,7 @@ namespace Service;
 
 public static class DependencyInjection
 {
-    public static void AddServiceLevelServices(this IServiceCollection services, IConfiguration configuration)
+    public static void AddApplicationServices(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddSingleton<JsonWebTokenHandler>();
         services.AddScoped<IdentityService>();
@@ -46,21 +45,6 @@ public static class DependencyInjection
         ));
         services.AddSingleton<CloudflareR2StorageService>();
         services.AddHealthChecks().AddCheck<CloudflareR2HealthCheck>(name: "Cloudflare R2 Storage", tags: ["storage"]);
-
-        // PayOS Service
-        services.AddHttpClient(PayOSHealthCheck.HealthCheckHttpClientName, client =>
-        {
-            client.BaseAddress = new Uri("https://api-merchant.payos.vn/");
-            client.Timeout = TimeSpan.FromSeconds(5);
-        });
-        services.AddSingleton(new PayOSClient(new PayOSOptions
-        {
-            ClientId = configuration["PayOS:ClientId"],
-            ApiKey = configuration["PayOS:ApiKey"],
-            ChecksumKey = configuration["PayOS:ChecksumKey"]
-        }));
-        services.AddSingleton<PayOSService>();
-        services.AddHealthChecks().AddCheck<PayOSHealthCheck>(name: "PayOS Service", tags: ["payment"]);
 
         // Background Services
         services.AddHostedService<ExpiredJobCleanupService>();

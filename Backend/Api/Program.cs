@@ -3,6 +3,7 @@ using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
 using Api;
 using Api.Middlewares;
+using Infrastructure;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.HttpOverrides;
@@ -50,7 +51,9 @@ builder.Services.AddAuthentication(options =>
 
 builder.Services.AddRepositoryLevelServices(builder.Configuration);
 
-builder.Services.AddServiceLevelServices(builder.Configuration);
+builder.Services.AddApplicationServices(builder.Configuration);
+
+builder.AddInfrastructureServices();
 
 builder.Services.AddControllers()
     .AddJsonOptions(options => options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter(

@@ -8,12 +8,13 @@
 - Đăng kí làm Employer
 - Ứng tuyển job
 - Report job
+- Tính năng trả phí: Xem số đơn ứng tuyển job, số đơn được accept, bị reject, chưa phản hồi.
 
 **Employer**
 - Quản lý profile
 - CRUD job
-- Duyệt đơn Candidate
-- Tính năng trả phí: Đẩy tin, chủ động tìm Candidate phù hợp
+- Duyệt đơn ứng tuyển job
+- Tính năng trả phí: Đẩy bài (Mua theo lượt). Mở thêm lượt đăng bài (Subscription tháng/năm). Chủ động tìm Candidate phù hợp (Subscription tháng/năm)
 
 **Censor**
 - Duyệt đơn đăng kí làm Employer

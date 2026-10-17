@@ -7,10 +7,6 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\Service\Service.csproj" />
-    </ItemGroup>
-
-    <ItemGroup>
       <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.13" />
       <PackageReference Include="Microsoft.AspNetCore.OData" Version="9.5.0" />
       <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.13" />
@@ -20,6 +16,12 @@
       </PackageReference>
       <PackageReference Include="Scalar.AspNetCore" Version="2.18.0" />
       <PackageReference Include="Sentry.AspNetCore" Version="6.12.1" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\Contracts\Contracts.csproj" />
+      <ProjectReference Include="..\Infrastructure\Infrastructure.csproj" />
+      <ProjectReference Include="..\Service\Service.csproj" />
     </ItemGroup>
 
 </Project>
