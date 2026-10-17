@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Service.ApplicationServices;
 using Service.ApplicationServices.Candidate;
+using Service.ApplicationServices.Employer;
 using Service.ApplicationServices.Public;
 using Service.BackgroundServices;
 using Service.ExternalServices;
@@ -21,7 +22,7 @@ public static class DependencyInjection
         // Public Services
         services.AddScoped<AddressService>();
         services.AddScoped<IndustryService>();
-        services.AddScoped<JobService>();
+        //services.AddScoped<JobService>();
 
         // Candidate Services
         services.AddScoped<CandidateProfileService>();
@@ -30,6 +31,7 @@ public static class DependencyInjection
 
         // Employer Services
         services.AddScoped<ApplicationServices.Employer.JobService>();
+        services.AddScoped<EmployerProfileService>();
 
         // Censor Services
         services.AddScoped<ApplicationServices.Censor.EmployerRegistrationService>();

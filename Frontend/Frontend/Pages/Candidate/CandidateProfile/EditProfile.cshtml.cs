@@ -19,8 +19,8 @@ namespace Frontend.Pages.Candidate.CandidateProfile
         public EditProfileFormModel Input { get; set; } = new();
         public string? CurrentAvatarUrl { get; set; }
         public List<string> fileValidate = [".jpg", ".jpeg", ".png"];
-        public List<ProvinceDto> Provinces { get; private set; } = [];
-        public List<CommuneDto> Communes { get; private set; } = [];
+        //public List<ProvinceDto> Provinces { get; private set; } = [];
+        //public List<CommuneDto> Communes { get; private set; } = [];
 
         public async Task<IActionResult> OnGetAsync()
         {
