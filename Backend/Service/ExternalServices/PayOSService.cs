@@ -78,19 +78,18 @@ public class PayOSService(PayOSClient payOSClient)
     }
 }
 
-public class PayOSHealthCheck(PayOSClient payOSClient) : IHealthCheck
+public class PayOSHealthCheck(IHttpClientFactory httpClientFactory) : IHealthCheck
 {
+    public const string HealthCheckHttpClientName = "PayOSHealthCheck";
+
     public async Task<HealthCheckResult> CheckHealthAsync(HealthCheckContext context,
         CancellationToken cancellationToken = default)
     {
         try
         {
-            await payOSClient.GetAsync<object>("/", new RequestOptions<object>
-            {
-                MaxRetries = 0,
-                CancellationToken = cancellationToken
-            });
-
+            var client = httpClientFactory.CreateClient(HealthCheckHttpClientName);
+            using var response = await client.GetAsync("/", cancellationToken);
+            response.EnsureSuccessStatusCode();
             return HealthCheckResult.Healthy("Kết nối đến PayOS thành công.");
         }
         catch (Exception ex)

@@ -48,6 +48,11 @@ public static class DependencyInjection
         services.AddHealthChecks().AddCheck<CloudflareR2HealthCheck>(name: "Cloudflare R2 Storage", tags: ["storage"]);
 
         // PayOS Service
+        services.AddHttpClient(PayOSHealthCheck.HealthCheckHttpClientName, client =>
+        {
+            client.BaseAddress = new Uri("https://api-merchant.payos.vn/");
+            client.Timeout = TimeSpan.FromSeconds(5);
+        });
         services.AddSingleton(new PayOSClient(new PayOSOptions
         {
             ClientId = configuration["PayOS:ClientId"],
