@@ -71,6 +71,11 @@
                         {
                             <li><a class="dropdown-item" asp-page="/Candidate/EmployerRegistrations/MyRegistrations">Đơn đăng ký nhà tuyển
                                     dụng</a></li>
+                            <li>
+                                <a class="dropdown-item" asp-page="/Candidate/CandidateProfile/EditProfile">
+                                    Hồ sơ của tôi
+                                </a>
+                            </li>
                         }
                         @if (User.IsInRole(Role.Employer))
                         {

@@ -10,6 +10,7 @@ using ApiSdk.Api.Identity;
 using ApiSdk.Api.Industries;
 using ApiSdk.Api.Jobs;
 using ApiSdk.Api.Notifications;
+using ApiSdk.Api.PayOsWebhook;
 using Microsoft.Kiota.Abstractions.Extensions;
 using Microsoft.Kiota.Abstractions;
 using System.Collections.Generic;
@@ -73,6 +74,11 @@ namespace ApiSdk.Api
         public global::ApiSdk.Api.Notifications.NotificationsRequestBuilder Notifications
         {
             get => new global::ApiSdk.Api.Notifications.NotificationsRequestBuilder(PathParameters, RequestAdapter);
+        }
+        /// <summary>The PayOsWebhook property</summary>
+        public global::ApiSdk.Api.PayOsWebhook.PayOsWebhookRequestBuilder PayOsWebhook
+        {
+            get => new global::ApiSdk.Api.PayOsWebhook.PayOsWebhookRequestBuilder(PathParameters, RequestAdapter);
         }
         /// <summary>
         /// Instantiates a new <see cref="global::ApiSdk.Api.ApiRequestBuilder"/> and sets the default values.
