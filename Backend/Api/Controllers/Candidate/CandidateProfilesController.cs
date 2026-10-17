@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using Repository.Constants;
@@ -21,6 +21,7 @@ namespace Api.Controllers.Candidate
         }
 
         [HttpPut]
+        [Consumes("multipart/form-data")]
         [ProducesResponseType<CandidateProfileResponseDto>(StatusCodes.Status200OK)]
         [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
         [ProducesResponseType<ProblemDetails>(StatusCodes.Status401Unauthorized)]
