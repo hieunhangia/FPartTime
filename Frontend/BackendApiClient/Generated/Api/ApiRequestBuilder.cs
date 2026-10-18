@@ -5,6 +5,7 @@ using ApiSdk.Api.Candidate;
 using ApiSdk.Api.CandidateProfiles;
 using ApiSdk.Api.Censor;
 using ApiSdk.Api.Employer;
+using ApiSdk.Api.EmployerProfiles;
 using ApiSdk.Api.EmployerRegistrations;
 using ApiSdk.Api.Identity;
 using ApiSdk.Api.Industries;
@@ -49,6 +50,11 @@ namespace ApiSdk.Api
         public global::ApiSdk.Api.Employer.EmployerRequestBuilder Employer
         {
             get => new global::ApiSdk.Api.Employer.EmployerRequestBuilder(PathParameters, RequestAdapter);
+        }
+        /// <summary>The EmployerProfiles property</summary>
+        public global::ApiSdk.Api.EmployerProfiles.EmployerProfilesRequestBuilder EmployerProfiles
+        {
+            get => new global::ApiSdk.Api.EmployerProfiles.EmployerProfilesRequestBuilder(PathParameters, RequestAdapter);
         }
         /// <summary>The EmployerRegistrations property</summary>
         public global::ApiSdk.Api.EmployerRegistrations.EmployerRegistrationsRequestBuilder EmployerRegistrations

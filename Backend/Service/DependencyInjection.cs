@@ -22,7 +22,7 @@ public static class DependencyInjection
         // Public Services
         services.AddScoped<AddressService>();
         services.AddScoped<IndustryService>();
-        //services.AddScoped<JobService>();
+        services.AddScoped<ApplicationServices.Public.JobService>();
 
         // Candidate Services
         services.AddScoped<CandidateProfileService>();

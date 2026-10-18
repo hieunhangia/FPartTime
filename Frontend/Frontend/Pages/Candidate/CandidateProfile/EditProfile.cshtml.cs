@@ -18,7 +18,7 @@ namespace Frontend.Pages.Candidate.CandidateProfile
         [BindProperty]
         public EditProfileFormModel Input { get; set; } = new();
         public string? CurrentAvatarUrl { get; set; }
-        public List<string> fileValidate = [".jpg", ".jpeg", ".png"];
+        public HashSet<string> fileValidate = [".jpg", ".jpeg", ".png"];
         //public List<ProvinceDto> Provinces { get; private set; } = [];
         //public List<CommuneDto> Communes { get; private set; } = [];
 
