@@ -4,6 +4,7 @@ using System.Text.Json.Serialization;
 using Api;
 using Api.Middlewares;
 using Application;
+using Domain;
 using Infrastructure;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
@@ -11,7 +12,6 @@ using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.OData;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
-using Repository;
 using Scalar.AspNetCore;
 using Service;
 
@@ -50,13 +50,11 @@ builder.Services.AddAuthentication(options =>
         };
     });
 
-builder.Services.AddRepositoryLevelServices(builder.Configuration);
+builder.AddApplicationServices_Old();
 
-builder.Services.AddApplicationServices(builder.Configuration);
-
-builder.AddApplicationServices();
-
+builder.AddDomainServices();
 builder.AddInfrastructureServices();
+builder.AddApplicationServices();
 
 builder.Services.AddControllers()
     .AddJsonOptions(options => options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter(

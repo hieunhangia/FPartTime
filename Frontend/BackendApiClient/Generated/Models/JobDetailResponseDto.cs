@@ -79,6 +79,8 @@ namespace ApiSdk.Models
 #else
         public List<global::ApiSdk.Models.JobScheduleResponseDto> JobSchedules { get; set; }
 #endif
+        /// <summary>The lastBumpedAt property</summary>
+        public DateTimeOffset? LastBumpedAt { get; set; }
         /// <summary>The maxAgeRequirement property</summary>
         public int? MaxAgeRequirement { get; set; }
         /// <summary>The minAgeRequirement property</summary>
@@ -101,6 +103,8 @@ namespace ApiSdk.Models
 #else
         public string Title { get; set; }
 #endif
+        /// <summary>The updatedAt property</summary>
+        public DateTimeOffset? UpdatedAt { get; set; }
         /// <summary>The vacancyCount property</summary>
         public int? VacancyCount { get; set; }
         /// <summary>
@@ -139,11 +143,13 @@ namespace ApiSdk.Models
                 { "jobApplications", n => { JobApplications = n.GetCollectionOfObjectValues<global::ApiSdk.Models.JobApplicationSummaryResponseDto>(global::ApiSdk.Models.JobApplicationSummaryResponseDto.CreateFromDiscriminatorValue)?.AsList(); } },
                 { "jobSalaries", n => { JobSalaries = n.GetCollectionOfObjectValues<global::ApiSdk.Models.JobSalaryResponseDto>(global::ApiSdk.Models.JobSalaryResponseDto.CreateFromDiscriminatorValue)?.AsList(); } },
                 { "jobSchedules", n => { JobSchedules = n.GetCollectionOfObjectValues<global::ApiSdk.Models.JobScheduleResponseDto>(global::ApiSdk.Models.JobScheduleResponseDto.CreateFromDiscriminatorValue)?.AsList(); } },
+                { "lastBumpedAt", n => { LastBumpedAt = n.GetDateTimeOffsetValue(); } },
                 { "maxAgeRequirement", n => { MaxAgeRequirement = n.GetIntValue(); } },
                 { "minAgeRequirement", n => { MinAgeRequirement = n.GetIntValue(); } },
                 { "provinceName", n => { ProvinceName = n.GetStringValue(); } },
                 { "status", n => { Status = n.GetEnumValue<global::ApiSdk.Models.JobStatus>(); } },
                 { "title", n => { Title = n.GetStringValue(); } },
+                { "updatedAt", n => { UpdatedAt = n.GetDateTimeOffsetValue(); } },
                 { "vacancyCount", n => { VacancyCount = n.GetIntValue(); } },
             };
         }
@@ -165,11 +171,13 @@ namespace ApiSdk.Models
             writer.WriteCollectionOfObjectValues<global::ApiSdk.Models.JobApplicationSummaryResponseDto>("jobApplications", JobApplications);
             writer.WriteCollectionOfObjectValues<global::ApiSdk.Models.JobSalaryResponseDto>("jobSalaries", JobSalaries);
             writer.WriteCollectionOfObjectValues<global::ApiSdk.Models.JobScheduleResponseDto>("jobSchedules", JobSchedules);
+            writer.WriteDateTimeOffsetValue("lastBumpedAt", LastBumpedAt);
             writer.WriteIntValue("maxAgeRequirement", MaxAgeRequirement);
             writer.WriteIntValue("minAgeRequirement", MinAgeRequirement);
             writer.WriteStringValue("provinceName", ProvinceName);
             writer.WriteEnumValue<global::ApiSdk.Models.JobStatus>("status", Status);
             writer.WriteStringValue("title", Title);
+            writer.WriteDateTimeOffsetValue("updatedAt", UpdatedAt);
             writer.WriteIntValue("vacancyCount", VacancyCount);
             writer.WriteAdditionalData(AdditionalData);
         }

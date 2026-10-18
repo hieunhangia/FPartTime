@@ -1,8 +1,8 @@
+using Domain.Models.Users;
 using Domain.Shared.Exceptions.HttpErrorExceptions;
+using Domain.Shared.Extensions;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Caching.Memory;
-using Repository.Extensions;
-using Repository.Models.Users;
 
 namespace Api.Middlewares;
 

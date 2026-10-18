@@ -205,6 +205,12 @@
                             <dt class="col-sm-5">Ngày tạo</dt>
                             <dd class="col-sm-7">@(Model.Job.CreatedAt?.ToLocalTime().ToString("dd/MM/yyyy HH:mm") ?? "-")</dd>
 
+                            <dt class="col-sm-5">Ngày cập nhật</dt>
+                            <dd class="col-sm-7">@(Model.Job.UpdatedAt?.ToLocalTime().ToString("dd/MM/yyyy HH:mm") ?? "-")</dd>
+
+                            <dt class="col-sm-5">Đẩy bài lần cuối</dt>
+                            <dd class="col-sm-7">@(Model.Job.LastBumpedAt?.ToLocalTime().ToString("dd/MM/yyyy HH:mm") ?? "-")</dd>
+
                             <dt class="col-sm-5">Hạn nộp</dt>
                             <dd class="col-sm-7">@Model.FormatDate(Model.Job.ExpiryAt)</dd>
                         </dl>

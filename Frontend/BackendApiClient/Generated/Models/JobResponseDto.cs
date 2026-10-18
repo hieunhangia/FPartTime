@@ -145,6 +145,8 @@ namespace ApiSdk.Models
 #else
         public string Title { get; set; }
 #endif
+        /// <summary>The updatedAt property</summary>
+        public DateTimeOffset? UpdatedAt { get; set; }
         /// <summary>The vacancyCount property</summary>
         public int? VacancyCount { get; set; }
         /// <summary>
@@ -195,6 +197,7 @@ namespace ApiSdk.Models
                 { "schedules", n => { Schedules = n.GetCollectionOfObjectValues<global::ApiSdk.Models.JobScheduleResponseDto>(global::ApiSdk.Models.JobScheduleResponseDto.CreateFromDiscriminatorValue)?.AsList(); } },
                 { "status", n => { Status = n.GetEnumValue<global::ApiSdk.Models.JobStatus>(); } },
                 { "title", n => { Title = n.GetStringValue(); } },
+                { "updatedAt", n => { UpdatedAt = n.GetDateTimeOffsetValue(); } },
                 { "vacancyCount", n => { VacancyCount = n.GetIntValue(); } },
             };
         }
@@ -228,6 +231,7 @@ namespace ApiSdk.Models
             writer.WriteCollectionOfObjectValues<global::ApiSdk.Models.JobScheduleResponseDto>("schedules", Schedules);
             writer.WriteEnumValue<global::ApiSdk.Models.JobStatus>("status", Status);
             writer.WriteStringValue("title", Title);
+            writer.WriteDateTimeOffsetValue("updatedAt", UpdatedAt);
             writer.WriteIntValue("vacancyCount", VacancyCount);
             writer.WriteAdditionalData(AdditionalData);
         }

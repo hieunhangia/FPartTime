@@ -1,7 +1,7 @@
 using Contracts.Application.Public;
 using Microsoft.EntityFrameworkCore;
-using Repository;
-using Repository.Models.Address;
+using Domain;
+using Domain.Models.Address;
 using Riok.Mapperly.Abstractions;
 
 namespace Application.Public;

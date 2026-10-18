@@ -1,9 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData.Query;
-using Service.ApplicationServices;
-using Service.ApplicationServices.Public;
+using Service.Public;
 
 namespace Api.Controllers.Public;
 

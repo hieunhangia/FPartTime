@@ -33,6 +33,8 @@
         <div class="alert alert-light border d-flex justify-content-between align-items-center mb-4 py-2 px-3">
             <span class="text-muted small">
                 Bài đăng đang mở: <strong>@Model.PostsQuota.CurrentActivePosts</strong> / @Model.PostsQuota.MaxActivePosts bài
+                <span class="mx-1">•</span>
+                Số lượt đẩy bài còn lại: <strong>@(Model.PostsQuota.BumpBalance ?? 0)</strong>
             </span>
             <span
                 class="badge bg-success-subtle text-success border border-success-subtle">Còn @(Model.PostsQuota.MaxActivePosts - Model.PostsQuota.CurrentActivePosts) lượt đăng</span>

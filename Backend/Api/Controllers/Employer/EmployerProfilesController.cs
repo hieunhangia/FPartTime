@@ -1,7 +1,7 @@
 ﻿using Domain.Shared.Constants;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Service.ApplicationServices.Employer;
+using Service.Employer;
 
 namespace Api.Controllers.Employer
 {

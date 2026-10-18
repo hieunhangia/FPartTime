@@ -1,7 +1,7 @@
 using Contracts.Application.Public;
 using Microsoft.EntityFrameworkCore;
-using Repository;
-using Repository.Models.Jobs;
+using Domain;
+using Domain.Models.Jobs;
 using Riok.Mapperly.Abstractions;
 
 namespace Application.Public;

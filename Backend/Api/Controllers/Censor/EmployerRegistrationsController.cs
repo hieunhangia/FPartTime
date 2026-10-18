@@ -2,9 +2,9 @@ using Domain.Shared.Constants;
 using Domain.Shared.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Service.ApplicationServices.Candidate;
-using Service.ApplicationServices.Censor;
-using EmployerRegistrationService = Service.ApplicationServices.Censor.EmployerRegistrationService;
+using Service.Candidate;
+using Service.Censor;
+using EmployerRegistrationService = Service.Censor.EmployerRegistrationService;
 
 namespace Api.Controllers.Censor
 {

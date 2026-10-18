@@ -22,8 +22,10 @@
                     <div>
                         <h2 class="fw-bold mb-1">@job.Title</h2>
                         <h5 class="text-muted mb-2">@(job.EmployerCompanyName ?? "Nhà tuyển dụng")</h5>
-                        <div class="text-secondary small">
-                            📍 @JobDetailModel.FormatFullAddress(job)
+                        <div class="text-secondary small d-flex flex-wrap gap-2 align-items-center">
+                            <span>📍 @JobDetailModel.FormatFullAddress(job)</span>
+                            <span class="text-muted">•</span>
+                            <span>Cập nhật: @(job.UpdatedAt?.ToLocalTime().ToString("dd/MM/yyyy HH:mm") ?? "-")</span>
                         </div>
                     </div>
                     <button type="button" class="btn btn-outline-danger btn-sm text-nowrap" data-bs-toggle="modal" data-bs-target="#reportJobModal">

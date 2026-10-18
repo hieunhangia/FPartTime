@@ -5,10 +5,10 @@ using Contracts.External;
 using Domain.Shared.Constants;
 using Domain.Shared.Enums;
 using Domain.Shared.Exceptions.HttpErrorExceptions;
+using Domain.Shared.Extensions;
 using Microsoft.EntityFrameworkCore;
-using Repository;
-using Repository.Extensions;
-using Repository.Models.Jobs;
+using Domain;
+using Domain.Models.Jobs;
 using Riok.Mapperly.Abstractions;
 
 namespace Application.Employer;
@@ -41,7 +41,8 @@ public class JobService(
         {
             MaxActivePosts = employer.MaxActivePosts,
             CurrentActivePosts =
-                await context.Jobs.CountAsync(j => j.EmployerId == user.GetUserId() && j.Status == JobStatus.Active)
+                await context.Jobs.CountAsync(j => j.EmployerId == user.GetUserId() && j.Status == JobStatus.Active),
+            BumpBalance = employer.BumpBalance
         };
     }
 
@@ -87,13 +88,12 @@ public class JobService(
             };
         }
 
-        if (await context.JobApplications.AnyAsync(ja =>
-                ja.JobId == jobId && ja.Status != JobApplicationStatus.Rejected))
+        if (await context.JobApplications.AnyAsync(ja => ja.JobId == jobId))
         {
             return new CanUpdateJobResponseDto
             {
                 CanUpdate = false,
-                Reason = "Không thể cập nhật công việc đã có hồ sơ ứng tuyển đang chờ xử lý hoặc đã được chấp nhận."
+                Reason = "Không thể cập nhật công việc đã có hồ sơ ứng tuyển."
             };
         }
 
@@ -126,6 +126,7 @@ public class JobService(
         await context.JobSchedules.Where(s => s.JobId == jobId).ExecuteDeleteAsync();
         await context.JobSalaries.Where(s => s.JobId == jobId).ExecuteDeleteAsync();
         createUpdateJobRequestDto.MapToEntity(job);
+        job.UpdatedAt = DateTime.UtcNow;
         await context.SaveChangesAsync();
         await transaction.CommitAsync();
         return await GetJobDetailAsync(user, job.Id);
@@ -145,6 +146,7 @@ public class JobService(
         }
 
         job.Status = JobStatus.Closed;
+        job.UpdatedAt = DateTime.UtcNow;
         await context.SaveChangesAsync();
 
         var applicantsToNotify = await context.JobApplications
@@ -194,6 +196,7 @@ public class JobService(
         }
 
         job.Status = JobStatus.Active;
+        job.UpdatedAt = DateTime.UtcNow;
         await context.SaveChangesAsync();
 
         var applicantsToNotify = await context.JobApplications
@@ -209,6 +212,53 @@ public class JobService(
         }
 
         return await GetJobDetailAsync(user, job.Id);
+    }
+
+    public async Task<BumpJobResponseDto> BumpJobAsync(ClaimsPrincipal user, Guid jobId)
+    {
+        var userId = user.GetUserId();
+        var employer = await context.Employers.FirstOrDefaultAsync(e => e.UserId == userId);
+        if (employer == null)
+        {
+            throw new ForbiddenException("Bạn không có quyền thực hiện hành động này.");
+        }
+
+        if (employer.BumpBalance <= 0)
+        {
+            throw new BadRequestException(
+                "Bạn đã hết lượt đẩy tin. Vui lòng đăng ký gói hoặc gia hạn để nhận thêm lượt đẩy tin.");
+        }
+
+        var job = await context.Jobs.FirstOrDefaultAsync(j => j.Id == jobId && j.EmployerId == userId);
+        if (job == null)
+        {
+            throw new NotFoundException("Không tìm thấy công việc.");
+        }
+
+        if (job.Status != JobStatus.Active)
+        {
+            throw new BadRequestException("Chỉ có thể đẩy tin đối với các công việc đang hoạt động.");
+        }
+
+        var today = DateOnly.FromDateTime(DateTime.UtcNow);
+        if (job.ExpiryAt < today)
+        {
+            throw new BadRequestException("Công việc đã hết hạn ứng tuyển, không thể đẩy tin.");
+        }
+
+        employer.BumpBalance--;
+        var now = DateTime.UtcNow;
+        job.LastBumpedAt = now;
+        job.UpdatedAt = now;
+
+        await context.SaveChangesAsync();
+
+        return new BumpJobResponseDto
+        {
+            JobId = job.Id,
+            LastBumpedAt = job.LastBumpedAt,
+            RemainingBumpBalance = employer.BumpBalance
+        };
     }
 
     public async Task<JobApplicationDetailResponseDto> GetJobApplicationDetailAsync(ClaimsPrincipal user,
@@ -297,7 +347,9 @@ public class JobService(
     public async Task<int> CloseExpiredJobsAsync(CancellationToken cancellationToken = default) =>
         await context.Jobs.Where(x =>
                 x.Status == JobStatus.Active && x.ExpiryAt < DateOnly.FromDateTime(DateTime.UtcNow))
-            .ExecuteUpdateAsync(s => s.SetProperty(j => j.Status, JobStatus.Closed), cancellationToken);
+            .ExecuteUpdateAsync(s =>
+                    s.SetProperty(j => j.Status, JobStatus.Closed).SetProperty(j => j.UpdatedAt, DateTime.UtcNow),
+                cancellationToken);
 
     private async Task ValidateForCreationOrUpdateJobAsync(CreateUpdateJobRequestDto createUpdateJobRequestDto)
     {

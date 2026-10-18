@@ -20,6 +20,7 @@ public interface IJobService
     Task<JobDetailResponseDto> UpdateJobAsync(ClaimsPrincipal user, Guid jobId,
         CreateUpdateJobRequestDto createUpdateJobRequestDto);
 
+    Task<BumpJobResponseDto> BumpJobAsync(ClaimsPrincipal user, Guid jobId);
     Task<JobDetailResponseDto> CloseJobAsync(ClaimsPrincipal user, Guid jobId);
     Task<JobDetailResponseDto> ReopenJobAsync(ClaimsPrincipal user, Guid jobId);
     Task<JobApplicationDetailResponseDto> GetJobApplicationDetailAsync(ClaimsPrincipal user, Guid jobApplicationId);
@@ -37,6 +38,8 @@ public class JobSummaryResponseDto
     public required string ProvinceName { get; set; }
     public required int ApplicationCount { get; set; }
     public required DateTime CreatedAt { get; set; }
+    public DateTime? UpdatedAt { get; set; }
+    public required DateTime LastBumpedAt { get; set; }
     public required JobStatus Status { get; set; }
     public required List<JobSalaryResponseDto> JobSalaries { get; set; }
 }
@@ -56,6 +59,8 @@ public class JobDetailResponseDto
     public required DateOnly ExpiryAt { get; set; }
     public required JobStatus Status { get; set; }
     public required DateTime CreatedAt { get; set; }
+    public DateTime? UpdatedAt { get; set; }
+    public required DateTime LastBumpedAt { get; set; }
     public required string IndustryName { get; set; }
     public required List<JobScheduleResponseDto> JobSchedules { get; set; }
     public required List<JobSalaryResponseDto> JobSalaries { get; set; }
@@ -66,6 +71,14 @@ public class PostsQuotaResponseDto
 {
     public required int MaxActivePosts { get; set; }
     public required int CurrentActivePosts { get; set; }
+    public int BumpBalance { get; set; }
+}
+
+public class BumpJobResponseDto
+{
+    public required Guid JobId { get; set; }
+    public required DateTime LastBumpedAt { get; set; }
+    public required int RemainingBumpBalance { get; set; }
 }
 
 public class CreateUpdateJobRequestDto

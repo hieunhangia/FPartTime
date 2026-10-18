@@ -2,7 +2,7 @@ using Domain.Shared.Constants;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData.Query;
-using Service.ApplicationServices.Candidate;
+using Service.Candidate;
 
 namespace Api.Controllers.Candidate;
 

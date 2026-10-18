@@ -96,11 +96,58 @@ public static class BusinessRuleConstants
             public const int TitleMaxLength = 200;
             public const int ContentMaxLength = 1000;
         }
+
+        public static class EmployerSubscriptionOrder
+        {
+            public const int PaymentReferenceIdMaxLength = 100;
+        }
+
+        public static class EmployerSubscriptionPlan
+        {
+            public const int TierMaxLength = 50;
+            public const int DurationMaxLength = 50;
+            public const int NameMaxLength = 100;
+            public const int DescriptionMaxLength = 500;
+        }
     }
 
     public static class Employers
     {
         public const int DefaultMaxActivePosts = 5;
+
+        public static class Subscriptions
+        {
+            public const int OrderExpiresInMinutes = 15;
+            public const int MonthlyDurationDays = 30;
+            public const int YearlyDurationDays = 365;
+
+            public static class Plus
+            {
+                public const int ExtraActivePosts = 5;
+                public const int MonthlyFreeBumps = 5;
+                public const int YearlyFreeBumps = 20;
+                public const decimal MonthlyPrice = 30_000m;
+                public const decimal YearlyPrice = 200_000m;
+            }
+
+            public static class Pro
+            {
+                public const int ExtraActivePosts = 10;
+                public const int MonthlyFreeBumps = 10;
+                public const int YearlyFreeBumps = 40;
+                public const decimal MonthlyPrice = 100_000m;
+                public const decimal YearlyPrice = 600_000m;
+            }
+
+            public static class Ultra
+            {
+                public const int ExtraActivePosts = 20;
+                public const int MonthlyFreeBumps = 50;
+                public const int YearlyFreeBumps = 100;
+                public const decimal MonthlyPrice = 200_000m;
+                public const decimal YearlyPrice = 1_000_000m;
+            }
+        }
     }
 
     public static class Jobs

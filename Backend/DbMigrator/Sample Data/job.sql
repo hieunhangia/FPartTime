@@ -45,186 +45,188 @@ BEGIN
     -- 2. NẠP 36 CÔNG VIỆC (JOBS) CHO USER 0000000010
     -- Phân bố ngẫu nhiên đều cho 3 xã: 09988 (Hòa Lạc), 08980 (Yên Lãng), 16279 (Nông Cống)
     -- =====================================================================================
-    INSERT INTO Jobs (Id, Title, Description, VacancyCount, GenderRequirement, MinAgeRequirement, MaxAgeRequirement, CommuneCode, DetailAddress, ExpiryAt, Status, CreatedAt, EmployerId, IndustryId) VALUES
+    INSERT INTO Jobs (Id, Title, Description, VacancyCount, GenderRequirement, MinAgeRequirement, MaxAgeRequirement, CommuneCode, DetailAddress, ExpiryAt, Status, CreatedAt,UpdatedAt,LastBumpedAt, EmployerId, IndustryId) VALUES
     ('22222222-0000-0000-0000-000000000001',
      N'Nhân viên pha chế Barista ca linh hoạt',
      N'Pha chế các loại cà phê, trà hoa quả theo công thức chuẩn của quán. Hỗ trợ đón khách, order đồ uống và giữ gìn vệ sinh sạch sẽ khu vực quầy bar. Môi trường trẻ trung, thân thiện, có hỗ trợ đào tạo bài bản cho người mới bắt đầu.',
-     3, NULL, 18, 26, '09988', N'Số 15 đường Cần Kiệm, gần ĐH FPT, Khu CNC Hòa Lạc', DATEADD(DAY, 36, GETUTCDATE()), 'Active', DATEADD(DAY, -14, GETUTCDATE()), @EmployerId, '11111111-0000-0000-0000-000000000001'),
+     3, NULL, 18, 26, '09988', N'Số 15 đường Cần Kiệm, gần ĐH FPT, Khu CNC Hòa Lạc', DATEADD(DAY, 36, GETUTCDATE()), 'Active', DATEADD(DAY, -14, GETUTCDATE()), DATEADD(DAY, -14, GETUTCDATE()),DATEADD(DAY, -14, GETUTCDATE()),@EmployerId, '11111111-0000-0000-0000-000000000001'),
 
     ('22222222-0000-0000-0000-000000000002',
      N'Nhân viên phục vụ quán ăn gia đình ca tối',
      N'Chào đón khách hàng, lấy order, bưng bê món ăn và dọn dẹp bàn sau khi khách dùng bữa. Yêu cầu nhanh nhẹn, hòa đồng, trung thực. Có hỗ trợ ăn tối miễn phí tại quán.',
-     2, NULL, 18, 28, '08980', N'Số 42 đường Trục chính Yên Lãng', DATEADD(DAY, 36, GETUTCDATE()), 'Active', DATEADD(DAY, -12, GETUTCDATE()), @EmployerId, '11111111-0000-0000-0000-000000000001'),
+     2, NULL, 18, 28, '08980', N'Số 42 đường Trục chính Yên Lãng', DATEADD(DAY, 36, GETUTCDATE()), 'Active', DATEADD(DAY, -12, GETUTCDATE()),DATEADD(DAY, -12, GETUTCDATE()),DATEADD(DAY, -12, GETUTCDATE()), @EmployerId, '11111111-0000-0000-0000-000000000001'),
 
     ('22222222-0000-0000-0000-000000000003',
      N'Nhân viên thu ngân siêu thị mini',
      N'Thực hiện thanh toán hàng hóa qua máy quét mã vạch và phần mềm POS, in hóa đơn, bàn giao tiền ca và kiểm kê kệ hàng gần quầy. Công việc nhẹ nhàng trong môi trường máy lạnh mát mẻ.',
-     2, 'Female', 18, 30, '16279', N'Số 89 đường Quốc lộ 45, Tiểu khu Nam Tiến', DATEADD(DAY, 36, GETUTCDATE()), 'Active', DATEADD(DAY, -10, GETUTCDATE()), @EmployerId, '11111111-0000-0000-0000-000000000002'),
+     2, 'Female', 18, 30, '16279', N'Số 89 đường Quốc lộ 45, Tiểu khu Nam Tiến', DATEADD(DAY, 36, GETUTCDATE()), 'Active', DATEADD(DAY, -10, GETUTCDATE()),DATEADD(DAY, -10, GETUTCDATE()),DATEADD(DAY, -10, GETUTCDATE()), @EmployerId, '11111111-0000-0000-0000-000000000002'),
 
     ('22222222-0000-0000-0000-000000000004',
      N'Nhân viên bán hàng & sắp xếp kệ hàng tiện lợi 24/7',
      N'Tiếp nhận hàng hóa, kiểm tra date và xếp hàng lên quầy kệ ngăn nắp. Tư vấn các chương trình khuyến mãi cho khách hàng đến mua sắm tại cửa hàng tiện lợi.',
-     4, NULL, 18, 25, '09988', N'Số 88 đường Mục Uyên, Khu CNC Hòa Lạc', DATEADD(DAY, 36, GETUTCDATE()), 'Active', DATEADD(DAY, -9, GETUTCDATE()), @EmployerId, '11111111-0000-0000-0000-000000000002'),
+     4, NULL, 18, 25, '09988', N'Số 88 đường Mục Uyên, Khu CNC Hòa Lạc', DATEADD(DAY, 36, GETUTCDATE()), 'Active', DATEADD(DAY, -9, GETUTCDATE()), DATEADD(DAY, -14, GETUTCDATE()),DATEADD(DAY, -14, GETUTCDATE()),@EmployerId, '11111111-0000-0000-0000-000000000002'),
 
     ('22222222-0000-0000-0000-000000000005',
      N'Gia sư Tiếng Anh cho học sinh THCS',
      N'Dạy kèm ngữ pháp và kỹ năng giao tiếp tiếng Anh cơ bản cho học sinh lớp 7-8. Giúp học sinh củng cố kiến thức trên lớp và ôn thi giữa kỳ, cuối kỳ đạt kết quả tốt.',
-     1, NULL, 19, 25, '08980', N'Thôn Bến, gần trường THCS Yên Lãng', DATEADD(DAY, 36, GETUTCDATE()), 'Active', DATEADD(DAY, -8, GETUTCDATE()), @EmployerId, '11111111-0000-0000-0000-000000000003'),
+     1, NULL, 19, 25, '08980', N'Thôn Bến, gần trường THCS Yên Lãng', DATEADD(DAY, 36, GETUTCDATE()), 'Active', DATEADD(DAY, -8, GETUTCDATE()), DATEADD(DAY, -14, GETUTCDATE()),DATEADD(DAY, -14, GETUTCDATE()),@EmployerId, '11111111-0000-0000-0000-000000000003'),
 
     ('22222222-0000-0000-0000-000000000006',
      N'Trợ giảng lớp Toán tư duy tiểu học cuối tuần',
      N'Hỗ trợ giáo viên đứng lớp quản lý trật tự, chấm bài tập thực hành, hướng dẫn các em học sinh làm bài và trao đổi tình hình học tập với phụ huynh sau buổi học.',
-     2, NULL, 18, 24, '16279', N'Số 12 đường Trần Phú, Xã Nông Cống', DATEADD(DAY, 36, GETUTCDATE()), 'Active', DATEADD(DAY, -7, GETUTCDATE()), @EmployerId, '11111111-0000-0000-0000-000000000003'),
+     2, NULL, 18, 24, '16279', N'Số 12 đường Trần Phú, Xã Nông Cống', DATEADD(DAY, 36, GETUTCDATE()), 'Active', DATEADD(DAY, -7, GETUTCDATE()), DATEADD(DAY, -14, GETUTCDATE()),DATEADD(DAY, -14, GETUTCDATE()),@EmployerId, '11111111-0000-0000-0000-000000000003'),
 
     ('22222222-0000-0000-0000-000000000007',
      N'Nhân viên giao đồ ăn & bưu phẩm nội khu CNC Hòa Lạc',
      N'Nhận đồ ăn và các kiện hàng bưu phẩm nhỏ từ các quán ăn, giao nhanh đến ký túc xá và văn phòng doanh nghiệp trong khuôn viên khu CNC. Có phụ cấp xăng xe.',
-     5, NULL, 18, 35, '09988', N'Khu ký túc xá sinh viên, Khu CNC Hòa Lạc', DATEADD(DAY, 36, GETUTCDATE()), 'Active', DATEADD(DAY, -15, GETUTCDATE()), @EmployerId, '11111111-0000-0000-0000-000000000004'),
+     5, NULL, 18, 35, '09988', N'Khu ký túc xá sinh viên, Khu CNC Hòa Lạc', DATEADD(DAY, 36, GETUTCDATE()), 'Active', DATEADD(DAY, -15, GETUTCDATE()), DATEADD(DAY, -14, GETUTCDATE()),DATEADD(DAY, -14, GETUTCDATE()),@EmployerId, '11111111-0000-0000-0000-000000000004'),
 
     ('22222222-0000-0000-0000-000000000008',
      N'Nhân viên phân loại & đóng gói bưu phẩm bưu cục',
      N'Phân chia bưu gửi theo từng tuyến giao nhận, dán tem mã vận đơn và hỗ trợ bốc dỡ các kiện hàng nhẹ tại kho bưu cục. Công việc đều đặn, không áp lực doanh số.',
-     3, 'Male', 18, 32, '08980', N'Bưu cục trung tâm, Thôn Đồi Sen, Xã Yên Lãng', DATEADD(DAY, 36, GETUTCDATE()), 'Active', DATEADD(DAY, -11, GETUTCDATE()), @EmployerId, '11111111-0000-0000-0000-000000000004'),
+     3, 'Male', 18, 32, '08980', N'Bưu cục trung tâm, Thôn Đồi Sen, Xã Yên Lãng', DATEADD(DAY, 36, GETUTCDATE()), 'Active', DATEADD(DAY, -11, GETUTCDATE()), DATEADD(DAY, -14, GETUTCDATE()),DATEADD(DAY, -14, GETUTCDATE()),@EmployerId, '11111111-0000-0000-0000-000000000004'),
 
     ('22222222-0000-0000-0000-000000000009',
      N'Cộng tác viên viết bài Content Marketing & Fanpage',
      N'Sáng tạo nội dung bài viết quảng bá nông sản và đặc sản địa phương trên Fanpage Facebook, TikTok. Trả lời comment, giải đáp thắc mắc cơ bản của khách hàng.',
-     2, NULL, 18, 28, '16279', N'Số 150 đường Lê Lai, Xã Nông Cống', DATEADD(DAY, 36, GETUTCDATE()), 'Active', DATEADD(DAY, -6, GETUTCDATE()), @EmployerId, '11111111-0000-0000-0000-000000000005'),
+     2, NULL, 18, 28, '16279', N'Số 150 đường Lê Lai, Xã Nông Cống', DATEADD(DAY, 36, GETUTCDATE()), 'Active', DATEADD(DAY, -6, GETUTCDATE()), DATEADD(DAY, -14, GETUTCDATE()),DATEADD(DAY, -14, GETUTCDATE()),@EmployerId, '11111111-0000-0000-0000-000000000005'),
 
     ('22222222-0000-0000-0000-000000000010',
      N'Cộng tác viên Seeding và phát triển cộng đồng sinh viên',
      N'Tham gia chia sẻ bài viết, kích hoạt thảo luận trên các diễn đàn, hội nhóm sinh viên tại Hòa Lạc để lan tỏa thông tin các sự kiện học thuật và nghề nghiệp.',
-     3, NULL, 18, 24, '09988', N'Tòa nhà Innovation Hub, Lô CN1, Khu CNC Hòa Lạc', DATEADD(DAY, 36, GETUTCDATE()), 'Active', DATEADD(DAY, -5, GETUTCDATE()), @EmployerId, '11111111-0000-0000-0000-000000000005'),
+     3, NULL, 18, 24, '09988', N'Tòa nhà Innovation Hub, Lô CN1, Khu CNC Hòa Lạc', DATEADD(DAY, 36, GETUTCDATE()), 'Active', DATEADD(DAY, -5, GETUTCDATE()), DATEADD(DAY, -14, GETUTCDATE()),DATEADD(DAY, -14, GETUTCDATE()),@EmployerId, '11111111-0000-0000-0000-000000000005'),
 
     ('22222222-0000-0000-0000-000000000011',
      N'Nhân viên phục vụ tiệc cưới cuối tuần',
      N'Chuẩn bị setup bàn tiệc, bưng bê món ăn theo quy trình tiệc cưới chuyên nghiệp, dọn dẹp bàn tiệc sau chương trình. Thích hợp cho sinh viên làm thêm cuối tuần.',
-     6, NULL, 18, 26, '08980', N'Trung tâm tiệc cưới Ven Sông, Xã Yên Lãng', DATEADD(DAY, 36, GETUTCDATE()), 'Active', DATEADD(DAY, -13, GETUTCDATE()), @EmployerId, '11111111-0000-0000-0000-000000000006'),
+     6, NULL, 18, 26, '08980', N'Trung tâm tiệc cưới Ven Sông, Xã Yên Lãng', DATEADD(DAY, 36, GETUTCDATE()), 'Active', DATEADD(DAY, -13, GETUTCDATE()), DATEADD(DAY, -14, GETUTCDATE()),DATEADD(DAY, -14, GETUTCDATE()),@EmployerId, '11111111-0000-0000-0000-000000000006'),
 
     ('22222222-0000-0000-0000-000000000012',
      N'PG/PB hỗ trợ gian hàng triển lãm hội chợ thương mại',
      N'Đứng quầy giới thiệu sản phẩm tiêu dùng, phát tờ rơi brochure thông tin, hướng dẫn khách tham quan trải nghiệm sản phẩm và tham gia bốc thăm trúng thưởng.',
-     4, NULL, 18, 25, '16279', N'Sân vận động Trung tâm, Xã Nông Cống', DATEADD(DAY, 36, GETUTCDATE()), 'Closed', DATEADD(DAY, -20, GETUTCDATE()), @EmployerId, '11111111-0000-0000-0000-000000000006'),
+     4, NULL, 18, 25, '16279', N'Sân vận động Trung tâm, Xã Nông Cống', DATEADD(DAY, 36, GETUTCDATE()), 'Closed', DATEADD(DAY, -20, GETUTCDATE()), DATEADD(DAY, -14, GETUTCDATE()),DATEADD(DAY, -14, GETUTCDATE()),@EmployerId, '11111111-0000-0000-0000-000000000006'),
 
     ('22222222-0000-0000-0000-000000000013',
      N'Lễ tân tòa nhà văn phòng ca xoay linh hoạt',
      N'Trực quầy sảnh chính tòa nhà, chào đón khách đến công tác, hướng dẫn khách làm thủ tục đăng ký ra vào, tiếp nhận bưu phẩm thư tín chuyển phát nhanh.',
-     2, 'Female', 19, 26, '09988', N'Tòa nhà Alpha Office, Km 29 Đại lộ Thăng Long, Hòa Lạc', DATEADD(DAY, 36, GETUTCDATE()), 'Active', DATEADD(DAY, -4, GETUTCDATE()), @EmployerId, '11111111-0000-0000-0000-000000000007'),
+     2, 'Female', 19, 26, '09988', N'Tòa nhà Alpha Office, Km 29 Đại lộ Thăng Long, Hòa Lạc', DATEADD(DAY, 36, GETUTCDATE()), 'Active', DATEADD(DAY, -4, GETUTCDATE()), DATEADD(DAY, -14, GETUTCDATE()),DATEADD(DAY, -14, GETUTCDATE()),@EmployerId, '11111111-0000-0000-0000-000000000007'),
 
     ('22222222-0000-0000-0000-000000000014',
      N'Nhân viên trực tổng đài & CSKH bán thời gian',
      N'Nghe điện thoại tổng đài, giải đáp thông tin dịch vụ và các câu hỏi thường gặp của khách hàng, ghi chép phản hồi vào phần mềm quản lý chăm sóc khách hàng.',
-     3, NULL, 18, 28, '08980', N'Văn phòng chăm sóc khách hàng, Số 19 đường Làng, Xã Yên Lãng', DATEADD(DAY, 36, GETUTCDATE()), 'Active', DATEADD(DAY, -7, GETUTCDATE()), @EmployerId, '11111111-0000-0000-0000-000000000007'),
+     3, NULL, 18, 28, '08980', N'Văn phòng chăm sóc khách hàng, Số 19 đường Làng, Xã Yên Lãng', DATEADD(DAY, 36, GETUTCDATE()), 'Active', DATEADD(DAY, -7, GETUTCDATE()), DATEADD(DAY, -14, GETUTCDATE()),DATEADD(DAY, -14, GETUTCDATE()),@EmployerId, '11111111-0000-0000-0000-000000000007'),
 
     ('22222222-0000-0000-0000-000000000015',
      N'Cộng tác viên kiểm thử phần mềm (Manual Tester) part-time',
      N'Chạy kiểm thử các chức năng trên ứng dụng web và mobile theo test case có sẵn, ghi chép và log các lỗi phát hiện lên Jira. Ưu tiên sinh viên ngành CNTT có tư duy logic tốt.',
-     2, NULL, 19, 26, '16279', N'Phòng R&D Công nghệ số, Thôn Minh Hải, Xã Nông Cống', DATEADD(DAY, 36, GETUTCDATE()), 'Active', DATEADD(DAY, -5, GETUTCDATE()), @EmployerId, '11111111-0000-0000-0000-000000000008'),
+     2, NULL, 19, 26, '16279', N'Phòng R&D Công nghệ số, Thôn Minh Hải, Xã Nông Cống', DATEADD(DAY, 36, GETUTCDATE()), 'Active', DATEADD(DAY, -5, GETUTCDATE()), DATEADD(DAY, -14, GETUTCDATE()),DATEADD(DAY, -14, GETUTCDATE()),@EmployerId, '11111111-0000-0000-0000-000000000008'),
 
     ('22222222-0000-0000-0000-000000000016',
      N'Nhân viên nhập liệu số hóa hồ sơ chứng từ',
      N'Nhập thông tin khách hàng, hóa đơn chứng từ từ bản scan giấy sang bảng tính Excel và phần mềm lưu trữ số. Yêu cầu tính cẩn thận, tỉ mỉ, tốc độ gõ phím nhanh.',
-     3, NULL, 18, 27, '09988', N'Tòa nhà Công nghệ F-Town, Khu CNC Hòa Lạc', DATEADD(DAY, 36, GETUTCDATE()), 'Active', DATEADD(DAY, -3, GETUTCDATE()), @EmployerId, '11111111-0000-0000-0000-000000000008'),
+     3, NULL, 18, 27, '09988', N'Tòa nhà Công nghệ F-Town, Khu CNC Hòa Lạc', DATEADD(DAY, 36, GETUTCDATE()), 'Active', DATEADD(DAY, -3, GETUTCDATE()), DATEADD(DAY, -14, GETUTCDATE()),DATEADD(DAY, -14, GETUTCDATE()),@EmployerId, '11111111-0000-0000-0000-000000000008'),
 
     ('22222222-0000-0000-0000-000000000017',
      N'Thiết kế đồ họa 2D banner quảng cáo part-time',
      N'Thiết kế ấn phẩm truyền thông, banner mạng xã hội Facebook, poster sự kiện bằng Canva hoặc Photoshop theo brief của phòng truyền thông. Có thể mang laptop cá nhân làm việc.',
-     1, NULL, 18, 28, '08980', N'Cụm văn phòng sáng tạo Yên Lãng', DATEADD(DAY, 36, GETUTCDATE()), 'Active', DATEADD(DAY, -8, GETUTCDATE()), @EmployerId, '11111111-0000-0000-0000-000000000009'),
+     1, NULL, 18, 28, '08980', N'Cụm văn phòng sáng tạo Yên Lãng', DATEADD(DAY, 36, GETUTCDATE()), 'Active', DATEADD(DAY, -8, GETUTCDATE()), DATEADD(DAY, -14, GETUTCDATE()),DATEADD(DAY, -14, GETUTCDATE()),@EmployerId, '11111111-0000-0000-0000-000000000009'),
 
     ('22222222-0000-0000-0000-000000000018',
      N'Video Editor dựng video ngắn TikTok / Reels theo ca',
      N'Cắt ghép video, chèn nhạc bắt trend, tạo hiệu ứng chữ và âm thanh cho các video ngắn giới thiệu sản phẩm. Yêu cầu biết sử dụng CapCut PC hoặc Premiere căn bản.',
-     2, NULL, 18, 26, '16279', N'Studio Media Nam Tiến, Xã Nông Cống', DATEADD(DAY, 36, GETUTCDATE()), 'AdminHidden', DATEADD(DAY, -16, GETUTCDATE()), @EmployerId, '11111111-0000-0000-0000-000000000009'),
+     2, NULL, 18, 26, '16279', N'Studio Media Nam Tiến, Xã Nông Cống', DATEADD(DAY, 36, GETUTCDATE()), 'AdminHidden', DATEADD(DAY, -16, GETUTCDATE()), DATEADD(DAY, -14, GETUTCDATE()),DATEADD(DAY, -14, GETUTCDATE()),@EmployerId, '11111111-0000-0000-0000-000000000009'),
 
     ('22222222-0000-0000-0000-000000000019',
      N'Trợ lý văn phòng kiêm sắp xếp tài liệu bán thời gian',
      N'Phân loại và đóng tập hồ sơ hợp đồng, kiểm tra tài liệu văn phòng, scan giấy tờ gửi email và chuẩn bị phòng họp khi có khách đối tác đến làm việc.',
-     1, NULL, 19, 26, '09988', N'Văn phòng quản lý dự án, Khu CNC Hòa Lạc', DATEADD(DAY, 36, GETUTCDATE()), 'Active', DATEADD(DAY, -6, GETUTCDATE()), @EmployerId, '11111111-0000-0000-0000-000000000010'),
+     1, NULL, 19, 26, '09988', N'Văn phòng quản lý dự án, Khu CNC Hòa Lạc', DATEADD(DAY, 36, GETUTCDATE()), 'Active', DATEADD(DAY, -6, GETUTCDATE()), DATEADD(DAY, -14, GETUTCDATE()),DATEADD(DAY, -14, GETUTCDATE()),@EmployerId, '11111111-0000-0000-0000-000000000010'),
 
     ('22222222-0000-0000-0000-000000000020',
      N'Nhân viên photocopy và in ấn văn phòng phẩm',
      N'Vận hành máy photocopy, máy scan, đóng sổ gáy xoắn tài liệu cho khách hàng, hỗ trợ bán sách vở văn phòng phẩm tại cửa hàng gần cổng trường học.',
-     2, NULL, 18, 25, '08980', N'Cửa hàng In ấn số 56 đường Liên Xã Yên Lãng', DATEADD(DAY, 36, GETUTCDATE()), 'Active', DATEADD(DAY, -9, GETUTCDATE()), @EmployerId, '11111111-0000-0000-0000-000000000010'),
+     2, NULL, 18, 25, '08980', N'Cửa hàng In ấn số 56 đường Liên Xã Yên Lãng', DATEADD(DAY, 36, GETUTCDATE()), 'Active', DATEADD(DAY, -9, GETUTCDATE()), DATEADD(DAY, -14, GETUTCDATE()),DATEADD(DAY, -14, GETUTCDATE()),@EmployerId, '11111111-0000-0000-0000-000000000010'),
 
     ('22222222-0000-0000-0000-000000000021',
      N'Nhân viên phụ bếp buffet khách sạn ca sáng',
      N'Sơ chế rau củ quả, chuẩn bị nguyên liệu thịt cá cho các món ăn sáng, phụ trách chia món và rửa dọn dụng cụ nấu nướng sau giờ tiệc buffet.',
-     2, NULL, 18, 32, '16279', N'Khách sạn Hương Quê, Tiểu khu Nam Tiến, Xã Nông Cống', DATEADD(DAY, 36, GETUTCDATE()), 'Active', DATEADD(DAY, -11, GETUTCDATE()), @EmployerId, '11111111-0000-0000-0000-000000000011'),
+     2, NULL, 18, 32, '16279', N'Khách sạn Hương Quê, Tiểu khu Nam Tiến, Xã Nông Cống', DATEADD(DAY, 36, GETUTCDATE()), 'Active', DATEADD(DAY, -11, GETUTCDATE()), DATEADD(DAY, -14, GETUTCDATE()),DATEADD(DAY, -14, GETUTCDATE()),@EmployerId, '11111111-0000-0000-0000-000000000011'),
 
     ('22222222-0000-0000-0000-000000000022',
      N'Hướng dẫn viên phụ trách đoàn khách dã ngoại sinh thái',
      N'Đón tiếp các đoàn tham quan học sinh, sinh viên, dẫn đoàn qua các trạm trải nghiệm, tổ chức các trò chơi hoạt náo và đảm bảo an toàn cho các bạn trong đoàn.',
-     3, NULL, 20, 28, '09988', N'Khu trải nghiệm sinh thái Hồ Tân Xã, Xã Hòa Lạc', DATEADD(DAY, 36, GETUTCDATE()), 'Active', DATEADD(DAY, -15, GETUTCDATE()), @EmployerId, '11111111-0000-0000-0000-000000000011'),
+     3, NULL, 20, 28, '09988', N'Khu trải nghiệm sinh thái Hồ Tân Xã, Xã Hòa Lạc', DATEADD(DAY, 36, GETUTCDATE()), 'Active', DATEADD(DAY, -15, GETUTCDATE()), DATEADD(DAY, -14, GETUTCDATE()),DATEADD(DAY, -14, GETUTCDATE()),@EmployerId, '11111111-0000-0000-0000-000000000011'),
 
     ('22222222-0000-0000-0000-000000000023',
      N'Trợ lý thợ phụ gội đầu dưỡng sinh & làm móng part-time',
      N'Thực hiện các bước gội đầu dưỡng sinh thư giãn, đắp mặt nạ, ngâm chân thảo mộc cho khách và dọn dẹp vệ sinh phòng dịch vụ sạch sẽ, ngăn nắp.',
-     2, 'Female', 18, 28, '08980', N'Tiệm Spa An Nhiên, Thôn Yên Lãng, Xã Yên Lãng', DATEADD(DAY, 36, GETUTCDATE()), 'Active', DATEADD(DAY, -7, GETUTCDATE()), @EmployerId, '11111111-0000-0000-0000-000000000012'),
+     2, 'Female', 18, 28, '08980', N'Tiệm Spa An Nhiên, Thôn Yên Lãng, Xã Yên Lãng', DATEADD(DAY, 36, GETUTCDATE()), 'Active', DATEADD(DAY, -7, GETUTCDATE()), DATEADD(DAY, -14, GETUTCDATE()),DATEADD(DAY, -14, GETUTCDATE()),@EmployerId, '11111111-0000-0000-0000-000000000012'),
 
     ('22222222-0000-0000-0000-000000000024',
      N'Kỹ thuật viên phụ việc tiệm làm tóc & mi móng',
      N'Hỗ trợ thợ chính xả tóc, sấy tóc, khử trùng kềm kéo dụng cụ và giữ vệ sinh không gian tiệm. Được chỉ dạy nâng cao tay nghề nếu có tinh thần cầu tiến.',
-     1, 'Female', 18, 26, '16279', N'Beauty Salon Mai Anh, Số 48 đường Thanh Niên, Xã Nông Cống', DATEADD(DAY, 36, GETUTCDATE()), 'Closed', DATEADD(DAY, -22, GETUTCDATE()), @EmployerId, '11111111-0000-0000-0000-000000000012'),
+     1, 'Female', 18, 26, '16279', N'Beauty Salon Mai Anh, Số 48 đường Thanh Niên, Xã Nông Cống', DATEADD(DAY, 36, GETUTCDATE()), 'Closed', DATEADD(DAY, -22, GETUTCDATE()), DATEADD(DAY, -14, GETUTCDATE()),DATEADD(DAY, -14, GETUTCDATE()),@EmployerId, '11111111-0000-0000-0000-000000000012'),
 
     ('22222222-0000-0000-0000-000000000025',
      N'Nhân viên giữ xe quán cà phê theo ca',
      N'Dắt xe, bấm vé và sắp xếp xe gọn gàng vào bãi cho khách đến uống nước. Giữ gìn an ninh, quan sát khu vực để xe của khách hàng luôn an toàn.',
-     2, 'Male', 18, 40, '09988', N'Cổng số 2 Khu CNC Hòa Lạc, Xã Hòa Lạc', DATEADD(DAY, 36, GETUTCDATE()), 'Active', DATEADD(DAY, -5, GETUTCDATE()), @EmployerId, '11111111-0000-0000-0000-000000000013'),
+     2, 'Male', 18, 40, '09988', N'Cổng số 2 Khu CNC Hòa Lạc, Xã Hòa Lạc', DATEADD(DAY, 36, GETUTCDATE()), 'Active', DATEADD(DAY, -5, GETUTCDATE()), DATEADD(DAY, -14, GETUTCDATE()),DATEADD(DAY, -14, GETUTCDATE()),@EmployerId, '11111111-0000-0000-0000-000000000013'),
 
     ('22222222-0000-0000-0000-000000000026',
      N'Nhân viên an ninh tuần tra bãi xe ca đêm',
      N'Trực chốt kiểm soát phương tiện ban đêm, đi tuần tra định kỳ quanh khuôn viên nhà xưởng bãi giữ xe, giám sát hệ thống camera an ninh và phòng cháy chữa cháy.',
-     2, 'Male', 20, 45, '08980', N'Cụm công nghiệp Yên Lãng, Xã Yên Lãng', DATEADD(DAY, 36, GETUTCDATE()), 'Active', DATEADD(DAY, -12, GETUTCDATE()), @EmployerId, '11111111-0000-0000-0000-000000000013'),
+     2, 'Male', 20, 45, '08980', N'Cụm công nghiệp Yên Lãng, Xã Yên Lãng', DATEADD(DAY, 36, GETUTCDATE()), 'Active', DATEADD(DAY, -12, GETUTCDATE()), DATEADD(DAY, -14, GETUTCDATE()),DATEADD(DAY, -14, GETUTCDATE()),@EmployerId, '11111111-0000-0000-0000-000000000013'),
 
     ('22222222-0000-0000-0000-000000000027',
      N'Nhân viên tạp vụ văn phòng theo giờ buổi sáng',
      N'Lau dọn sàn nhà, lau kính, rửa cốc chén, thu gom và phân loại rác thải văn phòng trước khi nhân viên vào làm việc ca sáng. Môi trường sạch sẽ, lịch sự.',
-     1, 'Female', 22, 50, '16279', N'Tòa nhà Chi nhánh Ngân hàng, Xã Nông Cống', DATEADD(DAY, 36, GETUTCDATE()), 'Active', DATEADD(DAY, -8, GETUTCDATE()), @EmployerId, '11111111-0000-0000-0000-000000000014'),
+     1, 'Female', 22, 50, '16279', N'Tòa nhà Chi nhánh Ngân hàng, Xã Nông Cống', DATEADD(DAY, 36, GETUTCDATE()), 'Active', DATEADD(DAY, -8, GETUTCDATE()), DATEADD(DAY, -14, GETUTCDATE()),DATEADD(DAY, -14, GETUTCDATE()),@EmployerId, '11111111-0000-0000-0000-000000000014'),
 
     ('22222222-0000-0000-0000-000000000028',
      N'Nhân viên vệ sinh buồng phòng homestay theo ca',
      N'Thay chăn ga gối đệm, hút bụi, lau sàn, cọ rửa nhà tắm và bổ sung vật phẩm tiện ích trong phòng homestay sau khi khách làm thủ tục check-out trả phòng.',
-     2, NULL, 20, 45, '09988', N'Homestay Thung Lũng Xanh, Thôn 4, Xã Hòa Lạc', DATEADD(DAY, 36, GETUTCDATE()), 'Active', DATEADD(DAY, -4, GETUTCDATE()), @EmployerId, '11111111-0000-0000-0000-000000000014'),
+     2, NULL, 20, 45, '09988', N'Homestay Thung Lũng Xanh, Thôn 4, Xã Hòa Lạc', DATEADD(DAY, 36, GETUTCDATE()), 'Active', DATEADD(DAY, -4, GETUTCDATE()), DATEADD(DAY, -14, GETUTCDATE()),DATEADD(DAY, -14, GETUTCDATE()),@EmployerId, '11111111-0000-0000-0000-000000000014'),
 
     ('22222222-0000-0000-0000-000000000029',
      N'Lễ tân quầy dịch vụ phòng tập Gym & Yoga',
      N'Chào đón hội viên, quẹt thẻ check-in, phát khăn tập, thu ngân bán nước bù khoáng và hỗ trợ tư vấn các gói dịch vụ thẻ tập thể thao tại trung tâm.',
-     2, NULL, 18, 25, '08980', N'Trung tâm Thể hình Star Fitness, Xã Yên Lãng', DATEADD(DAY, 36, GETUTCDATE()), 'Active', DATEADD(DAY, -6, GETUTCDATE()), @EmployerId, '11111111-0000-0000-0000-000000000015'),
+     2, NULL, 18, 25, '08980', N'Trung tâm Thể hình Star Fitness, Xã Yên Lãng', DATEADD(DAY, 36, GETUTCDATE()), 'Active', DATEADD(DAY, -6, GETUTCDATE()), DATEADD(DAY, -14, GETUTCDATE()),DATEADD(DAY, -14, GETUTCDATE()),@EmployerId, '11111111-0000-0000-0000-000000000015'),
 
     ('22222222-0000-0000-0000-000000000030',
      N'Cứu hộ hồ bơi kiêm quản lý phòng thay đồ ca chiều',
      N'Quan sát nhắc nhở người bơi tuân thủ nội quy an toàn tại hồ bơi, cứu hộ xử lý sự cố kịp thời, kiểm tra vệ sinh và khóa tủ gửi đồ của khách bơi.',
-     1, 'Male', 19, 28, '16279', N'Khu liên hợp thể thao Nông Cống, Xã Nông Cống', DATEADD(DAY, 36, GETUTCDATE()), 'AdminHidden', DATEADD(DAY, -18, GETUTCDATE()), @EmployerId, '11111111-0000-0000-0000-000000000015'),
+     1, 'Male', 19, 28, '16279', N'Khu liên hợp thể thao Nông Cống, Xã Nông Cống', DATEADD(DAY, 36, GETUTCDATE()), 'AdminHidden', DATEADD(DAY, -18, GETUTCDATE()), DATEADD(DAY, -14, GETUTCDATE()),DATEADD(DAY, -14, GETUTCDATE()),@EmployerId, '11111111-0000-0000-0000-000000000015'),
 
     ('22222222-0000-0000-0000-000000000031',
      N'Cộng tác viên dịch thuật tài liệu Anh - Việt bán thời gian',
      N'Biên dịch tài liệu hướng dẫn kỹ thuật, tài liệu hội thảo và các bài viết tin tức công nghệ từ tiếng Anh sang tiếng Việt. Được làm việc linh hoạt kết hợp từ xa.',
-     2, NULL, 19, 30, '09988', N'Tòa nhà Alpha, Khu CNC Hòa Lạc', DATEADD(DAY, 36, GETUTCDATE()), 'Active', DATEADD(DAY, -3, GETUTCDATE()), @EmployerId, '11111111-0000-0000-0000-000000000016'),
+     2, NULL, 19, 30, '09988', N'Tòa nhà Alpha, Khu CNC Hòa Lạc', DATEADD(DAY, 36, GETUTCDATE()), 'Active', DATEADD(DAY, -3, GETUTCDATE()), DATEADD(DAY, -14, GETUTCDATE()),DATEADD(DAY, -14, GETUTCDATE()),@EmployerId, '11111111-0000-0000-0000-000000000016'),
 
     ('22222222-0000-0000-0000-000000000032',
      N'Biên tập viên hiệu đính sách & tài liệu giáo dục',
      N'Đọc soát lỗi chính tả, câu từ, ngữ pháp tiếng Việt, đối chiếu bản dịch với bản gốc các đầu sách kỹ năng sống và tài liệu tham khảo cho học sinh.',
-     1, NULL, 20, 30, '08980', N'Văn phòng sách Tri Thức, Thôn Bến, Xã Yên Lãng', DATEADD(DAY, 36, GETUTCDATE()), 'Active', DATEADD(DAY, -5, GETUTCDATE()), @EmployerId, '11111111-0000-0000-0000-000000000016'),
+     1, NULL, 20, 30, '08980', N'Văn phòng sách Tri Thức, Thôn Bến, Xã Yên Lãng', DATEADD(DAY, 36, GETUTCDATE()), 'Active', DATEADD(DAY, -5, GETUTCDATE()), DATEADD(DAY, -14, GETUTCDATE()),DATEADD(DAY, -14, GETUTCDATE()),@EmployerId, '11111111-0000-0000-0000-000000000016'),
 
     ('22222222-0000-0000-0000-000000000033',
      N'Phụ quay & setup đèn ánh sáng tại studio chụp ảnh',
      N'Hỗ trợ nhiếp ảnh gia sắp xếp phông nền, bố trí chân máy, đèn led, chuẩn bị phụ kiện chụp ảnh và hỗ trợ khách hàng chỉnh trang trang phục trong studio.',
-     2, NULL, 18, 26, '16279', N'Studio Ảnh cưới Mộng Mơ, Số 30 đường Tỉnh lộ 505', DATEADD(DAY, 36, GETUTCDATE()), 'Active', DATEADD(DAY, -7, GETUTCDATE()), @EmployerId, '11111111-0000-0000-0000-000000000017'),
+     2, NULL, 18, 26, '16279', N'Studio Ảnh cưới Mộng Mơ, Số 30 đường Tỉnh lộ 505', DATEADD(DAY, 36, GETUTCDATE()), 'Active', DATEADD(DAY, -7, GETUTCDATE()), DATEADD(DAY, -14, GETUTCDATE()),DATEADD(DAY, -14, GETUTCDATE()),@EmployerId, '11111111-0000-0000-0000-000000000017'),
 
     ('22222222-0000-0000-0000-000000000034',
      N'Thợ chụp ảnh sự kiện & kỷ yếu học sinh sinh viên',
      N'Chụp ảnh phóng sự sự kiện ngày hội trường, chụp ảnh nhóm kỷ yếu tốt nghiệp tại các trường đại học lân cận. Yêu cầu có máy ảnh cá nhân và biết chụp góc rộng.',
-     2, NULL, 19, 27, '09988', N'Khuôn viên Đại học FPT, Khu CNC Hòa Lạc', DATEADD(DAY, 36, GETUTCDATE()), 'Active', DATEADD(DAY, -14, GETUTCDATE()), @EmployerId, '11111111-0000-0000-0000-000000000017'),
+     2, NULL, 19, 27, '09988', N'Khuôn viên Đại học FPT, Khu CNC Hòa Lạc', DATEADD(DAY, 36, GETUTCDATE()), 'Active', DATEADD(DAY, -14, GETUTCDATE()), DATEADD(DAY, -14, GETUTCDATE()),DATEADD(DAY, -14, GETUTCDATE()),@EmployerId, '11111111-0000-0000-0000-000000000017'),
 
     ('22222222-0000-0000-0000-000000000035',
      N'Nhân viên phỏng vấn khảo sát người tiêu dùng tại chợ',
      N'Gặp gỡ phỏng vấn người tiêu dùng theo bảng hỏi có sẵn trên tablet về thói quen mua sắm hàng tiêu dùng, ghi nhận ý kiến đánh giá chất lượng sản phẩm.',
-     3, NULL, 18, 28, '08980', N'Khu vực chợ trung tâm Yên Lãng, Xã Yên Lãng', DATEADD(DAY, 36, GETUTCDATE()), 'Active', DATEADD(DAY, -9, GETUTCDATE()), @EmployerId, '11111111-0000-0000-0000-000000000018'),
+     3, NULL, 18, 28, '08980', N'Khu vực chợ trung tâm Yên Lãng, Xã Yên Lãng', DATEADD(DAY, 36, GETUTCDATE()), 'Active', DATEADD(DAY, -9, GETUTCDATE()), DATEADD(DAY, -14, GETUTCDATE()),DATEADD(DAY, -14, GETUTCDATE()),@EmployerId, '11111111-0000-0000-0000-000000000018'),
 
     ('22222222-0000-0000-0000-000000000036',
      N'Khách hàng bí mật (Mystery Shopper) đánh giá cửa hàng',
      N'Đóng vai khách hàng đến trải nghiệm mua sắm tại các đại lý, ghi nhận thái độ phục vụ của nhân viên, chụp hình quầy kệ và hoàn thành phiếu đánh giá trực tuyến.',
-     2, NULL, 19, 30, '16279', N'Trung tâm bán lẻ Nam Tiến, Xã Nông Cống', DATEADD(DAY, 36, GETUTCDATE()), 'Active', DATEADD(DAY, -2, GETUTCDATE()), @EmployerId, '11111111-0000-0000-0000-000000000018');
+     2, NULL, 19, 30, '16279', N'Trung tâm bán lẻ Nam Tiến, Xã Nông Cống', DATEADD(DAY, 36, GETUTCDATE()), 'Active', DATEADD(DAY, -2, GETUTCDATE()), DATEADD(DAY, -14, GETUTCDATE()),DATEADD(DAY, -14, GETUTCDATE()),@EmployerId, '11111111-0000-0000-0000-000000000018');
+
+    UPDATE Jobs SET UpdatedAt = CreatedAt, LastBumpedAt = CreatedAt WHERE EmployerId = @EmployerId;
 
     -- =====================================================================================
     -- 3. NẠP MỨC LƯƠNG CÔNG VIỆC (JOB SALARIES)

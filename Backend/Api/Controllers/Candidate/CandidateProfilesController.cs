@@ -1,7 +1,8 @@
 using Domain.Shared.Constants;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
-using Service.ApplicationServices.Candidate;
+using Service.Candidate;
+
 namespace Api.Controllers.Candidate
 {
     [Route("api/[controller]")]

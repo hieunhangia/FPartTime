@@ -1,7 +1,7 @@
 using DbMigrator;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
-using Repository;
+using Domain;
 
 var isReset = args.Contains("--reset");
 var isMigrate = args.Contains("--migrate");

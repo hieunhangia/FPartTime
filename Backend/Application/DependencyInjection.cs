@@ -25,6 +25,8 @@ public static class DependencyInjection
 
         // Employer
         builder.Services.AddScoped<IJobService, JobService>();
+        builder.Services.AddScoped<ISubscriptionService, SubscriptionService>();
+        builder.Services.AddScoped<ICandidateService, CandidateService>();
 
         // Censor
 

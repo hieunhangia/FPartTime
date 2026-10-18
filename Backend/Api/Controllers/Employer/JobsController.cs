@@ -94,6 +94,15 @@ public class JobsController(IJobService jobService) : ControllerBase
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status500InternalServerError)]
     public async Task<IActionResult> ReopenJob(Guid id) => Ok(await jobService.ReopenJobAsync(User, id));
 
+    [HttpPost("{id:guid}/bump")]
+    [ProducesResponseType<BumpJobResponseDto>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status500InternalServerError)]
+    public async Task<IActionResult> BumpJob(Guid id) => Ok(await jobService.BumpJobAsync(User, id));
+
     [HttpGet("applications/{id:guid}")]
     [ProducesResponseType<JobApplicationDetailResponseDto>(StatusCodes.Status200OK)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status401Unauthorized)]

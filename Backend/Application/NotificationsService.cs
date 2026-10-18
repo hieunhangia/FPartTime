@@ -1,10 +1,10 @@
 using System.Security.Claims;
 using Contracts.Application;
 using Domain.Shared.Exceptions.HttpErrorExceptions;
+using Domain.Shared.Extensions;
 using Microsoft.EntityFrameworkCore;
-using Repository;
-using Repository.Extensions;
-using Repository.Models.Notifications;
+using Domain;
+using Domain.Models.Notifications;
 using Riok.Mapperly.Abstractions;
 
 namespace Application;

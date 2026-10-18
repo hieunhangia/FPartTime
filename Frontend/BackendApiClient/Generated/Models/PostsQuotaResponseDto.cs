@@ -14,6 +14,8 @@ namespace ApiSdk.Models
     {
         /// <summary>Stores additional data not described in the OpenAPI description found when deserializing. Can be used for serialization as well.</summary>
         public IDictionary<string, object> AdditionalData { get; set; }
+        /// <summary>The bumpBalance property</summary>
+        public int? BumpBalance { get; set; }
         /// <summary>The currentActivePosts property</summary>
         public int? CurrentActivePosts { get; set; }
         /// <summary>The maxActivePosts property</summary>
@@ -43,6 +45,7 @@ namespace ApiSdk.Models
         {
             return new Dictionary<string, Action<IParseNode>>
             {
+                { "bumpBalance", n => { BumpBalance = n.GetIntValue(); } },
                 { "currentActivePosts", n => { CurrentActivePosts = n.GetIntValue(); } },
                 { "maxActivePosts", n => { MaxActivePosts = n.GetIntValue(); } },
             };
@@ -54,6 +57,7 @@ namespace ApiSdk.Models
         public virtual void Serialize(ISerializationWriter writer)
         {
             if(ReferenceEquals(writer, null)) throw new ArgumentNullException(nameof(writer));
+            writer.WriteIntValue("bumpBalance", BumpBalance);
             writer.WriteIntValue("currentActivePosts", CurrentActivePosts);
             writer.WriteIntValue("maxActivePosts", MaxActivePosts);
             writer.WriteAdditionalData(AdditionalData);

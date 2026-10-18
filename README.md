@@ -14,7 +14,7 @@
 - Quản lý profile
 - CRUD job
 - Duyệt đơn ứng tuyển job
-- Tính năng trả phí: Đẩy bài (Mua theo lượt). Mở thêm lượt đăng bài (Subscription tháng/năm). Chủ động tìm Candidate phù hợp (Subscription tháng/năm)
+- Tính năng trả phí: Đẩy bài (Mua theo lượt). Mở thêm lượt đăng bài (Subscription). Chủ động tìm Candidate phù hợp (Subscription)
 
 **Censor**
 - Duyệt đơn đăng kí làm Employer

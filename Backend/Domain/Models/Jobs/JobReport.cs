@@ -1,0 +1,19 @@
+using Domain.Models.Users;
+using Domain.Shared.Enums;
+
+namespace Domain.Models.Jobs;
+
+public class JobReport
+{
+    public Guid Id { get; set; }
+    public required string Reason { get; set; }
+    public JobReportStatus Status { get; set; } = JobReportStatus.Pending;
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public Guid JobId { get; set; }
+    public Guid ReporterId { get; set; }
+    public Guid? ResolverId { get; set; }
+
+    public Job? Job { get; set; }
+    public CandidateProfile? Reporter { get; set; }
+    public CensorProfile? Resolver { get; set; }
+}

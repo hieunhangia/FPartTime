@@ -44,6 +44,8 @@ namespace ApiSdk.Models
 #else
         public List<global::ApiSdk.Models.JobSalaryResponseDto> JobSalaries { get; set; }
 #endif
+        /// <summary>The lastBumpedAt property</summary>
+        public DateTimeOffset? LastBumpedAt { get; set; }
         /// <summary>The provinceName property</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
@@ -62,6 +64,8 @@ namespace ApiSdk.Models
 #else
         public string Title { get; set; }
 #endif
+        /// <summary>The updatedAt property</summary>
+        public DateTimeOffset? UpdatedAt { get; set; }
         /// <summary>
         /// Instantiates a new <see cref="global::ApiSdk.Models.JobSummaryResponseDto"/> and sets the default values.
         /// </summary>
@@ -93,9 +97,11 @@ namespace ApiSdk.Models
                 { "detailAddress", n => { DetailAddress = n.GetStringValue(); } },
                 { "id", n => { Id = n.GetGuidValue(); } },
                 { "jobSalaries", n => { JobSalaries = n.GetCollectionOfObjectValues<global::ApiSdk.Models.JobSalaryResponseDto>(global::ApiSdk.Models.JobSalaryResponseDto.CreateFromDiscriminatorValue)?.AsList(); } },
+                { "lastBumpedAt", n => { LastBumpedAt = n.GetDateTimeOffsetValue(); } },
                 { "provinceName", n => { ProvinceName = n.GetStringValue(); } },
                 { "status", n => { Status = n.GetEnumValue<global::ApiSdk.Models.JobStatus>(); } },
                 { "title", n => { Title = n.GetStringValue(); } },
+                { "updatedAt", n => { UpdatedAt = n.GetDateTimeOffsetValue(); } },
             };
         }
         /// <summary>
@@ -111,9 +117,11 @@ namespace ApiSdk.Models
             writer.WriteStringValue("detailAddress", DetailAddress);
             writer.WriteGuidValue("id", Id);
             writer.WriteCollectionOfObjectValues<global::ApiSdk.Models.JobSalaryResponseDto>("jobSalaries", JobSalaries);
+            writer.WriteDateTimeOffsetValue("lastBumpedAt", LastBumpedAt);
             writer.WriteStringValue("provinceName", ProvinceName);
             writer.WriteEnumValue<global::ApiSdk.Models.JobStatus>("status", Status);
             writer.WriteStringValue("title", Title);
+            writer.WriteDateTimeOffsetValue("updatedAt", UpdatedAt);
             writer.WriteAdditionalData(AdditionalData);
         }
     }

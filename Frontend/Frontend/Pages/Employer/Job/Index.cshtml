@@ -13,6 +13,8 @@
             {
                 <span class="text-muted small">
                     Bài đăng đang mở: <strong>@Model.PostsQuota.CurrentActivePosts</strong> / @Model.PostsQuota.MaxActivePosts bài
+                    <span class="mx-1">•</span>
+                    Số lượt đẩy bài còn lại: <strong>@(Model.PostsQuota.BumpBalance ?? 0)</strong>
                 </span>
             }
         </div>
@@ -81,6 +83,8 @@
                     <th>Địa điểm</th>
                     <th>Mức lương</th>
                     <th>Ngày tạo</th>
+                    <th>Ngày cập nhật</th>
+                    <th>Đẩy bài lần cuối</th>
                     <th>Trạng thái</th>
                     <th class="text-end">Thao tác</th>
                 </tr>
@@ -95,7 +99,9 @@
                         <td>@(job.ApplicationCount ?? 0)</td>
                         <td>@(string.IsNullOrWhiteSpace(location) ? "-" : location)</td>
                         <td>@Model.FormatMaxSalary(job.JobSalaries)</td>
-                        <td>@(job.CreatedAt?.ToLocalTime().ToString("dd/MM/yyyy HH:mm") ?? "-")</td>
+                        <td class="text-nowrap">@(job.CreatedAt?.ToLocalTime().ToString("dd/MM/yyyy HH:mm") ?? "-")</td>
+                        <td class="text-nowrap">@(job.UpdatedAt?.ToLocalTime().ToString("dd/MM/yyyy HH:mm") ?? "-")</td>
+                        <td class="text-nowrap">@(job.LastBumpedAt?.ToLocalTime().ToString("dd/MM/yyyy HH:mm") ?? "-")</td>
                         <td><span class="badge @statusCss">@statusLabel</span></td>
                         <td class="text-end">
                             @if (job.Id is not null)

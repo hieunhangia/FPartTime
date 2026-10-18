@@ -1,6 +1,8 @@
 using Amazon.S3;
 using Contracts.External;
+using Contracts.External.Payment;
 using Infrastructure.BackgroundServices;
+using Infrastructure.Payments;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using PayOS;
@@ -14,6 +16,8 @@ public static class DependencyInjection
     {
         // Background Services
         builder.Services.AddHostedService<ExpiredJobCleanupService>();
+        builder.Services.AddHostedService<ExpiredSubscriptionCleanupService>();
+        builder.Services.AddHostedService<ExpiredSubscriptionOrderCleanupService>();
 
         // PayOS Service
         builder.Services.AddSingleton(new PayOSClient(new PayOSOptions
@@ -23,7 +27,7 @@ public static class DependencyInjection
             ChecksumKey = builder.Configuration["PayOS:ChecksumKey"]
         }));
         builder.Services.AddSingleton<IPaymentService, PayOSPaymentService>();
-        builder.Services.AddSingleton<IPaymentIpnService<Webhook, WebhookData>, PayOSWebhookService>();
+        builder.Services.AddSingleton<IPaymentServiceFactory, PaymentServiceFactory>();
         builder.Services.AddHttpClient(PayOSHealthCheck.HealthCheckHttpClientName, client =>
         {
             client.BaseAddress = new Uri("https://api-merchant.payos.vn/");
