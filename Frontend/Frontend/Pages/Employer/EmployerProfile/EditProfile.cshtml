@@ -1,0 +1,64 @@
+﻿@page
+@model Frontend.Pages.Employer.EmployerProfile.EditProfileModel
+@{
+    ViewData["Title"] = "Thông tin nhà tuyển dụng";
+}
+
+<div class="container my-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-7">
+            <h2 class="mb-3">Thông tin của tôi</h2>
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+            <form method="post" enctype="multipart/form-data">
+                <div class="card mb-4 shadow-sm">
+                    <div class="card-header fw-bold bg-white">Logo công ty</div>
+                    <div class="card-body">
+                        @if (!string.IsNullOrEmpty(Model.CurrentLogoUrl))
+                        {
+                            <div class="mb-3">
+                                <img src="@Model.CurrentLogoUrl" class="rounded border p-1"
+                                     style="width: 100px; height: 100px; object-fit: contain;" alt="Logo công ty" />
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="text-muted small mb-3">Chưa có logo công ty.</div>
+                        }
+                        <div class="mb-3">
+                            <label asp-for="Input.LogoFile" class="form-label">Tải lên logo mới</label>
+                            <input asp-for="Input.LogoFile" class="form-control" accept=".jpg,.jpeg,.png" />
+                            <div class="form-text">Định dạng JPG, JPEG hoặc PNG. Tối đa 5MB.</div>
+                            <span asp-validation-for="Input.LogoFile" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card mb-4 shadow-sm">
+                    <div class="card-header fw-bold bg-white">Thông tin liên hệ & Giới thiệu</div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label asp-for="Input.ContactPhone" class="form-label">Số điện thoại liên hệ</label>
+                            <input asp-for="Input.ContactPhone" class="form-control" placeholder="Ví dụ: 0912345678" />
+                            <span asp-validation-for="Input.ContactPhone" class="text-danger"></span>
+                        </div>
+                        <div class="mb-3">
+                            <label asp-for="Input.Description" class="form-label">Giới thiệu về công ty</label>
+                            <textarea asp-for="Input.Description" class="form-control" rows="5"
+                                      placeholder="Mô tả về công ty..."></textarea>
+                            <span asp-validation-for="Input.Description" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-end">
+                    <button type="submit" class="btn btn-primary px-4">Lưu thay đổi</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
