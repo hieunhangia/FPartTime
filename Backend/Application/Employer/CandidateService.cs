@@ -21,10 +21,10 @@ public class CandidateService(
         ClaimsPrincipal user, Guid jobId, PaginationRequestDto? pagination = null)
     {
         var employerId = user.GetUserId();
-        var plan = await GetActiveSubscriptionPlanAsync(employerId);
-        if (!plan.CanRecommendCandidates)
+        var sub = await GetActiveSubscriptionAsync(employerId);
+        if (!sub.CanRecommendCandidates)
         {
-            throw new ForbiddenException($"Gói dịch vụ hiện tại ({plan.Tier}) không hỗ trợ tính năng gợi ý ứng viên.");
+            throw new ForbiddenException($"Gói dịch vụ hiện tại ({sub.Tier}) không hỗ trợ tính năng gợi ý ứng viên.");
         }
 
         var job = await context.Jobs.AsNoTracking()
@@ -215,11 +215,11 @@ public class CandidateService(
     public async Task<IQueryable<CandidateSummaryResponseDto>> SearchCandidatesQueryableAsync(ClaimsPrincipal user)
     {
         var employerId = user.GetUserId();
-        var plan = await GetActiveSubscriptionPlanAsync(employerId);
-        if (!plan.CanQueryCandidates)
+        var sub = await GetActiveSubscriptionAsync(employerId);
+        if (!sub.CanQueryCandidates)
         {
             throw new ForbiddenException(
-                $"Gói dịch vụ hiện tại ({plan.Tier}) không hỗ trợ tính năng tìm kiếm ứng viên tự do qua OData. Vui lòng nâng cấp lên gói Ultra.");
+                $"Gói dịch vụ hiện tại ({sub.Tier}) không hỗ trợ tính năng tìm kiếm ứng viên tự do.");
         }
 
         return context.Candidates.ProjectToSummaryDto();
@@ -228,11 +228,10 @@ public class CandidateService(
     public async Task<CandidateDetailResponseDto> GetCandidateDetailAsync(ClaimsPrincipal user, Guid candidateId)
     {
         var employerId = user.GetUserId();
-        var plan = await GetActiveSubscriptionPlanAsync(employerId);
-        if (plan is { CanRecommendCandidates: false, CanQueryCandidates: false })
+        var sub = await GetActiveSubscriptionAsync(employerId);
+        if (sub is { CanRecommendCandidates: false, CanQueryCandidates: false })
         {
-            throw new ForbiddenException(
-                "Gói dịch vụ hiện tại không hỗ trợ xem hồ sơ chi tiết ứng viên. Vui lòng đăng ký gói Pro hoặc Ultra.");
+            throw new ForbiddenException("Gói dịch vụ hiện tại không hỗ trợ xem hồ sơ chi tiết ứng viên.");
         }
 
         var candidate = await context.Candidates.AsNoTracking()
@@ -256,7 +255,7 @@ public class CandidateService(
         return dto;
     }
 
-    private async Task<EmployerSubscriptionPlan> GetActiveSubscriptionPlanAsync(Guid employerId)
+    private async Task<EmployerSubscription> GetActiveSubscriptionAsync(Guid employerId)
     {
         var activeSub = await context.EmployerSubscriptions.AsNoTracking()
             .Where(s => s.EmployerId == employerId && s.Status == EmployerSubscriptionStatus.Active &&
@@ -264,14 +263,7 @@ public class CandidateService(
             .OrderByDescending(s => s.EndDate)
             .FirstOrDefaultAsync();
 
-        if (activeSub == null)
-        {
-            throw new ForbiddenException("Bạn cần đăng ký gói dịch vụ để sử dụng tính năng này.");
-        }
-
-        return await context.EmployerSubscriptionPlans.AsNoTracking()
-                   .FirstOrDefaultAsync(p => p.Tier == activeSub.Tier && p.Duration == activeSub.Duration) ??
-               throw new InvalidOperationException("Không tìm thấy cấu hình gói đăng ký hiện tại.");
+        return activeSub ?? throw new ForbiddenException("Bạn cần đăng ký gói dịch vụ để sử dụng tính năng này.");
     }
 
     private static bool DoesScheduleOverlapShift(TimeOnly jobStart, TimeOnly jobEnd, Shift shift)

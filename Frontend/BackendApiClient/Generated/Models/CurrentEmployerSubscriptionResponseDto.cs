@@ -14,10 +14,16 @@ namespace ApiSdk.Models
     {
         /// <summary>Stores additional data not described in the OpenAPI description found when deserializing. Can be used for serialization as well.</summary>
         public IDictionary<string, object> AdditionalData { get; set; }
+        /// <summary>The canQueryCandidates property</summary>
+        public bool? CanQueryCandidates { get; set; }
+        /// <summary>The canRecommendCandidates property</summary>
+        public bool? CanRecommendCandidates { get; set; }
         /// <summary>The duration property</summary>
         public global::ApiSdk.Models.EmployerSubscriptionDuration? Duration { get; set; }
         /// <summary>The endDate property</summary>
         public DateTimeOffset? EndDate { get; set; }
+        /// <summary>The extraActivePosts property</summary>
+        public int? ExtraActivePosts { get; set; }
         /// <summary>The hasActiveSubscription property</summary>
         public bool? HasActiveSubscription { get; set; }
         /// <summary>The startDate property</summary>
@@ -49,8 +55,11 @@ namespace ApiSdk.Models
         {
             return new Dictionary<string, Action<IParseNode>>
             {
+                { "canQueryCandidates", n => { CanQueryCandidates = n.GetBoolValue(); } },
+                { "canRecommendCandidates", n => { CanRecommendCandidates = n.GetBoolValue(); } },
                 { "duration", n => { Duration = n.GetEnumValue<global::ApiSdk.Models.EmployerSubscriptionDuration>(); } },
                 { "endDate", n => { EndDate = n.GetDateTimeOffsetValue(); } },
+                { "extraActivePosts", n => { ExtraActivePosts = n.GetIntValue(); } },
                 { "hasActiveSubscription", n => { HasActiveSubscription = n.GetBoolValue(); } },
                 { "startDate", n => { StartDate = n.GetDateTimeOffsetValue(); } },
                 { "tier", n => { Tier = n.GetEnumValue<global::ApiSdk.Models.EmployerSubscriptionTier>(); } },
@@ -63,8 +72,11 @@ namespace ApiSdk.Models
         public virtual void Serialize(ISerializationWriter writer)
         {
             if(ReferenceEquals(writer, null)) throw new ArgumentNullException(nameof(writer));
+            writer.WriteBoolValue("canQueryCandidates", CanQueryCandidates);
+            writer.WriteBoolValue("canRecommendCandidates", CanRecommendCandidates);
             writer.WriteEnumValue<global::ApiSdk.Models.EmployerSubscriptionDuration>("duration", Duration);
             writer.WriteDateTimeOffsetValue("endDate", EndDate);
+            writer.WriteIntValue("extraActivePosts", ExtraActivePosts);
             writer.WriteBoolValue("hasActiveSubscription", HasActiveSubscription);
             writer.WriteDateTimeOffsetValue("startDate", StartDate);
             writer.WriteEnumValue<global::ApiSdk.Models.EmployerSubscriptionTier>("tier", Tier);

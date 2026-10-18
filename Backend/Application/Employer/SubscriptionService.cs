@@ -37,6 +37,55 @@ public class SubscriptionService(
             HasActiveSubscription = false
         };
 
+    public async Task CancelCurrentSubscriptionAsync(ClaimsPrincipal user)
+    {
+        var userId = user.GetUserId();
+        var now = DateTime.UtcNow;
+        var activeSub = await context.EmployerSubscriptions
+            .Where(s => s.EmployerId == userId && s.Status == EmployerSubscriptionStatus.Active && s.EndDate >= now)
+            .OrderByDescending(s => s.EndDate)
+            .FirstOrDefaultAsync();
+
+        if (activeSub == null)
+        {
+            throw new BadRequestException("Bạn không có gói đăng ký nào đang hoạt động để hủy.");
+        }
+
+        activeSub.Status = EmployerSubscriptionStatus.Cancelled;
+
+        var employer = await context.Employers.FirstOrDefaultAsync(e => e.UserId == userId)
+                       ?? throw new NotFoundException(
+                           "Không tìm thấy thông tin nhà tuyển dụng. Liên hệ bộ phận hỗ trợ để được trợ giúp.");
+
+        employer.MaxActivePosts = BusinessRuleConstants.Employers.DefaultMaxActivePosts;
+
+        var activeJobs = await context.Jobs
+            .Where(j => j.EmployerId == userId && j.Status == JobStatus.Active)
+            .OrderBy(j => j.UpdatedAt)
+            .ToListAsync();
+
+        if (activeJobs.Count > BusinessRuleConstants.Employers.DefaultMaxActivePosts)
+        {
+            var excessCount = activeJobs.Count - BusinessRuleConstants.Employers.DefaultMaxActivePosts;
+            var jobsToClose = activeJobs.Take(excessCount).ToList();
+            foreach (var job in jobsToClose)
+            {
+                job.Status = JobStatus.Closed;
+                job.UpdatedAt = now;
+            }
+
+            await notificationsService.CreateNotificationAsync(userId, "Gói đăng ký đã bị hủy",
+                $"Bạn đã hủy gói đăng ký {activeSub.Tier} ({activeSub.Duration}). Hệ thống đã tự động đóng {excessCount} tin tuyển dụng có thời gian cập nhật cũ nhất để phù hợp với hạn mức mặc định ({BusinessRuleConstants.Employers.DefaultMaxActivePosts} tin).");
+        }
+        else
+        {
+            await notificationsService.CreateNotificationAsync(userId, "Gói đăng ký đã bị hủy",
+                $"Bạn đã hủy gói đăng ký {activeSub.Tier} ({activeSub.Duration}). Hạn mức đăng tin đã trở về mặc định ({BusinessRuleConstants.Employers.DefaultMaxActivePosts} tin).");
+        }
+
+        await context.SaveChangesAsync();
+    }
+
     public async Task<CreateSubscriptionCheckoutResponseDto> CreateCheckoutAsync(ClaimsPrincipal user,
         CreateSubscriptionCheckoutRequestDto request)
     {
@@ -113,59 +162,16 @@ public class SubscriptionService(
             PaymentReferenceId = paymentResponse.PaymentReferenceId,
             Tier = plan.Tier,
             Duration = plan.Duration,
-            Amount = plan.Price
+            Amount = plan.Price,
+            PlanName = plan.Name,
+            DurationDays = plan.DurationDays,
+            ExtraActivePosts = plan.ExtraActivePosts,
+            FreeBumps = plan.FreeBumps,
+            CanRecommendCandidates = plan.CanRecommendCandidates,
+            CanQueryCandidates = plan.CanQueryCandidates
         });
         await context.SaveChangesAsync();
         return paymentResponse.MapToDto();
-    }
-
-    public async Task CancelCurrentSubscriptionAsync(ClaimsPrincipal user)
-    {
-        var userId = user.GetUserId();
-        var now = DateTime.UtcNow;
-        var activeSub = await context.EmployerSubscriptions
-            .Where(s => s.EmployerId == userId && s.Status == EmployerSubscriptionStatus.Active && s.EndDate >= now)
-            .OrderByDescending(s => s.EndDate)
-            .FirstOrDefaultAsync();
-
-        if (activeSub == null)
-        {
-            throw new BadRequestException("Bạn không có gói đăng ký nào đang hoạt động để hủy.");
-        }
-
-        activeSub.Status = EmployerSubscriptionStatus.Cancelled;
-
-        var employer = await context.Employers.FirstOrDefaultAsync(e => e.UserId == userId)
-                       ?? throw new NotFoundException(
-                           "Không tìm thấy thông tin nhà tuyển dụng. Liên hệ bộ phận hỗ trợ để được trợ giúp.");
-
-        employer.MaxActivePosts = BusinessRuleConstants.Employers.DefaultMaxActivePosts;
-
-        var activeJobs = await context.Jobs
-            .Where(j => j.EmployerId == userId && j.Status == JobStatus.Active)
-            .OrderBy(j => j.UpdatedAt)
-            .ToListAsync();
-
-        if (activeJobs.Count > BusinessRuleConstants.Employers.DefaultMaxActivePosts)
-        {
-            var excessCount = activeJobs.Count - BusinessRuleConstants.Employers.DefaultMaxActivePosts;
-            var jobsToClose = activeJobs.Take(excessCount).ToList();
-            foreach (var job in jobsToClose)
-            {
-                job.Status = JobStatus.Closed;
-                job.UpdatedAt = now;
-            }
-
-            await notificationsService.CreateNotificationAsync(userId, "Gói đăng ký đã bị hủy",
-                $"Bạn đã hủy gói đăng ký {activeSub.Tier} ({activeSub.Duration}). Hệ thống đã tự động đóng {excessCount} tin tuyển dụng có thời gian cập nhật cũ nhất để phù hợp với hạn mức mặc định ({BusinessRuleConstants.Employers.DefaultMaxActivePosts} tin).");
-        }
-        else
-        {
-            await notificationsService.CreateNotificationAsync(userId, "Gói đăng ký đã bị hủy",
-                $"Bạn đã hủy gói đăng ký {activeSub.Tier} ({activeSub.Duration}). Hạn mức đăng tin đã trở về mặc định ({BusinessRuleConstants.Employers.DefaultMaxActivePosts} tin).");
-        }
-
-        await context.SaveChangesAsync();
     }
 
     public async Task ProcessIpnAsync(string paymentReferenceId)
@@ -193,23 +199,6 @@ public class SubscriptionService(
         }
 
         var now = DateTime.UtcNow;
-
-        var plan = await context.EmployerSubscriptionPlans
-            .FirstOrDefaultAsync(p => p.Tier == order.Tier && p.Duration == order.Duration);
-
-        if (plan == null)
-        {
-            logger.LogError("Không tìm thấy cấu hình gói cho đơn hàng {OrderId} ({Tier} {Duration})", order.Id,
-                order.Tier, order.Duration);
-            order.Status = EmployerSubscriptionOrderStatus.Failed;
-            order.PaidAt = now;
-            await context.SaveChangesAsync();
-
-            await notificationsService.CreateNotificationAsync(order.EmployerId,
-                "Kích hoạt gói dịch vụ không thành công",
-                $"Đơn hàng #{paymentReferenceId} đã thanh toán thành công ({order.Amount:N0} đ) nhưng không tìm thấy cấu hình gói cho hạng {order.Tier} ({order.Duration}). Vui lòng liên hệ bộ phận hỗ trợ để được trợ giúp.");
-            return;
-        }
 
         var employer = order.Employer ??
                        await context.Employers.FirstOrDefaultAsync(e => e.UserId == order.EmployerId);
@@ -252,8 +241,8 @@ public class SubscriptionService(
 
         order.Status = EmployerSubscriptionOrderStatus.Paid;
         order.PaidAt = now;
-        employer.BumpBalance += plan.FreeBumps;
-        employer.MaxActivePosts = BusinessRuleConstants.Employers.DefaultMaxActivePosts + plan.ExtraActivePosts;
+        employer.BumpBalance += order.FreeBumps;
+        employer.MaxActivePosts = BusinessRuleConstants.Employers.DefaultMaxActivePosts + order.ExtraActivePosts;
 
         if (activeSub == null)
         {
@@ -262,20 +251,24 @@ public class SubscriptionService(
                 EmployerId = order.EmployerId,
                 Tier = order.Tier,
                 Duration = order.Duration,
-                StartDate = now,
-                EndDate = now.AddDays(plan.DurationDays),
+                EndDate = now.AddDays(order.DurationDays),
                 Status = EmployerSubscriptionStatus.Active,
-                CreatedAt = now
+                ExtraActivePosts = order.ExtraActivePosts,
+                CanRecommendCandidates = order.CanRecommendCandidates,
+                CanQueryCandidates = order.CanQueryCandidates
             });
         }
         else
         {
-            activeSub.EndDate = activeSub.EndDate.AddDays(plan.DurationDays);
+            activeSub.EndDate = activeSub.EndDate.AddDays(order.DurationDays);
+            activeSub.ExtraActivePosts = order.ExtraActivePosts;
+            activeSub.CanRecommendCandidates = order.CanRecommendCandidates;
+            activeSub.CanQueryCandidates = order.CanQueryCandidates;
         }
 
         await context.SaveChangesAsync();
         await notificationsService.CreateNotificationAsync(order.EmployerId, "Đăng ký gói thành công",
-            $"Bạn đã kích hoạt thành công gói {plan.Name}. Hạn mức tin đăng tối đa: {employer.MaxActivePosts}, số lượt đẩy tin hiện có: {employer.BumpBalance}.");
+            $"Bạn đã kích hoạt thành công gói {order.PlanName}. Hạn mức tin đăng tối đa: {employer.MaxActivePosts}, số lượt đẩy tin hiện có: {employer.BumpBalance}.");
     }
 
     public async Task<int> ProcessExpiredSubscriptionsAsync(CancellationToken cancellationToken = default)

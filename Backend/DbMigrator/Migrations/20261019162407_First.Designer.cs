@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DbMigrator.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20261019142322_First")]
+    [Migration("20261019162407_First")]
     partial class First
     {
         /// <inheritdoc />
@@ -69,6 +69,12 @@ namespace DbMigrator.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<bool>("CanQueryCandidates")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("CanRecommendCandidates")
+                        .HasColumnType("bit");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
@@ -81,6 +87,9 @@ namespace DbMigrator.Migrations
 
                     b.Property<DateTime>("EndDate")
                         .HasColumnType("datetime2");
+
+                    b.Property<int>("ExtraActivePosts")
+                        .HasColumnType("int");
 
                     b.Property<DateTime>("StartDate")
                         .HasColumnType("datetime2");
@@ -110,6 +119,12 @@ namespace DbMigrator.Migrations
                         .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
+                    b.Property<bool>("CanQueryCandidates")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("CanRecommendCandidates")
+                        .HasColumnType("bit");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
@@ -117,11 +132,20 @@ namespace DbMigrator.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int>("DurationDays")
+                        .HasColumnType("int");
+
                     b.Property<Guid>("EmployerId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("ExpiredAt")
                         .HasColumnType("datetime2");
+
+                    b.Property<int>("ExtraActivePosts")
+                        .HasColumnType("int");
+
+                    b.Property<int>("FreeBumps")
+                        .HasColumnType("int");
 
                     b.Property<DateTime?>("PaidAt")
                         .HasColumnType("datetime2");
@@ -131,6 +155,11 @@ namespace DbMigrator.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("PaymentReferenceId")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("PlanName")
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");

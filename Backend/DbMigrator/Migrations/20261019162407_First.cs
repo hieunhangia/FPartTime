@@ -299,7 +299,13 @@ namespace DbMigrator.Migrations
                     Status = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     ExpiredAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    PaidAt = table.Column<DateTime>(type: "datetime2", nullable: true)
+                    PaidAt = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    PlanName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    DurationDays = table.Column<int>(type: "int", nullable: false),
+                    ExtraActivePosts = table.Column<int>(type: "int", nullable: false),
+                    FreeBumps = table.Column<int>(type: "int", nullable: false),
+                    CanRecommendCandidates = table.Column<bool>(type: "bit", nullable: false),
+                    CanQueryCandidates = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -323,7 +329,10 @@ namespace DbMigrator.Migrations
                     StartDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     EndDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     Status = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    ExtraActivePosts = table.Column<int>(type: "int", nullable: false),
+                    CanRecommendCandidates = table.Column<bool>(type: "bit", nullable: false),
+                    CanQueryCandidates = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {

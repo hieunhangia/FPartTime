@@ -252,6 +252,8 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             entity.Property(e => e.PaymentReferenceId)
                 .HasMaxLength(BusinessRuleConstants.Models.EmployerSubscriptionOrder.PaymentReferenceIdMaxLength);
             entity.Property(e => e.Amount).HasPrecision(18, 2);
+            entity.Property(e => e.PlanName)
+                .HasMaxLength(BusinessRuleConstants.Models.EmployerSubscriptionPlan.NameMaxLength);
 
             entity.HasOne(e => e.Employer)
                 .WithMany(em => em.SubscriptionOrders)

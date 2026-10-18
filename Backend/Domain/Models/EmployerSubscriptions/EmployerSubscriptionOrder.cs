@@ -20,6 +20,11 @@ public class EmployerSubscriptionOrder
         DateTime.UtcNow.AddMinutes(BusinessRuleConstants.Employers.Subscriptions.OrderExpiresInMinutes);
 
     public DateTime? PaidAt { get; set; }
-
+    public required string PlanName { get; set; }
+    public required int DurationDays { get; set; }
+    public required int ExtraActivePosts { get; set; }
+    public required int FreeBumps { get; set; }
+    public required bool CanRecommendCandidates { get; set; }
+    public required bool CanQueryCandidates { get; set; }
     public EmployerProfile? Employer { get; set; }
 }

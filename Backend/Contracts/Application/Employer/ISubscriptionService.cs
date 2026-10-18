@@ -8,11 +8,11 @@ public interface ISubscriptionService
 {
     Task<List<EmployerSubscriptionPlanResponseDto>> GetPlansAsync();
     Task<CurrentEmployerSubscriptionResponseDto> GetCurrentSubscriptionAsync(ClaimsPrincipal user);
+    Task CancelCurrentSubscriptionAsync(ClaimsPrincipal user);
 
     Task<CreateSubscriptionCheckoutResponseDto> CreateCheckoutAsync(ClaimsPrincipal user,
         CreateSubscriptionCheckoutRequestDto request);
 
-    Task CancelCurrentSubscriptionAsync(ClaimsPrincipal user);
     Task ProcessIpnAsync(string paymentReferenceId);
     Task<int> ProcessExpiredSubscriptionsAsync(CancellationToken cancellationToken = default);
     Task<int> CancelExpiredOrdersAsync(CancellationToken cancellationToken = default);
@@ -68,4 +68,7 @@ public class CurrentEmployerSubscriptionResponseDto
     public DateTime? StartDate { get; set; }
     public DateTime? EndDate { get; set; }
     public required bool HasActiveSubscription { get; set; }
+    public int ExtraActivePosts { get; set; }
+    public bool CanRecommendCandidates { get; set; }
+    public bool CanQueryCandidates { get; set; }
 }
