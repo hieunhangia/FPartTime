@@ -1,7 +1,7 @@
+using Domain.Shared.Constants;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using Repository.Constants;
 using Repository.Models.Address;
 using Repository.Models.Jobs;
 using Repository.Models.Notifications;

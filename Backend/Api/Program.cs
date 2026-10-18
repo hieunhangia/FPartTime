@@ -3,6 +3,7 @@ using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
 using Api;
 using Api.Middlewares;
+using Application;
 using Infrastructure;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
@@ -23,7 +24,7 @@ builder.Configuration.AddJsonFile("appsettings.secret.json", optional: true, rel
 builder.WebHost.UseSentry(options =>
 {
     var sentrySection = builder.Configuration.GetSection("Sentry");
-    options.Dsn = sentrySection["Dsn"] ?? throw new InvalidOperationException("Sentry DSN is not configured.");
+    options.Dsn = sentrySection["Dsn"] ?? throw new Exception("Sentry DSN is not configured.");
     options.Environment = builder.Environment.EnvironmentName;
     options.TracesSampleRate = sentrySection.GetValue<double?>("TracesSampleRate") ?? 1.0;
     options.Debug = builder.Environment.IsDevelopment();
@@ -52,6 +53,8 @@ builder.Services.AddAuthentication(options =>
 builder.Services.AddRepositoryLevelServices(builder.Configuration);
 
 builder.Services.AddApplicationServices(builder.Configuration);
+
+builder.AddApplicationServices();
 
 builder.AddInfrastructureServices();
 

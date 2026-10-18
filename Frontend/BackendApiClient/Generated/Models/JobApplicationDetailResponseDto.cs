@@ -72,10 +72,10 @@ namespace ApiSdk.Models
         /// <summary>The candidatePreferredWorkSchedules property</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
-        public List<global::ApiSdk.Models.JobScheduleResponseDto>? CandidatePreferredWorkSchedules { get; set; }
+        public List<global::ApiSdk.Models.CandidateScheduleResponseDto>? CandidatePreferredWorkSchedules { get; set; }
 #nullable restore
 #else
-        public List<global::ApiSdk.Models.JobScheduleResponseDto> CandidatePreferredWorkSchedules { get; set; }
+        public List<global::ApiSdk.Models.CandidateScheduleResponseDto> CandidatePreferredWorkSchedules { get; set; }
 #endif
         /// <summary>The id property</summary>
         public Guid? Id { get; set; }
@@ -115,7 +115,7 @@ namespace ApiSdk.Models
                 { "candidatePhoneNumber", n => { CandidatePhoneNumber = n.GetStringValue(); } },
                 { "candidatePreferredWorkCommuneName", n => { CandidatePreferredWorkCommuneName = n.GetStringValue(); } },
                 { "candidatePreferredWorkProvinceName", n => { CandidatePreferredWorkProvinceName = n.GetStringValue(); } },
-                { "candidatePreferredWorkSchedules", n => { CandidatePreferredWorkSchedules = n.GetCollectionOfObjectValues<global::ApiSdk.Models.JobScheduleResponseDto>(global::ApiSdk.Models.JobScheduleResponseDto.CreateFromDiscriminatorValue)?.AsList(); } },
+                { "candidatePreferredWorkSchedules", n => { CandidatePreferredWorkSchedules = n.GetCollectionOfObjectValues<global::ApiSdk.Models.CandidateScheduleResponseDto>(global::ApiSdk.Models.CandidateScheduleResponseDto.CreateFromDiscriminatorValue)?.AsList(); } },
                 { "id", n => { Id = n.GetGuidValue(); } },
                 { "status", n => { Status = n.GetEnumValue<global::ApiSdk.Models.JobApplicationStatus>(); } },
             };
@@ -136,7 +136,7 @@ namespace ApiSdk.Models
             writer.WriteStringValue("candidatePhoneNumber", CandidatePhoneNumber);
             writer.WriteStringValue("candidatePreferredWorkCommuneName", CandidatePreferredWorkCommuneName);
             writer.WriteStringValue("candidatePreferredWorkProvinceName", CandidatePreferredWorkProvinceName);
-            writer.WriteCollectionOfObjectValues<global::ApiSdk.Models.JobScheduleResponseDto>("candidatePreferredWorkSchedules", CandidatePreferredWorkSchedules);
+            writer.WriteCollectionOfObjectValues<global::ApiSdk.Models.CandidateScheduleResponseDto>("candidatePreferredWorkSchedules", CandidatePreferredWorkSchedules);
             writer.WriteGuidValue("id", Id);
             writer.WriteEnumValue<global::ApiSdk.Models.JobApplicationStatus>("status", Status);
             writer.WriteAdditionalData(AdditionalData);

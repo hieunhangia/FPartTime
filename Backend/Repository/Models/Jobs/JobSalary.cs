@@ -1,3 +1,5 @@
+using Domain.Shared.Enums;
+
 namespace Repository.Models.Jobs;
 
 public class JobSalary
@@ -9,14 +11,4 @@ public class JobSalary
     public Guid JobId { get; set; }
 
     public Job? Job { get; set; }
-}
-
-public enum JobSalaryTimeUnit
-{
-    Hour,
-    Session,
-    Day,
-    Week,
-    Month,
-    Project
 }

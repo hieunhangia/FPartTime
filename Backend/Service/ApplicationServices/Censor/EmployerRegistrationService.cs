@@ -1,15 +1,16 @@
 using System.ComponentModel.DataAnnotations;
 using System.Security.Claims;
+using Contracts.Application;
+using Domain.Shared.Constants;
+using Domain.Shared.Enums;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Repository;
 using Repository.Models.Users;
-using Repository.Constants;
+using Repository.Extensions;
 using Service.ApplicationServices.Candidate;
 using Service.ExternalServices;
-using Service.Extensions;
 using Service.HttpErrorExceptions;
-using EmployerRegistrationMapper = Service.ApplicationServices.Candidate.EmployerRegistrationMapper;
 
 namespace Service.ApplicationServices.Censor;
 
@@ -24,9 +25,10 @@ public class EmployerRegistrationService(
     ApplicationDbContext dbContext,
     CloudflareR2StorageService storageService,
     UserManager<User> userManager,
-    NotificationsService notificationsService)
+    INotificationsService notificationsService)
 {
-    public async Task<List<EmployerRegistrationViewDto>> GetRegistrationsAsync(EmployerRegistrationRequestStatus? status)
+    public async Task<List<EmployerRegistrationViewDto>> GetRegistrationsAsync(
+        EmployerRegistrationRequestStatus? status)
     {
         var query = dbContext.EmployerRegistrationRequests.AsNoTracking().AsQueryable();
 
@@ -35,8 +37,8 @@ public class EmployerRegistrationService(
             query = query.Where(r => r.Status == status.Value);
         }
 
-        return await EmployerRegistrationMapper.ProjectToViewDto(query
-                .OrderByDescending(r => r.CreatedAt))
+        return await query
+            .OrderByDescending(r => r.CreatedAt).ProjectToViewDto()
             .ToListAsync();
     }
 
@@ -46,7 +48,8 @@ public class EmployerRegistrationService(
             .AsNoTracking()
             .FirstOrDefaultAsync(r => r.Id == id) ?? throw new NotFoundException("Không tìm thấy yêu cầu đăng ký.");
 
-        return EmployerRegistrationMapper.ToDetailDto(request, await storageService.GeneratePresignedUrlAsync(request.DocumentPath, TimeSpan.FromMinutes(15)),
+        return request.ToDetailDto(
+            await storageService.GeneratePresignedUrlAsync(request.DocumentPath, TimeSpan.FromMinutes(15)),
             await storageService.GeneratePresignedUrlAsync(request.CCCDFrontImagePath, TimeSpan.FromMinutes(15)),
             await storageService.GeneratePresignedUrlAsync(request.CCCDBackImagePath, TimeSpan.FromMinutes(15)));
     }
@@ -64,7 +67,8 @@ public class EmployerRegistrationService(
             if (request.Status != EmployerRegistrationRequestStatus.Pending)
                 throw new ConflictException("Chỉ có thể duyệt yêu cầu đang chờ xử lý.");
 
-            var requesterUser = await userManager.FindByIdAsync(request.RequesterId.ToString()) ?? throw new NotFoundException("Người dùng không tồn tại.");
+            var requesterUser = await userManager.FindByIdAsync(request.RequesterId.ToString()) ??
+                                throw new NotFoundException("Người dùng không tồn tại.");
 
             request.Status = EmployerRegistrationRequestStatus.Approved;
             request.ProcessedAt = DateTime.UtcNow;
@@ -79,7 +83,7 @@ public class EmployerRegistrationService(
                 MaxActivePosts = BusinessRuleConstants.Employers.DefaultMaxActivePosts,
                 ContactPhone = request.PhoneNumber
             };
-            
+
             if (!await dbContext.Employers.AnyAsync(e => e.UserId == request.RequesterId))
             {
                 dbContext.Employers.Add(employerProfile);
@@ -135,4 +139,3 @@ public class EmployerRegistrationService(
             $"Yêu cầu đăng ký trở thành Nhà tuyển dụng cho doanh nghiệp \"{request.CompanyName}\" của bạn đã bị từ chối. Lý do: {rejectReason}");
     }
 }
-

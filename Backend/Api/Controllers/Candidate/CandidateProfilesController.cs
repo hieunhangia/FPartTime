@@ -1,7 +1,6 @@
-using Microsoft.AspNetCore.Http;
+using Domain.Shared.Constants;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
-using Repository.Constants;
 using Service.ApplicationServices.Candidate;
 namespace Api.Controllers.Candidate
 {

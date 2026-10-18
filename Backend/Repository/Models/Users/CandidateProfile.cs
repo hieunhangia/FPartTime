@@ -1,4 +1,4 @@
-using Repository.Constants;
+using Domain.Shared.Enums;
 using Repository.Models.Address;
 using Repository.Models.Jobs;
 

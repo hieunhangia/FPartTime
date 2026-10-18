@@ -1,9 +1,8 @@
+using Domain.Shared.Constants;
+using Domain.Shared.Enums;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData.Query;
-using Repository.Constants;
-using Repository.Models.Jobs;
 using Service.ApplicationServices.Censor;
 
 namespace Api.Controllers.Censor;
@@ -73,4 +72,3 @@ public class JobReportsController(JobReportService jobReportService) : Controlle
         return NoContent();
     }
 }
-

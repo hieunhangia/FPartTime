@@ -1,4 +1,4 @@
-using Repository.Constants;
+using Domain.Shared.Enums;
 using Repository.Models.Address;
 using Repository.Models.Users;
 
@@ -28,11 +28,4 @@ public class Job
     public ICollection<JobSalary>? JobSalaries { get; set; }
     public ICollection<JobApplication>? JobApplications { get; set; }
     public ICollection<JobReport>? JobReports { get; set; }
-}
-
-public enum JobStatus
-{
-    Active,
-    Closed,
-    AdminHidden
 }

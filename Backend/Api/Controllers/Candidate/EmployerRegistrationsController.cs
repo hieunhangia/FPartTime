@@ -1,6 +1,6 @@
+using Domain.Shared.Constants;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Repository.Constants;
 using Service.ApplicationServices.Candidate;
 
 namespace Api.Controllers.Candidate
@@ -8,7 +8,8 @@ namespace Api.Controllers.Candidate
     [Route("api/[controller]")]
     [ApiController]
     [Authorize(Roles = Role.Candidate)]
-    public class EmployerRegistrationsController(EmployerRegistrationService employerRegistrationService) : ControllerBase
+    public class EmployerRegistrationsController(EmployerRegistrationService employerRegistrationService)
+        : ControllerBase
     {
         [HttpPost]
         [Consumes("multipart/form-data")]

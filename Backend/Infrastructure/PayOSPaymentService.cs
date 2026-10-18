@@ -1,5 +1,5 @@
-using Contracts;
-using Contracts.HttpErrorExceptions;
+using Contracts.External;
+using Domain.Shared.Exceptions.HttpErrorExceptions;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using PayOS;
 using PayOS.Models.V2.PaymentRequests;
@@ -10,38 +10,32 @@ public class PayOSPaymentService(PayOSClient payOSClient) : IPaymentService
 {
     public async Task<CreatePaymentResponse> CreatePaymentAsync(CreatePaymentRequest request)
     {
-        var response = await payOSClient.PaymentRequests.CreateAsync(new CreatePaymentLinkRequest
+        var options = request.AdditionalData as PayOSRequestAdditionalData ??
+                      throw new BadRequestException("PayOSRequestAdditionalData là bắt buộc khi sử dụng PayOS.");
+        var result = await payOSClient.PaymentRequests.CreateAsync(new CreatePaymentLinkRequest
         {
-            OrderCode = request.AdditionalData?[nameof(CreatePaymentLinkRequest.OrderCode)] as long? ??
-                        throw new BadRequestException(
-                            $"{nameof(CreatePaymentLinkRequest.OrderCode)} là bắt buộc trong AdditionalData."),
+            OrderCode = options.OrderCode,
             Amount = decimal.ToInt64(request.Amount),
             Description = request.Description,
-            Items =
-            [
-                .. request.Items.Select(item => new PaymentLinkItem
-                {
-                    Name = item.Name,
-                    Price = decimal.ToInt64(item.Price),
-                    Quantity = item.Quantity
-                })
-            ],
             CancelUrl = request.CancelUrl,
             ReturnUrl = request.ReturnUrl,
+            BuyerPhone = options.BuyerPhone,
             ExpiredAt = request.ExpiredAt.HasValue
                 ? new DateTimeOffset(request.ExpiredAt.Value.ToUniversalTime()).ToUnixTimeSeconds()
                 : null,
-            BuyerName = request.AdditionalData?[nameof(CreatePaymentLinkRequest.BuyerName)] as string,
-            BuyerEmail = request.AdditionalData?[nameof(CreatePaymentLinkRequest.BuyerEmail)] as string,
-            BuyerPhone = request.AdditionalData?[nameof(CreatePaymentLinkRequest.BuyerPhone)] as string
+            Items =
+            [
+                .. options.Items.Select(i => new PaymentLinkItem
+                {
+                    Name = i.Name,
+                    Price = decimal.ToInt64(i.Price),
+                    Quantity = i.Quantity
+                })
+            ]
         });
         return new CreatePaymentResponse
         {
-            PaymentUrl = response.CheckoutUrl,
-            AdditionalData = new Dictionary<string, object>
-            {
-                { nameof(response.PaymentLinkId), response.PaymentLinkId }
-            }
+            PaymentUrl = result.CheckoutUrl
         };
     }
 }

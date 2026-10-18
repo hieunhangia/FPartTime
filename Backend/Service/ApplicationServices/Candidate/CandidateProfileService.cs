@@ -1,11 +1,11 @@
-﻿using System.Security.Claims;
+using System.Security.Claims;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Repository;
-using Repository.Constants;
+using Domain.Shared.Enums;
+using Repository.Extensions;
 using Repository.Models.Users;
 using Riok.Mapperly.Abstractions;
-using Service.Extensions;
 using Service.ExternalServices;
 using Service.HttpErrorExceptions;
 
@@ -14,11 +14,10 @@ namespace Service.ApplicationServices.Candidate;
 public class CandidateProfileService(ApplicationDbContext dbContext, CloudflareR2StorageService storage)
 {
     private static readonly HashSet<string> AllowedImageExtensions = [".png", ".jpg", ".jpeg"];
+
     public async Task<CandidateProfileResponseDto> GetProfileAsync(ClaimsPrincipal user)
     {
         var userId = user.GetUserId();
-        
-
         var profile = await dbContext.Candidates
             .Include(c => c.PreferredWorkCommune)
             .FirstOrDefaultAsync(c => c.UserId == userId);
@@ -27,6 +26,7 @@ public class CandidateProfileService(ApplicationDbContext dbContext, CloudflareR
         {
             throw new NotFoundException("Hồ sơ chưa được tạo.");
         }
+
         var dto = profile.MapToDto();
         if (!string.IsNullOrEmpty(profile.AvatarFilePath))
         {
@@ -75,14 +75,16 @@ public class CandidateProfileService(ApplicationDbContext dbContext, CloudflareR
             profile = new CandidateProfile { UserId = userId };
             dbContext.Candidates.Add(profile);
         }
+
         request.UpdateEntity(profile);
 
-        if(request.AvatarFilePath != null && request.AvatarFilePath.Length > 0)
+        if (request.AvatarFilePath != null && request.AvatarFilePath.Length > 0)
         {
             if (!string.IsNullOrEmpty(profile.AvatarFilePath))
             {
                 await storage.DeleteFileAsync(profile.AvatarFilePath, BucketType.Public);
             }
+
             var extension = Path.GetExtension(request.AvatarFilePath.FileName).ToLowerInvariant();
             var newAvatarKey = $"candidate-avatars/{userId:N}_{Guid.NewGuid():N}{extension}";
 
@@ -111,6 +113,7 @@ public class CandidateProfileService(ApplicationDbContext dbContext, CloudflareR
         {
             dto.AvatarFilePath = storage.GetPublicUrl(profile.AvatarFilePath);
         }
+
         return dto;
     }
 }

@@ -2,7 +2,7 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.OData;
-using Service.HttpErrorExceptions;
+using Domain.Shared.Exceptions.HttpErrorExceptions;
 
 namespace Api;
 

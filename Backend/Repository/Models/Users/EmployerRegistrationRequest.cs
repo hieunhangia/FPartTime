@@ -1,3 +1,5 @@
+using Domain.Shared.Enums;
+
 namespace Repository.Models.Users;
 
 public class EmployerRegistrationRequest
@@ -21,12 +23,4 @@ public class EmployerRegistrationRequest
 
     public CandidateProfile? Requester { get; set; }
     public CensorProfile? Processor { get; set; }
-}
-
-public enum EmployerRegistrationRequestStatus
-{
-    Pending,
-    Approved,
-    Rejected,
-    Cancelled
 }

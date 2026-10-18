@@ -1,3 +1,4 @@
+using Domain.Shared.Enums;
 using Repository.Models.Users;
 
 namespace Repository.Models.Jobs;
@@ -12,11 +13,4 @@ public class JobApplication
 
     public Job? Job { get; set; }
     public CandidateProfile? Candidate { get; set; }
-}
-
-public enum JobApplicationStatus
-{
-    Pending,
-    Accepted,
-    Rejected
 }

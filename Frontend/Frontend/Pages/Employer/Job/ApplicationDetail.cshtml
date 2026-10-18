@@ -132,8 +132,7 @@
                                     <thead class="table-light">
                                     <tr>
                                         <th>Thứ trong tuần</th>
-                                        <th>Giờ bắt đầu</th>
-                                        <th>Giờ kết thúc</th>
+                                        <th>Ca làm việc</th>
                                     </tr>
                                     </thead>
                                     <tbody>
@@ -141,8 +140,7 @@
                                     {
                                         <tr>
                                             <td class="fw-semibold">@Model.GetDayOfWeekDisplay(schedule.DayOfWeek)</td>
-                                            <td>@Model.FormatTime(schedule.StartTime)</td>
-                                            <td>@Model.FormatTime(schedule.EndTime)</td>
+                                            <td>@Model.GetShiftDisplay(schedule.Shift)</td>
                                         </tr>
                                     }
                                     </tbody>

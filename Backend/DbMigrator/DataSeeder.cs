@@ -1,8 +1,8 @@
+using Domain.Shared.Constants;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Repository;
-using Repository.Constants;
-using Repository.Models.Jobs;
+using Domain.Shared.Enums;
 using Repository.Models.Users;
 
 namespace DbMigrator;
@@ -110,31 +110,11 @@ public class DataSeeder(ApplicationDbContext db)
                 PreferredWorkCommuneCode = "16279",
                 PreferredWorkSchedules = new List<CandidateSchedule>
                 {
-                    new()
-                    {
-                        DayOfWeek = DayOfWeek.Monday, StartTime = new TimeOnly(9, 0, 0),
-                        EndTime = new TimeOnly(17, 0, 0)
-                    },
-                    new()
-                    {
-                        DayOfWeek = DayOfWeek.Tuesday, StartTime = new TimeOnly(9, 0, 0),
-                        EndTime = new TimeOnly(17, 0, 0)
-                    },
-                    new()
-                    {
-                        DayOfWeek = DayOfWeek.Wednesday, StartTime = new TimeOnly(9, 0, 0),
-                        EndTime = new TimeOnly(17, 0, 0)
-                    },
-                    new()
-                    {
-                        DayOfWeek = DayOfWeek.Thursday, StartTime = new TimeOnly(9, 0, 0),
-                        EndTime = new TimeOnly(17, 0, 0)
-                    },
-                    new()
-                    {
-                        DayOfWeek = DayOfWeek.Friday, StartTime = new TimeOnly(9, 0, 0),
-                        EndTime = new TimeOnly(17, 0, 0)
-                    }
+                    new() { DayOfWeek = DayOfWeek.Monday, Shift = Shift.Morning },
+                    new() { DayOfWeek = DayOfWeek.Tuesday, Shift = Shift.Afternoon },
+                    new() { DayOfWeek = DayOfWeek.Wednesday, Shift = Shift.Evening },
+                    new() { DayOfWeek = DayOfWeek.Thursday, Shift = Shift.Night },
+                    new() { DayOfWeek = DayOfWeek.Friday, Shift = Shift.Morning }
                 }
             });
         }

@@ -1,20 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Security.Claims;
-using System.Text;
+﻿using System.Security.Claims;
 using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Repository;
-using Repository.Constants;
+using Repository.Extensions;
 using Repository.Models.Users;
 using Riok.Mapperly.Abstractions;
-using Service.Extensions;
 using Service.ExternalServices;
 
 namespace Service.ApplicationServices.Employer
 {
-  
     public class EmployerProfileService(ApplicationDbContext dbContext, CloudflareR2StorageService storage)
     {
         private static readonly HashSet<string> AllowedImageExtensions = [".png", ".jpg", ".jpeg"];
@@ -43,8 +38,8 @@ namespace Service.ApplicationServices.Employer
         }
 
         public async Task<EmployerProfileResponseDto> EditEmployerProfile(
-        ClaimsPrincipal user,
-        UpdateEmployerProfileDto request)
+            ClaimsPrincipal user,
+            UpdateEmployerProfileDto request)
         {
             var userId = user.GetUserId();
 
@@ -111,7 +106,6 @@ namespace Service.ApplicationServices.Employer
 
             return dto;
         }
-
     }
 
 
@@ -121,6 +115,7 @@ namespace Service.ApplicationServices.Employer
         public string? Description { get; set; }
         public string? ContactPhone { get; set; }
     }
+
     public class UpdateEmployerProfileDto
     {
         public IFormFile? LogoFile { get; set; }
@@ -134,7 +129,7 @@ namespace Service.ApplicationServices.Employer
     {
         public static partial EmployerProfileResponseDto MapToDto(this EmployerProfile profile);
 
-        [MapperIgnoreTarget(nameof(EmployerProfile.LogoFilePath))] 
+        [MapperIgnoreTarget(nameof(EmployerProfile.LogoFilePath))]
         public static partial void UpdateEntity(this UpdateEmployerProfileDto request, EmployerProfile profile);
     }
 }

@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Repository;
-using Repository.Constants;
+using Domain.Shared.Enums;
 using Repository.Models.Jobs;
 using Riok.Mapperly.Abstractions;
 using Service.HttpErrorExceptions;

@@ -1,7 +1,7 @@
+using Domain.Shared.Constants;
+using Domain.Shared.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Repository.Constants;
-using Repository.Models.Users;
 using Service.ApplicationServices.Candidate;
 using Service.ApplicationServices.Censor;
 using EmployerRegistrationService = Service.ApplicationServices.Censor.EmployerRegistrationService;
@@ -57,11 +57,11 @@ namespace Api.Controllers.Censor
         [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
         [ProducesResponseType<ProblemDetails>(StatusCodes.Status409Conflict)]
         [ProducesResponseType<ProblemDetails>(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> RejectRegistration(Guid id, [FromBody] RejectEmployerRegistrationRequestDto dto)
+        public async Task<IActionResult> RejectRegistration(Guid id,
+            [FromBody] RejectEmployerRegistrationRequestDto dto)
         {
             await registrationService.RejectAsync(User, id, dto.RejectReason);
             return NoContent();
         }
     }
 }
-

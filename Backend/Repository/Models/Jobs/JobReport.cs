@@ -1,3 +1,4 @@
+using Domain.Shared.Enums;
 using Repository.Models.Users;
 
 namespace Repository.Models.Jobs;
@@ -15,11 +16,4 @@ public class JobReport
     public Job? Job { get; set; }
     public CandidateProfile? Reporter { get; set; }
     public CensorProfile? Resolver { get; set; }
-}
-
-public enum JobReportStatus
-{
-    Pending,
-    Resolved,
-    Dismissed
 }

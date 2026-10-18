@@ -1,9 +1,9 @@
+using Contracts.Common;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.OData.Extensions;
 using Microsoft.AspNetCore.OData.Query;
 using Microsoft.Extensions.Primitives;
-using Service;
 
 namespace Api.Attributes;
 

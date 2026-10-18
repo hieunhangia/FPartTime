@@ -114,11 +114,15 @@ public class ApplicationDetailModel(ApiClient apiClient) : PageModel
     {
         return date.HasValue ? $"{date.Value.Day:D2}/{date.Value.Month:D2}/{date.Value.Year}" : "-";
     }
-
-    public string FormatTime(Time? time)
+    
+    public string GetShiftDisplay(Shift? shift) => shift switch
     {
-        return time.HasValue ? $"{time.Value.Hour:D2}:{time.Value.Minute:D2}" : "-";
-    }
+        Shift.Morning => "Ca sáng",
+        Shift.Afternoon => "Ca chiều",
+        Shift.Evening => "Ca tối",
+        Shift.Night => "Ca đêm",
+        _ => "-"
+    };
 
     public int? GetAge(Date? dob)
     {

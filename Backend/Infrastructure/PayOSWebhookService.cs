@@ -1,4 +1,4 @@
-using Contracts;
+using Contracts.External;
 using PayOS;
 using PayOS.Models.Webhooks;
 

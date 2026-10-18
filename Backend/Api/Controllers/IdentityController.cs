@@ -1,12 +1,12 @@
+using Contracts.Application;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Service.ApplicationServices;
 
 namespace Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class IdentityController(IdentityService identityService) : ControllerBase
+public class IdentityController(IIdentityService identityService) : ControllerBase
 {
     [HttpPost("account-exists")]
     [ProducesResponseType<AccountExistResponseDto>(StatusCodes.Status200OK)]

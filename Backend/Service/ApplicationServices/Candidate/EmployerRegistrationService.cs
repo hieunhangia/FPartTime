@@ -1,12 +1,13 @@
 using System.ComponentModel.DataAnnotations;
 using System.Security.Claims;
+using Domain.Shared.Constants;
+using Domain.Shared.Enums;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Repository;
-using Repository.Constants;
+using Repository.Extensions;
 using Repository.Models.Users;
 using Riok.Mapperly.Abstractions;
-using Service.Extensions;
 using Service.ExternalServices;
 using Service.HttpErrorExceptions;
 

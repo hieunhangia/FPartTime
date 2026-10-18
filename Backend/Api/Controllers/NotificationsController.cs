@@ -1,14 +1,14 @@
 using Api.Attributes;
+using Contracts.Application;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Service.ApplicationServices;
 
 namespace Api.Controllers;
 
 [ApiController]
 [Route("api/notifications")]
 [Authorize]
-public class NotificationsController(NotificationsService notificationsService) : ControllerBase
+public class NotificationsController(INotificationsService notificationsService) : ControllerBase
 {
     [HttpGet]
     [ODataEnableQuery(OutputType.List)]

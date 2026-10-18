@@ -1,8 +1,7 @@
+using Domain.Shared.Constants;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData.Query;
-using Repository.Constants;
 using Service.ApplicationServices.Candidate;
 
 namespace Api.Controllers.Candidate;
@@ -65,4 +64,3 @@ public class JobReportsController(JobReportService jobReportService) : Controlle
         return Ok(report);
     }
 }
-

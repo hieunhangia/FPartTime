@@ -1,16 +1,16 @@
 using Api.Attributes;
+using Contracts.Application.Employer;
+using Contracts.Common;
+using Domain.Shared.Constants;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Repository.Constants;
-using Service;
-using Service.ApplicationServices.Employer;
 
 namespace Api.Controllers.Employer;
 
 [ApiController]
 [Route("api/employer/[controller]")]
 [Authorize(Roles = Role.Employer)]
-public class JobsController(JobService jobService) : ControllerBase
+public class JobsController(IJobService jobService) : ControllerBase
 {
     [HttpGet]
     [ODataEnableQuery(OutputType.Paged)]

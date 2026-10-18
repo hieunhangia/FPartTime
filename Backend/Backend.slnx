@@ -1,7 +1,9 @@
 <Solution>
   <Project Path="Api/Api.csproj" />
+  <Project Path="Application/Application.csproj" />
   <Project Path="Contracts/Contracts.csproj" />
   <Project Path="DbMigrator/DbMigrator.csproj" />
+  <Project Path="Domain.Shared/Domain.Shared.csproj" />
   <Project Path="Infrastructure/Infrastructure.csproj" />
   <Project Path="Repository/Repository.csproj" />
   <Project Path="Service/Service.csproj" />

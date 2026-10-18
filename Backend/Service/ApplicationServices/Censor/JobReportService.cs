@@ -1,12 +1,14 @@
 using System.Data;
 using System.Security.Claims;
+using Contracts.Application;
+using Domain.Shared.Enums;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Repository;
+using Repository.Extensions;
 using Repository.Models.Jobs;
 using Repository.Models.Users;
 using Riok.Mapperly.Abstractions;
-using Service.Extensions;
 using Service.HttpErrorExceptions;
 
 namespace Service.ApplicationServices.Censor;
@@ -14,7 +16,7 @@ namespace Service.ApplicationServices.Censor;
 public class JobReportService(
     ApplicationDbContext dbContext,
     UserManager<User> userManager,
-    NotificationsService notificationsService)
+    INotificationsService notificationsService)
 {
     public IQueryable<CensorJobReportViewDto> GetReportsQueryable(JobReportStatus? status = null)
     {
@@ -33,10 +35,10 @@ public class JobReportService(
     public async Task<CensorJobReportDetailDto> GetReportByIdAsync(Guid id)
     {
         var report = await dbContext.JobReports.AsNoTracking()
-            .Where(r => r.Id == id)
-            .ProjectToDetailDto()
-            .FirstOrDefaultAsync()
-            ?? throw new NotFoundException("Không tìm thấy đơn báo cáo.");
+                         .Where(r => r.Id == id)
+                         .ProjectToDetailDto()
+                         .FirstOrDefaultAsync()
+                     ?? throw new NotFoundException("Không tìm thấy đơn báo cáo.");
 
         return report;
     }
@@ -66,7 +68,7 @@ public class JobReportService(
 
         var job = await GetReportedJobAsync(id);
         var employerUser = await userManager.FindByIdAsync(job.EmployerId.ToString())
-            ?? throw new NotFoundException("Không tìm thấy tài khoản nhà tuyển dụng.");
+                           ?? throw new NotFoundException("Không tìm thấy tài khoản nhà tuyển dụng.");
 
         employerUser.LockoutEnabled = true;
         employerUser.LockoutEnd = DateTimeOffset.MaxValue;
@@ -119,7 +121,8 @@ public class JobReportService(
         await transaction.CommitAsync();
     }
 
-    private async Task NotifyReportResultAsync(Guid reportId, Guid employerId, string reporterContent, string employerContent)
+    private async Task NotifyReportResultAsync(Guid reportId, Guid employerId, string reporterContent,
+        string employerContent)
     {
         var reporterId = await dbContext.JobReports
             .Where(r => r.Id == reportId)
@@ -246,4 +249,3 @@ public static partial class CensorJobReportMapper
     [MapProperty("Resolver.User.Email", nameof(CensorJobReportDetailDto.ResolverEmail))]
     public static partial CensorJobReportDetailDto MapToDetailDto(this JobReport report);
 }
-

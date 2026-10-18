@@ -1,4 +1,4 @@
-using Contracts;
+using Contracts.External;
 using Microsoft.AspNetCore.Mvc;
 using PayOS.Models.Webhooks;
 
