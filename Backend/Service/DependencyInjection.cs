@@ -18,6 +18,7 @@ public static class DependencyInjection
         services.AddScoped<CandidateProfileService>();
         services.AddScoped<JobReportService>();
         services.AddScoped<EmployerRegistrationService>();
+        services.AddScoped<CandidateScheduleService>();
 
         // Employer Services
         services.AddScoped<EmployerProfileService>();
