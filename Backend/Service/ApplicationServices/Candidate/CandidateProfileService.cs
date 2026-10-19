@@ -143,7 +143,7 @@ public class UpdateCandidateProfileDto
 public static partial class CandidateProfileMapper
 {
     [MapProperty(
-        nameof(CandidateProfile.PreferredWorkCommune.Name),
+        $"{nameof(CandidateProfile.PreferredWorkCommune)}.{nameof(CandidateProfile.PreferredWorkCommune.Name)}",
         nameof(CandidateProfileResponseDto.PreferredWorkCommuneName))]
     public static partial CandidateProfileResponseDto MapToDto(this CandidateProfile profile);
 

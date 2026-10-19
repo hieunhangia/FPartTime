@@ -220,32 +220,45 @@ public static partial class CensorJobReportMapper
 {
     public static partial IQueryable<CensorJobReportViewDto> ProjectToViewDto(this IQueryable<JobReport> reports);
 
-    [MapProperty("Job.Title", nameof(CensorJobReportViewDto.JobTitle))]
-    [MapProperty("Job.Employer.CompanyName", nameof(CensorJobReportViewDto.EmployerCompanyName))]
-    [MapProperty("Reporter.FullName", nameof(CensorJobReportViewDto.ReporterName))]
-    [MapProperty("Reporter.User.Email", nameof(CensorJobReportViewDto.ReporterEmail))]
-    [MapProperty("Reporter.User.PhoneNumber", nameof(CensorJobReportViewDto.ReporterPhoneNumber))]
-    [MapProperty("Resolver.User.UserName", nameof(CensorJobReportViewDto.ResolverName))]
+    [MapProperty($"{nameof(JobReport.Job)}.{nameof(JobReport.Job.Title)}", nameof(CensorJobReportViewDto.JobTitle))]
+    [MapProperty($"{nameof(JobReport.Job)}.{nameof(JobReport.Job.Employer)}.{nameof(JobReport.Job.Employer.CompanyName)}",
+        nameof(CensorJobReportViewDto.EmployerCompanyName))]
+    [MapProperty($"{nameof(JobReport.Reporter)}.{nameof(JobReport.Reporter.FullName)}", nameof(CensorJobReportViewDto.ReporterName))]
+    [MapProperty($"{nameof(JobReport.Reporter)}.{nameof(JobReport.Reporter.User)}.{nameof(JobReport.Reporter.User.Email)}",
+        nameof(CensorJobReportViewDto.ReporterEmail))]
+    [MapProperty($"{nameof(JobReport.Reporter)}.{nameof(JobReport.Reporter.User)}.{nameof(JobReport.Reporter.User.PhoneNumber)}",
+        nameof(CensorJobReportViewDto.ReporterPhoneNumber))]
+    [MapProperty($"{nameof(JobReport.Resolver)}.{nameof(JobReport.Resolver.User)}.{nameof(JobReport.Resolver.User.UserName)}",
+        nameof(CensorJobReportViewDto.ResolverName))]
     public static partial CensorJobReportViewDto MapToViewDto(this JobReport report);
 
     public static partial IQueryable<CensorJobReportDetailDto> ProjectToDetailDto(this IQueryable<JobReport> reports);
 
-    [MapProperty("Job.Title", nameof(CensorJobReportDetailDto.JobTitle))]
-    [MapProperty("Job.Description", nameof(CensorJobReportDetailDto.JobDescription))]
-    [MapProperty("Job.Status", nameof(CensorJobReportDetailDto.JobStatus))]
-    [MapProperty("Job.ExpiryAt", nameof(CensorJobReportDetailDto.JobExpiryAt))]
-    [MapProperty("Job.CreatedAt", nameof(CensorJobReportDetailDto.JobCreatedAt))]
-    [MapProperty("Job.DetailAddress", nameof(CensorJobReportDetailDto.JobDetailAddress))]
-    [MapProperty("Job.Commune.Name", nameof(CensorJobReportDetailDto.JobCommuneName))]
-    [MapProperty("Job.Commune.Province.Name", nameof(CensorJobReportDetailDto.JobProvinceName))]
-    [MapProperty("Job.EmployerId", nameof(CensorJobReportDetailDto.EmployerId))]
-    [MapProperty("Job.Employer.CompanyName", nameof(CensorJobReportDetailDto.EmployerCompanyName))]
-    [MapProperty("Job.Employer.ContactPhone", nameof(CensorJobReportDetailDto.EmployerContactPhone))]
-    [MapProperty("Reporter.FullName", nameof(CensorJobReportDetailDto.ReporterName))]
-    [MapProperty("Reporter.User.Email", nameof(CensorJobReportDetailDto.ReporterEmail))]
-    [MapProperty("Reporter.User.PhoneNumber", nameof(CensorJobReportDetailDto.ReporterPhoneNumber))]
-    [MapProperty("Reporter.AvatarFilePath", nameof(CensorJobReportDetailDto.ReporterAvatarFilePath))]
-    [MapProperty("Resolver.User.UserName", nameof(CensorJobReportDetailDto.ResolverName))]
-    [MapProperty("Resolver.User.Email", nameof(CensorJobReportDetailDto.ResolverEmail))]
+    [MapProperty($"{nameof(JobReport.Job)}.{nameof(JobReport.Job.Title)}", nameof(CensorJobReportDetailDto.JobTitle))]
+    [MapProperty($"{nameof(JobReport.Job)}.{nameof(JobReport.Job.Description)}", nameof(CensorJobReportDetailDto.JobDescription))]
+    [MapProperty($"{nameof(JobReport.Job)}.{nameof(JobReport.Job.Status)}", nameof(CensorJobReportDetailDto.JobStatus))]
+    [MapProperty($"{nameof(JobReport.Job)}.{nameof(JobReport.Job.ExpiryAt)}", nameof(CensorJobReportDetailDto.JobExpiryAt))]
+    [MapProperty($"{nameof(JobReport.Job)}.{nameof(JobReport.Job.CreatedAt)}", nameof(CensorJobReportDetailDto.JobCreatedAt))]
+    [MapProperty($"{nameof(JobReport.Job)}.{nameof(JobReport.Job.DetailAddress)}", nameof(CensorJobReportDetailDto.JobDetailAddress))]
+    [MapProperty($"{nameof(JobReport.Job)}.{nameof(JobReport.Job.Commune)}.{nameof(JobReport.Job.Commune.Name)}",
+        nameof(CensorJobReportDetailDto.JobCommuneName))]
+    [MapProperty($"{nameof(JobReport.Job)}.{nameof(JobReport.Job.Commune)}.{nameof(JobReport.Job.Commune.Province)}.{nameof(JobReport.Job.Commune.Province.Name)}",
+        nameof(CensorJobReportDetailDto.JobProvinceName))]
+    [MapProperty($"{nameof(JobReport.Job)}.{nameof(JobReport.Job.EmployerId)}", nameof(CensorJobReportDetailDto.EmployerId))]
+    [MapProperty($"{nameof(JobReport.Job)}.{nameof(JobReport.Job.Employer)}.{nameof(JobReport.Job.Employer.CompanyName)}",
+        nameof(CensorJobReportDetailDto.EmployerCompanyName))]
+    [MapProperty($"{nameof(JobReport.Job)}.{nameof(JobReport.Job.Employer)}.{nameof(JobReport.Job.Employer.ContactPhone)}",
+        nameof(CensorJobReportDetailDto.EmployerContactPhone))]
+    [MapProperty($"{nameof(JobReport.Reporter)}.{nameof(JobReport.Reporter.FullName)}", nameof(CensorJobReportDetailDto.ReporterName))]
+    [MapProperty($"{nameof(JobReport.Reporter)}.{nameof(JobReport.Reporter.User)}.{nameof(JobReport.Reporter.User.Email)}",
+        nameof(CensorJobReportDetailDto.ReporterEmail))]
+    [MapProperty($"{nameof(JobReport.Reporter)}.{nameof(JobReport.Reporter.User)}.{nameof(JobReport.Reporter.User.PhoneNumber)}",
+        nameof(CensorJobReportDetailDto.ReporterPhoneNumber))]
+    [MapProperty($"{nameof(JobReport.Reporter)}.{nameof(JobReport.Reporter.AvatarFilePath)}",
+        nameof(CensorJobReportDetailDto.ReporterAvatarFilePath))]
+    [MapProperty($"{nameof(JobReport.Resolver)}.{nameof(JobReport.Resolver.User)}.{nameof(JobReport.Resolver.User.UserName)}",
+        nameof(CensorJobReportDetailDto.ResolverName))]
+    [MapProperty($"{nameof(JobReport.Resolver)}.{nameof(JobReport.Resolver.User)}.{nameof(JobReport.Resolver.User.Email)}",
+        nameof(CensorJobReportDetailDto.ResolverEmail))]
     public static partial CensorJobReportDetailDto MapToDetailDto(this JobReport report);
 }

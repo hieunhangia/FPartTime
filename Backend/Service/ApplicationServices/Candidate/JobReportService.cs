@@ -136,6 +136,6 @@ public static partial class JobReportMapper
 {
     public static partial IQueryable<JobReportResponseDto> ProjectToDto(this IQueryable<JobReport> reports);
 
-    [MapProperty("Job.Title", nameof(JobReportResponseDto.JobTitle))]
+    [MapProperty($"{nameof(JobReport.Job)}.{nameof(JobReport.Job.Title)}", nameof(JobReportResponseDto.JobTitle))]
     public static partial JobReportResponseDto MapToDto(this JobReport report);
 }
