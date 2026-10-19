@@ -3,6 +3,7 @@
 using ApiSdk.Api.Addresses;
 using ApiSdk.Api.Candidate;
 using ApiSdk.Api.CandidateProfiles;
+using ApiSdk.Api.CandidateSchedules;
 using ApiSdk.Api.Censor;
 using ApiSdk.Api.Employer;
 using ApiSdk.Api.EmployerProfiles;
@@ -40,6 +41,11 @@ namespace ApiSdk.Api
         public global::ApiSdk.Api.CandidateProfiles.CandidateProfilesRequestBuilder CandidateProfiles
         {
             get => new global::ApiSdk.Api.CandidateProfiles.CandidateProfilesRequestBuilder(PathParameters, RequestAdapter);
+        }
+        /// <summary>The CandidateSchedules property</summary>
+        public global::ApiSdk.Api.CandidateSchedules.CandidateSchedulesRequestBuilder CandidateSchedules
+        {
+            get => new global::ApiSdk.Api.CandidateSchedules.CandidateSchedulesRequestBuilder(PathParameters, RequestAdapter);
         }
         /// <summary>The censor property</summary>
         public global::ApiSdk.Api.Censor.CensorRequestBuilder Censor
