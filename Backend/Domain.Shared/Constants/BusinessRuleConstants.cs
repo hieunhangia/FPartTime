@@ -97,9 +97,10 @@ public static class BusinessRuleConstants
             public const int ContentMaxLength = 1000;
         }
 
-        public static class EmployerSubscriptionOrder
+        public static class PaymentTransaction
         {
             public const int PaymentReferenceIdMaxLength = 100;
+            public const int DescriptionMaxLength = 250;
         }
 
         public static class EmployerSubscriptionPlan

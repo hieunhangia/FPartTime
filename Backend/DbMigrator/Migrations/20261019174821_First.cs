@@ -267,6 +267,33 @@ namespace DbMigrator.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "PaymentTransactions",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Purpose = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Provider = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    PaymentReferenceId = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    Amount = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false),
+                    Status = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(250)", maxLength: 250, nullable: true),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    ExpiredAt = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    PaidAt = table.Column<DateTime>(type: "datetime2", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_PaymentTransactions", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_PaymentTransactions_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Communes",
                 columns: table => new
                 {
@@ -282,39 +309,6 @@ namespace DbMigrator.Migrations
                         column: x => x.ProvinceCode,
                         principalTable: "Provinces",
                         principalColumn: "Code",
-                        onDelete: ReferentialAction.Restrict);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "EmployerSubscriptionOrders",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    EmployerId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    PaymentProvider = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    PaymentReferenceId = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    Tier = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Duration = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Amount = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false),
-                    Status = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    ExpiredAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    PaidAt = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    PlanName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    DurationDays = table.Column<int>(type: "int", nullable: false),
-                    ExtraActivePosts = table.Column<int>(type: "int", nullable: false),
-                    FreeBumps = table.Column<int>(type: "int", nullable: false),
-                    CanRecommendCandidates = table.Column<bool>(type: "bit", nullable: false),
-                    CanQueryCandidates = table.Column<bool>(type: "bit", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_EmployerSubscriptionOrders", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_EmployerSubscriptionOrders_Employers_EmployerId",
-                        column: x => x.EmployerId,
-                        principalTable: "Employers",
-                        principalColumn: "UserId",
                         onDelete: ReferentialAction.Restrict);
                 });
 
@@ -342,6 +336,39 @@ namespace DbMigrator.Migrations
                         column: x => x.EmployerId,
                         principalTable: "Employers",
                         principalColumn: "UserId",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "EmployerSubscriptionOrders",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    PaymentTransactionId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    EmployerId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Tier = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Duration = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    PlanName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    DurationDays = table.Column<int>(type: "int", nullable: false),
+                    ExtraActivePosts = table.Column<int>(type: "int", nullable: false),
+                    FreeBumps = table.Column<int>(type: "int", nullable: false),
+                    CanRecommendCandidates = table.Column<bool>(type: "bit", nullable: false),
+                    CanQueryCandidates = table.Column<bool>(type: "bit", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_EmployerSubscriptionOrders", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_EmployerSubscriptionOrders_Employers_EmployerId",
+                        column: x => x.EmployerId,
+                        principalTable: "Employers",
+                        principalColumn: "UserId",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_EmployerSubscriptionOrders_PaymentTransactions_PaymentTransactionId",
+                        column: x => x.PaymentTransactionId,
+                        principalTable: "PaymentTransactions",
+                        principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                 });
 
@@ -650,6 +677,12 @@ namespace DbMigrator.Migrations
                 column: "EmployerId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_EmployerSubscriptionOrders_PaymentTransactionId",
+                table: "EmployerSubscriptionOrders",
+                column: "PaymentTransactionId",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
                 name: "IX_EmployerSubscriptions_EmployerId",
                 table: "EmployerSubscriptions",
                 column: "EmployerId");
@@ -708,6 +741,17 @@ namespace DbMigrator.Migrations
                 name: "IX_Notifications_UserId",
                 table: "Notifications",
                 column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PaymentTransactions_PaymentReferenceId",
+                table: "PaymentTransactions",
+                column: "PaymentReferenceId",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PaymentTransactions_UserId",
+                table: "PaymentTransactions",
+                column: "UserId");
         }
 
         /// <inheritdoc />
@@ -760,6 +804,9 @@ namespace DbMigrator.Migrations
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");
+
+            migrationBuilder.DropTable(
+                name: "PaymentTransactions");
 
             migrationBuilder.DropTable(
                 name: "Candidates");

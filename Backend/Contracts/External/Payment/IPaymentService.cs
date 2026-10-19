@@ -8,10 +8,14 @@ public interface IPaymentService
     PaymentProvider Provider { get; }
     Task<CreatePaymentResponse> CreatePaymentAsync(CreatePaymentRequest request);
     Task<IIpnResponse> ProcessIpnAsync(IIpnRequest request);
+    Task<PaymentPurpose?> GetPaymentPurposeAsync(string paymentReferenceId);
+    Task<int> CancelExpiredTransactionsAsync(CancellationToken cancellationToken = default);
 }
 
 public class CreatePaymentRequest
 {
+    public required Guid UserId { get; set; }
+    public required PaymentPurpose Purpose { get; set; }
     public required decimal Amount { get; set; }
     public required string Description { get; set; }
     public required string CancelUrl { get; set; }
@@ -22,6 +26,7 @@ public class CreatePaymentRequest
 
 public class CreatePaymentResponse
 {
+    public required Guid PaymentTransactionId { get; set; }
     public required string PaymentReferenceId { get; set; }
     public required string PaymentUrl { get; set; }
 }

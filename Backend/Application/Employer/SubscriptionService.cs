@@ -2,13 +2,13 @@ using System.Security.Claims;
 using Contracts.Application;
 using Contracts.Application.Employer;
 using Contracts.External.Payment;
+using Domain;
+using Domain.Models.EmployerSubscriptions;
 using Domain.Shared.Constants;
 using Domain.Shared.Enums;
 using Domain.Shared.Exceptions.HttpErrorExceptions;
 using Domain.Shared.Extensions;
 using Microsoft.EntityFrameworkCore;
-using Domain;
-using Domain.Models.EmployerSubscriptions;
 using Microsoft.Extensions.Logging;
 using Riok.Mapperly.Abstractions;
 
@@ -98,9 +98,11 @@ public class SubscriptionService(
             throw new ForbiddenException("Bạn không có quyền thực hiện hành động này.");
         }
 
-        if (await context.EmployerSubscriptionOrders.AnyAsync(o =>
-                o.EmployerId == userId && o.Status == EmployerSubscriptionOrderStatus.Pending &&
-                o.ExpiredAt > DateTime.UtcNow))
+        if (await context.PaymentTransactions.AnyAsync(t =>
+                t.UserId == userId &&
+                t.Purpose == PaymentPurpose.EmployerSubscription &&
+                t.Status == PaymentTransactionStatus.Pending &&
+                t.ExpiredAt > DateTime.UtcNow))
         {
             throw new BadRequestException(
                 "Bạn đang có đơn hàng Gói đăng ký chờ thanh toán. Vui lòng hoàn tất hoặc hủy các đơn hàng đó trước khi tạo đơn mới.");
@@ -137,6 +139,8 @@ public class SubscriptionService(
         var paymentResponse = await paymentServiceFactory.Get(provider)
             .CreatePaymentAsync(new CreatePaymentRequest
             {
+                UserId = userId,
+                Purpose = PaymentPurpose.EmployerSubscription,
                 Amount = plan.Price,
                 Description = $"Dang ki goi {plan.Tier} {plan.Duration}",
                 CancelUrl = request.CancelUrl,
@@ -157,12 +161,10 @@ public class SubscriptionService(
 
         context.EmployerSubscriptionOrders.Add(new EmployerSubscriptionOrder
         {
+            PaymentTransactionId = paymentResponse.PaymentTransactionId,
             EmployerId = userId,
-            PaymentProvider = provider,
-            PaymentReferenceId = paymentResponse.PaymentReferenceId,
             Tier = plan.Tier,
             Duration = plan.Duration,
-            Amount = plan.Price,
             PlanName = plan.Name,
             DurationDays = plan.DurationDays,
             ExtraActivePosts = plan.ExtraActivePosts,
@@ -176,25 +178,43 @@ public class SubscriptionService(
 
     public async Task ProcessIpnAsync(string paymentReferenceId)
     {
-        var order = await context.EmployerSubscriptionOrders
-            .Include(o => o.Employer)
-            .FirstOrDefaultAsync(o => o.PaymentReferenceId == paymentReferenceId);
+        var transaction = await context.PaymentTransactions
+            .Include(t => t.EmployerSubscriptionOrder)
+            .ThenInclude(o => o!.Employer)
+            .FirstOrDefaultAsync(t => t.PaymentReferenceId == paymentReferenceId);
 
-        if (order == null)
+        if (transaction == null)
         {
             logger.LogError("Webhook thanh toán nhận mã tham chiếu không tồn tại trong hệ thống: {PaymentReferenceId}",
                 paymentReferenceId);
             return;
         }
 
-        if (order.Status != EmployerSubscriptionOrderStatus.Pending)
+        if (transaction.Purpose != PaymentPurpose.EmployerSubscription)
         {
             logger.LogError(
-                "Webhook thanh toán nhận mã tham chiếu {PaymentReferenceId} nhưng đơn hàng {OrderId} đã có trạng thái {Status}",
-                paymentReferenceId, order.Id, order.Status);
+                "Giao dịch {TransactionId} có mục đích thanh toán {Purpose} không khớp với {EmployerSubscription}",
+                transaction.Id, transaction.Purpose, nameof(PaymentPurpose.EmployerSubscription));
+            return;
+        }
+
+        var order = transaction.EmployerSubscriptionOrder;
+        if (order == null)
+        {
+            logger.LogError(
+                "Không tìm thấy đơn hàng đăng ký gói liên kết với giao dịch {TransactionId} (PaymentReferenceId: {PaymentReferenceId})",
+                transaction.Id, paymentReferenceId);
+            return;
+        }
+
+        if (transaction.Status != PaymentTransactionStatus.Pending)
+        {
+            logger.LogError(
+                "Webhook thanh toán nhận mã tham chiếu {PaymentReferenceId} nhưng giao dịch {TransactionId} đã có trạng thái {Status}",
+                paymentReferenceId, transaction.Id, transaction.Status);
             await notificationsService.CreateNotificationAsync(order.EmployerId,
                 "Kích hoạt gói dịch vụ không thành công",
-                $"Đơn hàng #{paymentReferenceId} đã thanh toán thành công nhưng trạng thái đơn hàng không hợp lệ ({order.Status}). Vui lòng liên hệ bộ phận hỗ trợ để được trợ giúp.");
+                $"Đơn hàng #{paymentReferenceId} đã thanh toán thành công nhưng trạng thái đơn hàng không hợp lệ ({transaction.Status}). Vui lòng liên hệ bộ phận hỗ trợ để được trợ giúp.");
             return;
         }
 
@@ -207,13 +227,13 @@ public class SubscriptionService(
         {
             logger.LogError("Không tìm thấy thông tin nhà tuyển dụng cho đơn hàng {OrderId} (EmployerId: {EmployerId})",
                 order.Id, order.EmployerId);
-            order.Status = EmployerSubscriptionOrderStatus.Failed;
-            order.PaidAt = now;
+            transaction.Status = PaymentTransactionStatus.Failed;
+            transaction.PaidAt = now;
             await context.SaveChangesAsync();
 
             await notificationsService.CreateNotificationAsync(order.EmployerId,
                 "Kích hoạt gói dịch vụ không thành công",
-                $"Đơn hàng #{paymentReferenceId} đã thanh toán thành công ({order.Amount:N0} đ) nhưng không tìm thấy thông tin nhà tuyển dụng. Vui lòng liên hệ bộ phận hỗ trợ để được trợ giúp.");
+                $"Đơn hàng #{paymentReferenceId} đã thanh toán thành công ({transaction.Amount:N0} đ) nhưng không tìm thấy thông tin nhà tuyển dụng. Vui lòng liên hệ bộ phận hỗ trợ để được trợ giúp.");
             return;
         }
 
@@ -229,18 +249,18 @@ public class SubscriptionService(
                 "Đơn hàng {OrderId} thanh toán thành công nhưng gói hiện tại ({ActiveTier} {ActiveDuration}) không khớp với gói mới ({NewTier} {NewDuration})",
                 order.Id, activeSub.Tier, activeSub.Duration, order.Tier, order.Duration);
 
-            order.Status = EmployerSubscriptionOrderStatus.Failed;
-            order.PaidAt = now;
+            transaction.Status = PaymentTransactionStatus.Failed;
+            transaction.PaidAt = now;
             await context.SaveChangesAsync();
 
             await notificationsService.CreateNotificationAsync(order.EmployerId,
                 "Kích hoạt gói dịch vụ không thành công",
-                $"Đơn hàng #{paymentReferenceId} đã thanh toán thành công ({order.Amount:N0} đ) nhưng chưa thể kích hoạt do bạn đang có gói {activeSub.Tier} ({activeSub.Duration}) còn hạn đến {activeSub.EndDate:dd/MM/yyyy HH:mm} (UTC). Vui lòng liên hệ bộ phận hỗ trợ để được trợ giúp.");
+                $"Đơn hàng #{paymentReferenceId} đã thanh toán thành công ({transaction.Amount:N0} đ) nhưng chưa thể kích hoạt do bạn đang có gói {activeSub.Tier} ({activeSub.Duration}) còn hạn đến {activeSub.EndDate:dd/MM/yyyy HH:mm} (UTC). Vui lòng liên hệ bộ phận hỗ trợ để được trợ giúp.");
             return;
         }
 
-        order.Status = EmployerSubscriptionOrderStatus.Paid;
-        order.PaidAt = now;
+        transaction.Status = PaymentTransactionStatus.Paid;
+        transaction.PaidAt = now;
         employer.BumpBalance += order.FreeBumps;
         employer.MaxActivePosts = BusinessRuleConstants.Employers.DefaultMaxActivePosts + order.ExtraActivePosts;
 
@@ -340,12 +360,6 @@ public class SubscriptionService(
         await context.SaveChangesAsync(cancellationToken);
         return expiredSubs.Count;
     }
-
-    public async Task<int> CancelExpiredOrdersAsync(CancellationToken cancellationToken = default) =>
-        await context.EmployerSubscriptionOrders
-            .Where(o => o.Status == EmployerSubscriptionOrderStatus.Pending && o.ExpiredAt < DateTime.UtcNow)
-            .ExecuteUpdateAsync(s => s.SetProperty(o => o.Status, EmployerSubscriptionOrderStatus.Expired),
-                cancellationToken);
 }
 
 [Mapper(RequiredMappingStrategy = RequiredMappingStrategy.Target)]

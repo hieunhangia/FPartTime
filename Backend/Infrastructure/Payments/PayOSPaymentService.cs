@@ -1,15 +1,18 @@
 using Contracts.External.Payment;
+using Domain;
 using Domain.Shared.Enums;
 using Domain.Shared.Exceptions.HttpErrorExceptions;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using PayOS;
 using PayOS.Models.V2.PaymentRequests;
 using PayOS.Models.Webhooks;
 using Riok.Mapperly.Abstractions;
+using PaymentTransaction = Domain.Models.Payments.PaymentTransaction;
 
 namespace Infrastructure.Payments;
 
-public class PayOSPaymentService(PayOSClient payOSClient) : IPaymentService
+public class PayOSPaymentService(PayOSClient payOSClient, ApplicationDbContext context) : IPaymentService
 {
     public PaymentProvider Provider => PaymentProvider.PayOS;
 
@@ -38,8 +41,24 @@ public class PayOSPaymentService(PayOSClient payOSClient) : IPaymentService
                 })
             ]
         });
+
+        var transaction = new PaymentTransaction
+        {
+            UserId = request.UserId,
+            Purpose = request.Purpose,
+            Provider = Provider,
+            PaymentReferenceId = result.OrderCode.ToString(),
+            Amount = request.Amount,
+            Status = PaymentTransactionStatus.Pending,
+            Description = request.Description,
+            ExpiredAt = request.ExpiredAt
+        };
+        context.PaymentTransactions.Add(transaction);
+        await context.SaveChangesAsync();
+
         return new CreatePaymentResponse
         {
+            PaymentTransactionId = transaction.Id,
             PaymentReferenceId = result.OrderCode.ToString(),
             PaymentUrl = result.CheckoutUrl
         };
@@ -51,6 +70,17 @@ public class PayOSPaymentService(PayOSClient payOSClient) : IPaymentService
                            throw new BadRequestException("PayOSIpnRequest là bắt buộc khi sử dụng PayOS.");
         return (await payOSClient.Webhooks.VerifyAsync(payOSRequest.MapToSdkRequest())).MapToDomainResponse();
     }
+
+    public async Task<PaymentPurpose?> GetPaymentPurposeAsync(string paymentReferenceId) =>
+        await context.PaymentTransactions
+            .Where(t => t.PaymentReferenceId == paymentReferenceId && t.Provider == Provider)
+            .Select(t => t.Purpose)
+            .FirstOrDefaultAsync();
+
+    public async Task<int> CancelExpiredTransactionsAsync(CancellationToken cancellationToken = default) =>
+        await context.PaymentTransactions
+            .Where(t => t.Status == PaymentTransactionStatus.Pending && t.ExpiredAt < DateTime.UtcNow)
+            .ExecuteUpdateAsync(s => s.SetProperty(t => t.Status, PaymentTransactionStatus.Expired), cancellationToken);
 }
 
 public class PayOSHealthCheck(IHttpClientFactory httpClientFactory) : IHealthCheck

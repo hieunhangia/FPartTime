@@ -112,18 +112,11 @@ namespace DbMigrator.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<decimal>("Amount")
-                        .HasPrecision(18, 2)
-                        .HasColumnType("decimal(18,2)");
-
                     b.Property<bool>("CanQueryCandidates")
                         .HasColumnType("bit");
 
                     b.Property<bool>("CanRecommendCandidates")
                         .HasColumnType("bit");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
 
                     b.Property<string>("Duration")
                         .IsRequired()
@@ -135,35 +128,19 @@ namespace DbMigrator.Migrations
                     b.Property<Guid>("EmployerId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("ExpiredAt")
-                        .HasColumnType("datetime2");
-
                     b.Property<int>("ExtraActivePosts")
                         .HasColumnType("int");
 
                     b.Property<int>("FreeBumps")
                         .HasColumnType("int");
 
-                    b.Property<DateTime?>("PaidAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("PaymentProvider")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("PaymentReferenceId")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                    b.Property<Guid>("PaymentTransactionId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("PlanName")
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Tier")
                         .IsRequired()
@@ -172,6 +149,9 @@ namespace DbMigrator.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("EmployerId");
+
+                    b.HasIndex("PaymentTransactionId")
+                        .IsUnique();
 
                     b.ToTable("EmployerSubscriptionOrders");
                 });
@@ -460,6 +440,59 @@ namespace DbMigrator.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("Notifications");
+                });
+
+            modelBuilder.Entity("Domain.Models.Payments.PaymentTransaction", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<decimal>("Amount")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(250)");
+
+                    b.Property<DateTime?>("ExpiredAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("PaidAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("PaymentReferenceId")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("Provider")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Purpose")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PaymentReferenceId")
+                        .IsUnique();
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("PaymentTransactions");
                 });
 
             modelBuilder.Entity("Domain.Models.Users.CandidateProfile", b =>
@@ -879,7 +912,15 @@ namespace DbMigrator.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("Domain.Models.Payments.PaymentTransaction", "PaymentTransaction")
+                        .WithOne("EmployerSubscriptionOrder")
+                        .HasForeignKey("Domain.Models.EmployerSubscriptions.EmployerSubscriptionOrder", "PaymentTransactionId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.Navigation("Employer");
+
+                    b.Navigation("PaymentTransaction");
                 });
 
             modelBuilder.Entity("Domain.Models.Jobs.Job", b =>
@@ -980,6 +1021,17 @@ namespace DbMigrator.Migrations
                 {
                     b.HasOne("Domain.Models.Users.User", "User")
                         .WithMany("Notifications")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Domain.Models.Payments.PaymentTransaction", b =>
+                {
+                    b.HasOne("Domain.Models.Users.User", "User")
+                        .WithMany("PaymentTransactions")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
@@ -1128,6 +1180,11 @@ namespace DbMigrator.Migrations
                     b.Navigation("JobSchedules");
                 });
 
+            modelBuilder.Entity("Domain.Models.Payments.PaymentTransaction", b =>
+                {
+                    b.Navigation("EmployerSubscriptionOrder");
+                });
+
             modelBuilder.Entity("Domain.Models.Users.CandidateProfile", b =>
                 {
                     b.Navigation("EmployerRegistrationRequests");
@@ -1164,6 +1221,8 @@ namespace DbMigrator.Migrations
                     b.Navigation("EmployerProfile");
 
                     b.Navigation("Notifications");
+
+                    b.Navigation("PaymentTransactions");
                 });
 #pragma warning restore 612, 618
         }

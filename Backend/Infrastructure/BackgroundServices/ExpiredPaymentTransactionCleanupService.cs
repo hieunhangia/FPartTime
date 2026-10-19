@@ -1,13 +1,13 @@
-using Contracts.Application.Employer;
+using Contracts.External.Payment;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
 namespace Infrastructure.BackgroundServices;
 
-public class ExpiredSubscriptionOrderCleanupService(
+public class ExpiredPaymentTransactionCleanupService(
     IServiceProvider serviceProvider,
-    ILogger<ExpiredSubscriptionOrderCleanupService> logger)
+    ILogger<ExpiredPaymentTransactionCleanupService> logger)
     : BackgroundService
 {
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -17,31 +17,31 @@ public class ExpiredSubscriptionOrderCleanupService(
             if (logger.IsEnabled(LogLevel.Information))
             {
                 logger.LogInformation(
-                    $"{nameof(ExpiredSubscriptionOrderCleanupService)} đang kiểm tra các đơn hàng thanh toán gói đăng ký hết hạn...");
+                    $"{nameof(ExpiredPaymentTransactionCleanupService)} đang kiểm tra các giao dịch thanh toán hết hạn...");
             }
 
             try
             {
                 using var scope = serviceProvider.CreateScope();
-                var cancelledCount = await scope.ServiceProvider.GetRequiredService<ISubscriptionService>()
-                    .CancelExpiredOrdersAsync(stoppingToken);
+                var cancelledCount = await scope.ServiceProvider.GetRequiredService<IPaymentService>()
+                    .CancelExpiredTransactionsAsync(stoppingToken);
 
                 if (logger.IsEnabled(LogLevel.Information))
                 {
                     if (cancelledCount > 0)
                     {
-                        logger.LogInformation("Đã tự động hủy {CancelledCount} đơn hàng hết hạn thanh toán.",
+                        logger.LogInformation("Đã tự động hủy {CancelledCount} giao dịch hết hạn thanh toán.",
                             cancelledCount);
                     }
                     else
                     {
-                        logger.LogInformation("Không có đơn hàng nào hết hạn.");
+                        logger.LogInformation("Không có giao dịch nào hết hạn.");
                     }
                 }
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "Đã xảy ra lỗi khi kiểm tra các đơn hàng hết hạn.");
+                logger.LogError(ex, "Đã xảy ra lỗi khi kiểm tra các giao dịch hết hạn.");
             }
 
             await Task.Delay(TimeSpan.FromMinutes(1), stoppingToken);

@@ -17,7 +17,7 @@ public static class DependencyInjection
         // Background Services
         builder.Services.AddHostedService<ExpiredJobCleanupService>();
         builder.Services.AddHostedService<ExpiredSubscriptionCleanupService>();
-        builder.Services.AddHostedService<ExpiredSubscriptionOrderCleanupService>();
+        builder.Services.AddHostedService<ExpiredPaymentTransactionCleanupService>();
 
         // PayOS Service
         builder.Services.AddSingleton(new PayOSClient(new PayOSOptions
@@ -26,8 +26,8 @@ public static class DependencyInjection
             ApiKey = builder.Configuration["PayOS:ApiKey"],
             ChecksumKey = builder.Configuration["PayOS:ChecksumKey"]
         }));
-        builder.Services.AddSingleton<IPaymentService, PayOSPaymentService>();
-        builder.Services.AddSingleton<IPaymentServiceFactory, PaymentServiceFactory>();
+        builder.Services.AddScoped<IPaymentService, PayOSPaymentService>();
+        builder.Services.AddScoped<IPaymentServiceFactory, PaymentServiceFactory>();
         builder.Services.AddHttpClient(PayOSHealthCheck.HealthCheckHttpClientName, client =>
         {
             client.BaseAddress = new Uri("https://api-merchant.payos.vn/");

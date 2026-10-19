@@ -1,3 +1,4 @@
+using Contracts.Application.Employer;
 using Contracts.External.Payment;
 using Domain.Shared.Enums;
 using Microsoft.AspNetCore.Mvc;
@@ -6,22 +7,36 @@ namespace Api.Controllers.Webhook;
 
 [ApiController]
 [Route("api/[controller]")]
-public class PayOSWebhookController(IPaymentServiceFactory paymentServiceFactory)
+public class PayOSWebhookController(
+    IPaymentServiceFactory paymentServiceFactory,
+    ISubscriptionService subscriptionService,
+    ILogger<PayOSWebhookController> logger)
     : ControllerBase
 {
     [HttpPost]
     public async Task<IActionResult> ProcessWebhook([FromBody] PayOSIpnRequest request)
     {
-        var response = await paymentServiceFactory.Get(PaymentProvider.PayOS).ProcessIpnAsync(request);
-        var payOsResponse = response as PayOsIpnResponse ??
+        var paymentService = paymentServiceFactory.Get(PaymentProvider.PayOS);
+        var payOsResponse = await paymentService.ProcessIpnAsync(request) as PayOsIpnResponse ??
                             throw new InvalidOperationException("Phản hồi từ PayOS không hợp lệ.");
-        await OnIpnVerifiedAsync(payOsResponse);
+
+        await OnIpnVerifiedAsync(payOsResponse,
+            await paymentService.GetPaymentPurposeAsync(payOsResponse.PaymentReferenceId));
         return Ok();
     }
 
-    // This method is called when the webhook is verified successfully.
-    private async Task OnIpnVerifiedAsync(PayOsIpnResponse response)
+    private async Task OnIpnVerifiedAsync(PayOsIpnResponse response, PaymentPurpose? paymentPurpose)
     {
-        var paymentReferenceId = response.PaymentReferenceId;
+        switch (paymentPurpose)
+        {
+            case PaymentPurpose.EmployerSubscription:
+                await subscriptionService.ProcessIpnAsync(response.PaymentReferenceId);
+                break;
+            default:
+                logger.LogWarning(
+                    "Mục đích thanh toán '{Purpose}' không được hỗ trợ hoặc không tìm thấy giao dịch cho mã tham chiếu {PaymentReferenceId}",
+                    paymentPurpose, response.PaymentReferenceId);
+                break;
+        }
     }
 }

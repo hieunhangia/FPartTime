@@ -1,6 +1,6 @@
 namespace Domain.Shared.Enums;
 
-public enum EmployerSubscriptionOrderStatus
+public enum PaymentTransactionStatus
 {
     Pending,
     Paid,

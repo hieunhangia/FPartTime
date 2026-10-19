@@ -2,6 +2,7 @@ using Domain.Models.Address;
 using Domain.Models.EmployerSubscriptions;
 using Domain.Models.Jobs;
 using Domain.Models.Notifications;
+using Domain.Models.Payments;
 using Domain.Models.Users;
 using Domain.Shared.Constants;
 using Microsoft.AspNetCore.Identity;
@@ -30,6 +31,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<JobSalary> JobSalaries { get; set; }
     public DbSet<JobReport> JobReports { get; set; }
     public DbSet<Notification> Notifications { get; set; }
+    public DbSet<PaymentTransaction> PaymentTransactions { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -249,15 +251,17 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 
         builder.Entity<EmployerSubscriptionOrder>(entity =>
         {
-            entity.Property(e => e.PaymentReferenceId)
-                .HasMaxLength(BusinessRuleConstants.Models.EmployerSubscriptionOrder.PaymentReferenceIdMaxLength);
-            entity.Property(e => e.Amount).HasPrecision(18, 2);
             entity.Property(e => e.PlanName)
                 .HasMaxLength(BusinessRuleConstants.Models.EmployerSubscriptionPlan.NameMaxLength);
 
             entity.HasOne(e => e.Employer)
                 .WithMany(em => em.SubscriptionOrders)
                 .HasForeignKey(e => e.EmployerId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(e => e.PaymentTransaction)
+                .WithOne(t => t.EmployerSubscriptionOrder)
+                .HasForeignKey<EmployerSubscriptionOrder>(e => e.PaymentTransactionId)
                 .OnDelete(DeleteBehavior.Restrict);
         });
 
@@ -276,6 +280,21 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
                 .HasMaxLength(BusinessRuleConstants.Models.EmployerSubscriptionPlan.DescriptionMaxLength);
             entity.Property(e => e.Price)
                 .HasPrecision(18, 2);
+        });
+
+        builder.Entity<PaymentTransaction>(entity =>
+        {
+            entity.Property(e => e.PaymentReferenceId)
+                .HasMaxLength(BusinessRuleConstants.Models.PaymentTransaction.PaymentReferenceIdMaxLength);
+            entity.HasIndex(e => e.PaymentReferenceId).IsUnique();
+            entity.Property(e => e.Amount).HasPrecision(18, 2);
+            entity.Property(e => e.Description)
+                .HasMaxLength(BusinessRuleConstants.Models.PaymentTransaction.DescriptionMaxLength);
+
+            entity.HasOne(e => e.User)
+                .WithMany(u => u.PaymentTransactions)
+                .HasForeignKey(e => e.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
         });
 
         foreach (var entityType in builder.Model.GetEntityTypes())

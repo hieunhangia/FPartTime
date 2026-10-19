@@ -15,7 +15,6 @@ public interface ISubscriptionService
 
     Task ProcessIpnAsync(string paymentReferenceId);
     Task<int> ProcessExpiredSubscriptionsAsync(CancellationToken cancellationToken = default);
-    Task<int> CancelExpiredOrdersAsync(CancellationToken cancellationToken = default);
 }
 
 public class EmployerSubscriptionPlanResponseDto
