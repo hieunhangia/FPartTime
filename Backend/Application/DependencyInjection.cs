@@ -26,7 +26,6 @@ public static class DependencyInjection
         // Candidate
 
         // Employer
-        builder.Services.AddScoped<Contracts.Application.Employer.IIndustryService, Employer.IndustryService>();
         builder.Services.AddScoped<IJobService, JobService>();
         builder.Services.AddScoped<ISubscriptionService, SubscriptionService>();
         builder.Services.AddScoped<ICandidateService, CandidateService>();
@@ -34,6 +33,7 @@ public static class DependencyInjection
         // Censor
 
         // Manager
+        builder.Services.AddScoped<Contracts.Application.Manager.IIndustryService, Manager.IndustryService>();
 
         // Admin
     }

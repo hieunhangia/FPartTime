@@ -1,15 +1,15 @@
 using Api.Attributes;
-using Contracts.Application.Employer;
+using Contracts.Application.Manager;
 using Contracts.Common;
 using Domain.Shared.Constants;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Api.Controllers.Employer;
+namespace Api.Controllers.Manager;
 
 [ApiController]
-[Route("api/employer/[controller]")]
-[Authorize(Roles = Role.Employer)]
+[Route("api/manager/[controller]")]
+[Authorize(Roles = Role.Manager)]
 [ProducesResponseType<ProblemDetails>(StatusCodes.Status401Unauthorized)]
 [ProducesResponseType<ProblemDetails>(StatusCodes.Status403Forbidden)]
 [ProducesResponseType<ProblemDetails>(StatusCodes.Status500InternalServerError)]

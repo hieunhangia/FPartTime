@@ -1,4 +1,4 @@
-using Contracts.Application.Employer;
+using Contracts.Application.Manager;
 using Domain;
 using Domain.Models.Jobs;
 using Domain.Shared.Constants;
@@ -6,7 +6,7 @@ using Domain.Shared.Exceptions.HttpErrorExceptions;
 using Microsoft.EntityFrameworkCore;
 using Riok.Mapperly.Abstractions;
 
-namespace Application.Employer;
+namespace Application.Manager;
 
 public class IndustryService(ApplicationDbContext context) : IIndustryService
 {

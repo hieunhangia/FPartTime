@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using Domain.Shared.Constants;
 
-namespace Contracts.Application.Employer;
+namespace Contracts.Application.Manager;
 
 public interface IIndustryService
 {
