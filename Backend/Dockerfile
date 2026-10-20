@@ -4,7 +4,11 @@ ARG TARGETARCH
 WORKDIR /src
 
 # Copy csproj files and restore dependencies cho target architecture (tận dụng cache mount)
-COPY ["Repository/Repository.csproj", "Repository/"]
+COPY ["Domain.Shared/Domain.Shared.csproj", "Domain.Shared/"]
+COPY ["Domain/Domain.csproj", "Domain/"]
+COPY ["Contracts/Contracts.csproj", "Contracts/"]
+COPY ["Application/Application.csproj", "Application/"]
+COPY ["Infrastructure/Infrastructure.csproj", "Infrastructure/"]
 COPY ["Service/Service.csproj", "Service/"]
 COPY ["Api/Api.csproj", "Api/"]
 RUN --mount=type=cache,id=nuget,target=/root/.nuget/packages \

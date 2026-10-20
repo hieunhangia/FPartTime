@@ -4,7 +4,8 @@ ARG TARGETARCH
 WORKDIR /src
 
 # Copy csproj files and restore dependencies cho target architecture (tận dụng cache mount)
-COPY ["Repository/Repository.csproj", "Repository/"]
+COPY ["Domain.Shared/Domain.Shared.csproj", "Domain.Shared/"]
+COPY ["Domain/Domain.csproj", "Domain/"]
 COPY ["DbMigrator/DbMigrator.csproj", "DbMigrator/"]
 RUN --mount=type=cache,id=nuget,target=/root/.nuget/packages \
     dotnet restore "DbMigrator/DbMigrator.csproj" -a $TARGETARCH

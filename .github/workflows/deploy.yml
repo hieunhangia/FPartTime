@@ -36,8 +36,12 @@ jobs:
           filters: |
             backend:
               - 'Backend/Api/**'
+              - 'Backend/Application/**'
+              - 'Backend/Contracts/**'
+              - 'Backend/Domain/**'
+              - 'Backend/Domain.Shared/**'
+              - 'Backend/Infrastructure/**'
               - 'Backend/Service/**'
-              - 'Backend/Repository/**'
               - 'Backend/Dockerfile'
               - 'Backend/.dockerignore'
               - 'Backend/*.sln*'
@@ -45,7 +49,9 @@ jobs:
               - 'Frontend/**'
             db_migrator:
               - 'Backend/DbMigrator/**'
-              - 'Backend/Repository/**'
+              - 'Backend/Domain/**'
+              - 'Backend/Domain.Shared/**'
+              - 'Backend/*.sln*'
             compose:
               - 'docker-compose.yml'
               - '.github/workflows/deploy.yml'
