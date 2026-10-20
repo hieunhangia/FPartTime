@@ -21,11 +21,12 @@ public static class DependencyInjection
 
         // Public
         builder.Services.AddScoped<IAddressService, AddressService>();
-        builder.Services.AddScoped<IIndustryService, IndustryService>();
+        builder.Services.AddScoped<Contracts.Application.Public.IIndustryService, Public.IndustryService>();
 
         // Candidate
 
         // Employer
+        builder.Services.AddScoped<Contracts.Application.Employer.IIndustryService, Employer.IndustryService>();
         builder.Services.AddScoped<IJobService, JobService>();
         builder.Services.AddScoped<ISubscriptionService, SubscriptionService>();
         builder.Services.AddScoped<ICandidateService, CandidateService>();

@@ -516,9 +516,9 @@ public class JobService(
             throw new BadRequestException("Ngành nghề không hợp lệ.");
         }
 
-        if (!await context.Industries.AnyAsync(i => i.Id == createUpdateJobRequestDto.IndustryId.Value))
+        if (!await context.Industries.AnyAsync(i => i.Id == createUpdateJobRequestDto.IndustryId.Value && i.IsActive))
         {
-            throw new BadRequestException("Ngành nghề không tồn tại.");
+            throw new BadRequestException("Ngành nghề không tồn tại hoặc đã ngừng hoạt động.");
         }
 
         if (!await context.Communes.AnyAsync(c => c.Code == createUpdateJobRequestDto.CommuneCode))

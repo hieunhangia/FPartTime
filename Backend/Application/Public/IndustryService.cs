@@ -9,7 +9,7 @@ namespace Application.Public;
 public class IndustryService(ApplicationDbContext dbContext) : IIndustryService
 {
     public async Task<List<IndustryResponseDto>> GetAllIndustriesAsync() =>
-        await dbContext.Industries.ProjectToDto().ToListAsync();
+        await dbContext.Industries.AsNoTracking().Where(i => i.IsActive).ProjectToDto().ToListAsync();
 }
 
 [Mapper(RequiredMappingStrategy = RequiredMappingStrategy.Target)]
