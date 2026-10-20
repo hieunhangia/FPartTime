@@ -1,3 +1,4 @@
+using Api.Attributes;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData.Query;
@@ -11,7 +12,6 @@ namespace Api.Controllers.Public;
 public class JobsController(JobService jobService) : ControllerBase
 {
     [HttpGet]
-    [EnableQuery]
     [ProducesResponseType<IEnumerable<JobResponseDto>>(StatusCodes.Status200OK)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status500InternalServerError)]

@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DbMigrator.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20261020022411_First")]
+    [Migration("20261020083637_First")]
     partial class First
     {
         /// <inheritdoc />
@@ -210,6 +210,9 @@ namespace DbMigrator.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
 
                     b.Property<string>("Name")
                         .IsRequired()
