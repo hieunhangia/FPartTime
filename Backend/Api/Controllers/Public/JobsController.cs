@@ -1,4 +1,5 @@
 using Api.Attributes;
+using Contracts.Common;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.OData.Query;
@@ -12,11 +13,11 @@ namespace Api.Controllers.Public;
 public class JobsController(JobService jobService) : ControllerBase
 {
     [HttpGet]
-    [ProducesResponseType<IEnumerable<JobResponseDto>>(StatusCodes.Status200OK)]
+    [ODataEnableQuery(OutputType.Paged)]
+    [ProducesResponseType<PagedResponseDto<JobResponseDto>>(StatusCodes.Status200OK)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status500InternalServerError)]
-    public IQueryable<JobResponseDto> GetActiveJobs() =>
-        jobService.GetActiveJobsQueryable();
+    public IQueryable<JobResponseDto> GetActiveJobs() => jobService.GetActiveJobsQueryable();
 
     [HttpGet("{id:guid}")]
     [ProducesResponseType<JobResponseDto>(StatusCodes.Status200OK)]
