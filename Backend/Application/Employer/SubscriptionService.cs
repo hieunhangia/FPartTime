@@ -17,7 +17,9 @@ namespace Application.Employer;
 public class SubscriptionService(
     ApplicationDbContext context,
     IPaymentServiceFactory paymentServiceFactory,
+    IPaymentTransactionService paymentTransactionService,
     INotificationsService notificationsService,
+    IFrontendUrlBuilder frontendUrlBuilder,
     ILogger<SubscriptionService> logger) : ISubscriptionService
 {
     public async Task<List<EmployerSubscriptionPlanResponseDto>> GetPlansAsync() =>
@@ -136,32 +138,32 @@ public class SubscriptionService(
                 $"Bạn đang sử dụng gói {activeSub.Tier} ({activeSub.Duration}). Gói mới không trùng khớp với gói hiện tại. Bạn cần hủy gói cũ để đăng ký gói mới, hoặc gia hạn gói {activeSub.Tier} ({activeSub.Duration}).");
         }
 
+        var description = $"Dang ki goi {plan.Tier} {plan.Duration}";
         var paymentResponse = await paymentServiceFactory.Get(provider)
-            .CreatePaymentAsync(new CreatePaymentRequest
+            .CreatePaymentAsync(provider switch
             {
-                UserId = userId,
-                Purpose = PaymentPurpose.EmployerSubscription,
-                Amount = plan.Price,
-                Description = $"Dang ki goi {plan.Tier} {plan.Duration}",
-                CancelUrl = request.CancelUrl,
-                ReturnUrl = request.ReturnUrl,
-                ExpiredAt = DateTime.UtcNow.AddMinutes(BusinessRuleConstants.Employers.Subscriptions
-                    .OrderExpiresInMinutes),
-                AdditionalData = provider switch
+                PaymentProvider.PayOS => new PayOSCreatePaymentRequest
                 {
-                    PaymentProvider.PayOS => new PayOSRequestAdditionalData
-                    {
-                        OrderCode = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
-                        Items = [new PayOSPaymentItem { Name = plan.Name, Price = plan.Price, Quantity = 1 }],
-                        BuyerPhone = employer.User?.PhoneNumber,
-                    },
-                    _ => throw new BadRequestException("Phương thức thanh toán không hợp lệ hoặc không được hỗ trợ.")
-                }
+                    Amount = plan.Price,
+                    Description = description,
+                    CancelUrl = frontendUrlBuilder.BuildUrl(request.CancelPath),
+                    ReturnUrl = frontendUrlBuilder.BuildUrl(request.ReturnPath),
+                    ExpiredAt = DateTime.UtcNow.AddMinutes(BusinessRuleConstants.Employers.Subscriptions
+                        .OrderExpiresInMinutes),
+                    OrderCode = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
+                    BuyerPhone = employer.User?.PhoneNumber,
+                    Items = [new PayOSPaymentItem { Name = plan.Name, Price = plan.Price, Quantity = 1 }]
+                },
+                _ => throw new BadRequestException("Phương thức thanh toán không hợp lệ hoặc không được hỗ trợ.")
             });
+
+        var paymentTransactionId = await paymentTransactionService.CreatePaymentTransactionAsync(userId,
+            PaymentPurpose.EmployerSubscription, provider, paymentResponse.PaymentReferenceId, plan.Price, description,
+            DateTime.UtcNow.AddMinutes(BusinessRuleConstants.Employers.Subscriptions.OrderExpiresInMinutes));
 
         context.EmployerSubscriptionOrders.Add(new EmployerSubscriptionOrder
         {
-            PaymentTransactionId = paymentResponse.PaymentTransactionId,
+            PaymentTransactionId = paymentTransactionId,
             EmployerId = userId,
             Tier = plan.Tier,
             Duration = plan.Duration,
@@ -174,6 +176,56 @@ public class SubscriptionService(
         });
         await context.SaveChangesAsync();
         return paymentResponse.MapToDto();
+    }
+
+    public async Task CancelCheckoutAsync(ClaimsPrincipal user, Guid transactionId)
+    {
+        var transaction = await context.PaymentTransactions.AsNoTracking()
+            .Include(t => t.EmployerSubscriptionOrder)
+            .FirstOrDefaultAsync(t => t.Id == transactionId);
+
+        if (transaction == null)
+        {
+            throw new NotFoundException("Không tìm thấy giao dịch thanh toán.");
+        }
+
+        if (transaction.UserId != user.GetUserId())
+        {
+            throw new ForbiddenException("Bạn không có quyền thực hiện hành động này.");
+        }
+
+        if (transaction.Purpose != PaymentPurpose.EmployerSubscription || transaction.EmployerSubscriptionOrder == null)
+        {
+            throw new BadRequestException("Giao dịch không phải là đơn hàng đăng ký gói dịch vụ.");
+        }
+
+        switch (transaction.Status)
+        {
+            case PaymentTransactionStatus.Paid:
+                throw new BadRequestException("Giao dịch đã được thanh toán thành công, không thể hủy.");
+            case PaymentTransactionStatus.Cancelled:
+                throw new BadRequestException("Giao dịch đã được hủy trước đó.");
+            case PaymentTransactionStatus.Expired:
+                throw new BadRequestException("Giao dịch thanh toán đã hết hạn.");
+            case PaymentTransactionStatus.Failed:
+                throw new BadRequestException("Giao dịch thanh toán đã thất bại, không thể hủy.");
+            case PaymentTransactionStatus.Pending:
+                break;
+            default:
+                throw new BadRequestException("Trạng thái giao dịch không hợp lệ để hủy.");
+        }
+
+        if (transaction.ExpiredAt.HasValue && transaction.ExpiredAt.Value <= DateTime.UtcNow)
+        {
+            await context.PaymentTransactions
+                .Where(t => t.Id == transaction.Id && t.Status == PaymentTransactionStatus.Pending)
+                .ExecuteUpdateAsync(s => s.SetProperty(t => t.Status, PaymentTransactionStatus.Expired));
+
+            throw new BadRequestException("Giao dịch thanh toán đã hết hạn.");
+        }
+
+        await paymentServiceFactory.Get(transaction.Provider).CancelPaymentAsync(transaction.PaymentReferenceId);
+        await paymentTransactionService.CancelPaymentTransactionAsync(transaction.Id);
     }
 
     public async Task ProcessIpnAsync(string paymentReferenceId)

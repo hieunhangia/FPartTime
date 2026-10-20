@@ -34,6 +34,19 @@ public class SubscriptionsController(ISubscriptionService subscriptionService) :
     public async Task<IActionResult> CreateCheckout([FromBody] CreateSubscriptionCheckoutRequestDto request) =>
         Ok(await subscriptionService.CreateCheckoutAsync(User, request));
 
+    [HttpPut("checkout/{transactionId:guid}/cancel")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status500InternalServerError)]
+    public async Task<IActionResult> CancelCheckout(Guid transactionId)
+    {
+        await subscriptionService.CancelCheckoutAsync(User, transactionId);
+        return NoContent();
+    }
+
     [HttpPost("cancel")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]

@@ -13,6 +13,8 @@ public interface ISubscriptionService
     Task<CreateSubscriptionCheckoutResponseDto> CreateCheckoutAsync(ClaimsPrincipal user,
         CreateSubscriptionCheckoutRequestDto request);
 
+    Task CancelCheckoutAsync(ClaimsPrincipal user, Guid transactionId);
+
     Task ProcessIpnAsync(string paymentReferenceId);
     Task<int> ProcessExpiredSubscriptionsAsync(CancellationToken cancellationToken = default);
 }
@@ -45,13 +47,13 @@ public class CreateSubscriptionCheckoutRequestDto
     [EnumDataType(typeof(PaymentProvider), ErrorMessage = "Phương thức thanh toán không hợp lệ.")]
     public PaymentProvider? PaymentProvider { get; set; }
 
-    [Required(ErrorMessage = "Đường dẫn quay về (ReturnUrl) là bắt buộc.")]
-    [Url(ErrorMessage = "Đường dẫn quay về phải là URL hợp lệ.")]
-    public string ReturnUrl { get; set; } = string.Empty;
+    [Required(ErrorMessage = "Đường dẫn khi hủy (CancelPath) là bắt buộc.")]
+    [RegularExpression(@"^/(?![/\\]).*$", ErrorMessage = "Đường dẫn khi hủy (CancelPath) phải là đường dẫn tương đối hợp lệ bắt đầu bằng '/'.")]
+    public string CancelPath { get; set; } = string.Empty;
 
-    [Required(ErrorMessage = "Đường dẫn khi hủy (CancelUrl) là bắt buộc.")]
-    [Url(ErrorMessage = "Đường dẫn khi hủy phải là URL hợp lệ.")]
-    public string CancelUrl { get; set; } = string.Empty;
+    [Required(ErrorMessage = "Đường dẫn quay về (ReturnPath) là bắt buộc.")]
+    [RegularExpression(@"^/(?![/\\]).*$", ErrorMessage = "Đường dẫn quay về (ReturnPath) phải là đường dẫn tương đối hợp lệ bắt đầu bằng '/'.")]
+    public string ReturnPath { get; set; } = string.Empty;
 }
 
 public class CreateSubscriptionCheckoutResponseDto

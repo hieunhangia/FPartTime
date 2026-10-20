@@ -14,25 +14,25 @@ namespace ApiSdk.Models
     {
         /// <summary>Stores additional data not described in the OpenAPI description found when deserializing. Can be used for serialization as well.</summary>
         public IDictionary<string, object> AdditionalData { get; set; }
-        /// <summary>The cancelUrl property</summary>
+        /// <summary>The cancelPath property</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
-        public string? CancelUrl { get; set; }
+        public string? CancelPath { get; set; }
 #nullable restore
 #else
-        public string CancelUrl { get; set; }
+        public string CancelPath { get; set; }
 #endif
         /// <summary>The duration property</summary>
         public global::ApiSdk.Models.EmployerSubscriptionDuration? Duration { get; set; }
         /// <summary>The paymentProvider property</summary>
         public global::ApiSdk.Models.PaymentProvider? PaymentProvider { get; set; }
-        /// <summary>The returnUrl property</summary>
+        /// <summary>The returnPath property</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
-        public string? ReturnUrl { get; set; }
+        public string? ReturnPath { get; set; }
 #nullable restore
 #else
-        public string ReturnUrl { get; set; }
+        public string ReturnPath { get; set; }
 #endif
         /// <summary>The tier property</summary>
         public global::ApiSdk.Models.EmployerSubscriptionTier? Tier { get; set; }
@@ -61,10 +61,10 @@ namespace ApiSdk.Models
         {
             return new Dictionary<string, Action<IParseNode>>
             {
-                { "cancelUrl", n => { CancelUrl = n.GetStringValue(); } },
+                { "cancelPath", n => { CancelPath = n.GetStringValue(); } },
                 { "duration", n => { Duration = n.GetEnumValue<global::ApiSdk.Models.EmployerSubscriptionDuration>(); } },
                 { "paymentProvider", n => { PaymentProvider = n.GetEnumValue<global::ApiSdk.Models.PaymentProvider>(); } },
-                { "returnUrl", n => { ReturnUrl = n.GetStringValue(); } },
+                { "returnPath", n => { ReturnPath = n.GetStringValue(); } },
                 { "tier", n => { Tier = n.GetEnumValue<global::ApiSdk.Models.EmployerSubscriptionTier>(); } },
             };
         }
@@ -75,10 +75,10 @@ namespace ApiSdk.Models
         public virtual void Serialize(ISerializationWriter writer)
         {
             if(ReferenceEquals(writer, null)) throw new ArgumentNullException(nameof(writer));
-            writer.WriteStringValue("cancelUrl", CancelUrl);
+            writer.WriteStringValue("cancelPath", CancelPath);
             writer.WriteEnumValue<global::ApiSdk.Models.EmployerSubscriptionDuration>("duration", Duration);
             writer.WriteEnumValue<global::ApiSdk.Models.PaymentProvider>("paymentProvider", PaymentProvider);
-            writer.WriteStringValue("returnUrl", ReturnUrl);
+            writer.WriteStringValue("returnPath", ReturnPath);
             writer.WriteEnumValue<global::ApiSdk.Models.EmployerSubscriptionTier>("tier", Tier);
             writer.WriteAdditionalData(AdditionalData);
         }

@@ -13,9 +13,11 @@ public static class DependencyInjection
 {
     public static void AddApplicationServices(this IHostApplicationBuilder builder)
     {
+        builder.Services.AddSingleton<IFrontendUrlBuilder, FrontendUrlBuilder>();
         builder.Services.AddSingleton<JsonWebTokenHandler>();
         builder.Services.AddScoped<IIdentityService, IdentityService>();
         builder.Services.AddScoped<INotificationsService, NotificationsService>();
+        builder.Services.AddScoped<IPaymentTransactionService, PaymentTransactionService>();
 
         // Public
         builder.Services.AddScoped<IAddressService, AddressService>();

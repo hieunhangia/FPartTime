@@ -7,33 +7,26 @@ public interface IPaymentService
 {
     PaymentProvider Provider { get; }
     Task<CreatePaymentResponse> CreatePaymentAsync(CreatePaymentRequest request);
-    Task<IIpnResponse> ProcessIpnAsync(IIpnRequest request);
-    Task<PaymentPurpose?> GetPaymentPurposeAsync(string paymentReferenceId);
-    Task<int> CancelExpiredTransactionsAsync(CancellationToken cancellationToken = default);
+    Task CancelPaymentAsync(string paymentReferenceId);
+    Task<IpnResponse> ProcessIpnAsync(IpnRequest request);
 }
 
-public class CreatePaymentRequest
+public abstract class CreatePaymentRequest
 {
-    public required Guid UserId { get; set; }
-    public required PaymentPurpose Purpose { get; set; }
     public required decimal Amount { get; set; }
     public required string Description { get; set; }
     public required string CancelUrl { get; set; }
     public required string ReturnUrl { get; set; }
     public DateTime? ExpiredAt { get; set; }
-    public IPaymentRequestAdditionalData? AdditionalData { get; set; }
 }
 
-public class CreatePaymentResponse
+public abstract class CreatePaymentResponse
 {
-    public required Guid PaymentTransactionId { get; set; }
     public required string PaymentReferenceId { get; set; }
     public required string PaymentUrl { get; set; }
 }
 
-public interface IPaymentRequestAdditionalData;
-
-public class PayOSRequestAdditionalData : IPaymentRequestAdditionalData
+public class PayOSCreatePaymentRequest : CreatePaymentRequest
 {
     public required long OrderCode { get; set; }
     public required List<PayOSPaymentItem> Items { get; set; }
@@ -47,14 +40,16 @@ public class PayOSPaymentItem
     public required int Quantity { get; set; }
 }
 
-public interface IIpnRequest;
+public class PayOSCreatePaymentResponse : CreatePaymentResponse;
 
-public interface IIpnResponse
+public abstract class IpnRequest;
+
+public abstract class IpnResponse
 {
-    string PaymentReferenceId { get; }
+    public string PaymentReferenceId { get; set; } = string.Empty;
 }
 
-public class PayOSIpnRequest : IIpnRequest
+public class PayOSIpnRequest : IpnRequest
 {
     public string Code { get; set; } = string.Empty;
 
@@ -67,9 +62,8 @@ public class PayOSIpnRequest : IIpnRequest
     public string Signature { get; set; } = string.Empty;
 }
 
-public class PayOsIpnResponse : IIpnResponse
+public class PayOsIpnResponse : IpnResponse
 {
-    public string PaymentReferenceId => OrderCode.ToString();
     public long OrderCode { get; set; }
 
     public long Amount { get; set; }

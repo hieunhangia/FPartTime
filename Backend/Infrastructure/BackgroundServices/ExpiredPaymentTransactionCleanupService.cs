@@ -1,4 +1,4 @@
-using Contracts.External.Payment;
+using Contracts.Application;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -23,7 +23,7 @@ public class ExpiredPaymentTransactionCleanupService(
             try
             {
                 using var scope = serviceProvider.CreateScope();
-                var cancelledCount = await scope.ServiceProvider.GetRequiredService<IPaymentService>()
+                var cancelledCount = await scope.ServiceProvider.GetRequiredService<IPaymentTransactionService>()
                     .CancelExpiredTransactionsAsync(stoppingToken);
 
                 if (logger.IsEnabled(LogLevel.Information))
