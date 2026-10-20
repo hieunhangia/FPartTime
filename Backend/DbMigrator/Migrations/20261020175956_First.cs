@@ -272,14 +272,11 @@ namespace DbMigrator.Migrations
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Purpose = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Provider = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     PaymentReferenceId = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
                     Amount = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false),
                     Status = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Description = table.Column<string>(type: "nvarchar(250)", maxLength: 250, nullable: true),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    ExpiredAt = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    ExpiredAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     PaidAt = table.Column<DateTime>(type: "datetime2", nullable: true)
                 },
                 constraints: table =>
@@ -340,36 +337,37 @@ namespace DbMigrator.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "EmployerSubscriptionOrders",
+                name: "Orders",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     PaymentTransactionId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    EmployerId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Tier = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Duration = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    PlanName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    DurationDays = table.Column<int>(type: "int", nullable: false),
-                    ExtraActivePosts = table.Column<int>(type: "int", nullable: false),
-                    FreeBumps = table.Column<int>(type: "int", nullable: false),
-                    CanRecommendCandidates = table.Column<bool>(type: "bit", nullable: false),
-                    CanQueryCandidates = table.Column<bool>(type: "bit", nullable: false)
+                    Discriminator = table.Column<string>(type: "nvarchar(34)", maxLength: 34, nullable: false),
+                    EmployerId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    Tier = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Duration = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    PlanName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
+                    DurationDays = table.Column<int>(type: "int", nullable: true),
+                    ExtraActivePosts = table.Column<int>(type: "int", nullable: true),
+                    FreeBumps = table.Column<int>(type: "int", nullable: true),
+                    CanRecommendCandidates = table.Column<bool>(type: "bit", nullable: true),
+                    CanQueryCandidates = table.Column<bool>(type: "bit", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_EmployerSubscriptionOrders", x => x.Id);
+                    table.PrimaryKey("PK_Orders", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_EmployerSubscriptionOrders_Employers_EmployerId",
+                        name: "FK_Orders_Employers_EmployerId",
                         column: x => x.EmployerId,
                         principalTable: "Employers",
                         principalColumn: "UserId",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "FK_EmployerSubscriptionOrders_PaymentTransactions_PaymentTransactionId",
+                        name: "FK_Orders_PaymentTransactions_PaymentTransactionId",
                         column: x => x.PaymentTransactionId,
                         principalTable: "PaymentTransactions",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -672,17 +670,6 @@ namespace DbMigrator.Migrations
                 column: "RequesterId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_EmployerSubscriptionOrders_EmployerId",
-                table: "EmployerSubscriptionOrders",
-                column: "EmployerId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_EmployerSubscriptionOrders_PaymentTransactionId",
-                table: "EmployerSubscriptionOrders",
-                column: "PaymentTransactionId",
-                unique: true);
-
-            migrationBuilder.CreateIndex(
                 name: "IX_EmployerSubscriptions_EmployerId",
                 table: "EmployerSubscriptions",
                 column: "EmployerId");
@@ -743,6 +730,17 @@ namespace DbMigrator.Migrations
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Orders_EmployerId",
+                table: "Orders",
+                column: "EmployerId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Orders_PaymentTransactionId",
+                table: "Orders",
+                column: "PaymentTransactionId",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
                 name: "IX_PaymentTransactions_PaymentReferenceId",
                 table: "PaymentTransactions",
                 column: "PaymentReferenceId",
@@ -779,9 +777,6 @@ namespace DbMigrator.Migrations
                 name: "EmployerRegistrationRequests");
 
             migrationBuilder.DropTable(
-                name: "EmployerSubscriptionOrders");
-
-            migrationBuilder.DropTable(
                 name: "EmployerSubscriptionPlans");
 
             migrationBuilder.DropTable(
@@ -803,10 +798,10 @@ namespace DbMigrator.Migrations
                 name: "Notifications");
 
             migrationBuilder.DropTable(
-                name: "AspNetRoles");
+                name: "Orders");
 
             migrationBuilder.DropTable(
-                name: "PaymentTransactions");
+                name: "AspNetRoles");
 
             migrationBuilder.DropTable(
                 name: "Candidates");
@@ -816,6 +811,9 @@ namespace DbMigrator.Migrations
 
             migrationBuilder.DropTable(
                 name: "Jobs");
+
+            migrationBuilder.DropTable(
+                name: "PaymentTransactions");
 
             migrationBuilder.DropTable(
                 name: "Communes");

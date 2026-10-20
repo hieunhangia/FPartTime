@@ -3,6 +3,7 @@
 using ApiSdk.Api.Employer.Subscriptions.Cancel;
 using ApiSdk.Api.Employer.Subscriptions.Checkout;
 using ApiSdk.Api.Employer.Subscriptions.Current;
+using ApiSdk.Api.Employer.Subscriptions.PayosCheckout;
 using ApiSdk.Api.Employer.Subscriptions.Plans;
 using Microsoft.Kiota.Abstractions.Extensions;
 using Microsoft.Kiota.Abstractions;
@@ -32,6 +33,11 @@ namespace ApiSdk.Api.Employer.Subscriptions
         public global::ApiSdk.Api.Employer.Subscriptions.Current.CurrentRequestBuilder Current
         {
             get => new global::ApiSdk.Api.Employer.Subscriptions.Current.CurrentRequestBuilder(PathParameters, RequestAdapter);
+        }
+        /// <summary>The payosCheckout property</summary>
+        public global::ApiSdk.Api.Employer.Subscriptions.PayosCheckout.PayosCheckoutRequestBuilder PayosCheckout
+        {
+            get => new global::ApiSdk.Api.Employer.Subscriptions.PayosCheckout.PayosCheckoutRequestBuilder(PathParameters, RequestAdapter);
         }
         /// <summary>The plans property</summary>
         public global::ApiSdk.Api.Employer.Subscriptions.Plans.PlansRequestBuilder Plans

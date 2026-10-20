@@ -1,5 +1,5 @@
 using Domain.Models.Notifications;
-using Domain.Models.Payments;
+using Domain.Models.Orders;
 using Microsoft.AspNetCore.Identity;
 
 namespace Domain.Models.Users;

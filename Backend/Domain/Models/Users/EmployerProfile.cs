@@ -1,5 +1,6 @@
 using Domain.Models.EmployerSubscriptions;
 using Domain.Models.Jobs;
+using Domain.Models.Orders;
 
 namespace Domain.Models.Users;
 

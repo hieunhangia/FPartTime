@@ -11,6 +11,7 @@ using ApiSdk.Api.EmployerRegistrations;
 using ApiSdk.Api.Identity;
 using ApiSdk.Api.Industries;
 using ApiSdk.Api.Jobs;
+using ApiSdk.Api.Manager;
 using ApiSdk.Api.Notifications;
 using ApiSdk.Api.PayOSWebhook;
 using Microsoft.Kiota.Abstractions.Extensions;
@@ -81,6 +82,11 @@ namespace ApiSdk.Api
         public global::ApiSdk.Api.Jobs.JobsRequestBuilder Jobs
         {
             get => new global::ApiSdk.Api.Jobs.JobsRequestBuilder(PathParameters, RequestAdapter);
+        }
+        /// <summary>The manager property</summary>
+        public global::ApiSdk.Api.Manager.ManagerRequestBuilder Manager
+        {
+            get => new global::ApiSdk.Api.Manager.ManagerRequestBuilder(PathParameters, RequestAdapter);
         }
         /// <summary>The notifications property</summary>
         public global::ApiSdk.Api.Notifications.NotificationsRequestBuilder Notifications

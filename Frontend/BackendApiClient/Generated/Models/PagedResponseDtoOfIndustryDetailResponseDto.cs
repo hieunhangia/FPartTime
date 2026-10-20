@@ -9,43 +9,37 @@ namespace ApiSdk.Models
 {
     [global::System.CodeDom.Compiler.GeneratedCode("Kiota", "1.0.0")]
     #pragma warning disable CS1591
-    public partial class CreateSubscriptionCheckoutResponseDto : IAdditionalDataHolder, IParsable
+    public partial class PagedResponseDtoOfIndustryDetailResponseDto : IAdditionalDataHolder, IParsable
     #pragma warning restore CS1591
     {
         /// <summary>Stores additional data not described in the OpenAPI description found when deserializing. Can be used for serialization as well.</summary>
         public IDictionary<string, object> AdditionalData { get; set; }
-        /// <summary>The paymentReferenceId property</summary>
+        /// <summary>The items property</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
-        public string? PaymentReferenceId { get; set; }
+        public List<global::ApiSdk.Models.IndustryDetailResponseDto>? Items { get; set; }
 #nullable restore
 #else
-        public string PaymentReferenceId { get; set; }
+        public List<global::ApiSdk.Models.IndustryDetailResponseDto> Items { get; set; }
 #endif
-        /// <summary>The paymentUrl property</summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-        public string? PaymentUrl { get; set; }
-#nullable restore
-#else
-        public string PaymentUrl { get; set; }
-#endif
+        /// <summary>The totalCount property</summary>
+        public long? TotalCount { get; set; }
         /// <summary>
-        /// Instantiates a new <see cref="global::ApiSdk.Models.CreateSubscriptionCheckoutResponseDto"/> and sets the default values.
+        /// Instantiates a new <see cref="global::ApiSdk.Models.PagedResponseDtoOfIndustryDetailResponseDto"/> and sets the default values.
         /// </summary>
-        public CreateSubscriptionCheckoutResponseDto()
+        public PagedResponseDtoOfIndustryDetailResponseDto()
         {
             AdditionalData = new Dictionary<string, object>();
         }
         /// <summary>
         /// Creates a new instance of the appropriate class based on discriminator value
         /// </summary>
-        /// <returns>A <see cref="global::ApiSdk.Models.CreateSubscriptionCheckoutResponseDto"/></returns>
+        /// <returns>A <see cref="global::ApiSdk.Models.PagedResponseDtoOfIndustryDetailResponseDto"/></returns>
         /// <param name="parseNode">The parse node to use to read the discriminator value and create the object</param>
-        public static global::ApiSdk.Models.CreateSubscriptionCheckoutResponseDto CreateFromDiscriminatorValue(IParseNode parseNode)
+        public static global::ApiSdk.Models.PagedResponseDtoOfIndustryDetailResponseDto CreateFromDiscriminatorValue(IParseNode parseNode)
         {
             if(ReferenceEquals(parseNode, null)) throw new ArgumentNullException(nameof(parseNode));
-            return new global::ApiSdk.Models.CreateSubscriptionCheckoutResponseDto();
+            return new global::ApiSdk.Models.PagedResponseDtoOfIndustryDetailResponseDto();
         }
         /// <summary>
         /// The deserialization information for the current model
@@ -55,8 +49,8 @@ namespace ApiSdk.Models
         {
             return new Dictionary<string, Action<IParseNode>>
             {
-                { "paymentReferenceId", n => { PaymentReferenceId = n.GetStringValue(); } },
-                { "paymentUrl", n => { PaymentUrl = n.GetStringValue(); } },
+                { "items", n => { Items = n.GetCollectionOfObjectValues<global::ApiSdk.Models.IndustryDetailResponseDto>(global::ApiSdk.Models.IndustryDetailResponseDto.CreateFromDiscriminatorValue)?.AsList(); } },
+                { "totalCount", n => { TotalCount = n.GetLongValue(); } },
             };
         }
         /// <summary>
@@ -66,8 +60,8 @@ namespace ApiSdk.Models
         public virtual void Serialize(ISerializationWriter writer)
         {
             if(ReferenceEquals(writer, null)) throw new ArgumentNullException(nameof(writer));
-            writer.WriteStringValue("paymentReferenceId", PaymentReferenceId);
-            writer.WriteStringValue("paymentUrl", PaymentUrl);
+            writer.WriteCollectionOfObjectValues<global::ApiSdk.Models.IndustryDetailResponseDto>("items", Items);
+            writer.WriteLongValue("totalCount", TotalCount);
             writer.WriteAdditionalData(AdditionalData);
         }
     }

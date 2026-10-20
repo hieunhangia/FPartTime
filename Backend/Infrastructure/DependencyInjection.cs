@@ -1,12 +1,8 @@
 using Amazon.S3;
 using Contracts.External;
-using Contracts.External.Payment;
 using Infrastructure.BackgroundServices;
-using Infrastructure.Payments;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using PayOS;
-using PayOS.Models.Webhooks;
 
 namespace Infrastructure;
 
@@ -20,17 +16,11 @@ public static class DependencyInjection
         builder.Services.AddHostedService<ExpiredPaymentTransactionCleanupService>();
 
         // PayOS Service
-        builder.Services.AddSingleton(new PayOSClient(new PayOSOptions
-        {
-            ClientId = builder.Configuration["PayOS:ClientId"],
-            ApiKey = builder.Configuration["PayOS:ApiKey"],
-            ChecksumKey = builder.Configuration["PayOS:ChecksumKey"]
-        }));
-        builder.Services.AddScoped<IPaymentService, PayOSPaymentService>();
-        builder.Services.AddScoped<IPaymentServiceFactory, PaymentServiceFactory>();
+        builder.Services.AddScoped<IPayOSPaymentService, PayOSPaymentService>();
         builder.Services.AddHttpClient(PayOSHealthCheck.HealthCheckHttpClientName, client =>
         {
-            client.BaseAddress = new Uri("https://api-merchant.payos.vn/");
+            client.BaseAddress = new Uri(builder.Configuration["PayOS:HealthCheckUrl"] ??
+                                         throw new InvalidOperationException("PayOS:HealthCheckUrl is not configured"));
             client.Timeout = TimeSpan.FromSeconds(5);
         });
         builder.Services.AddHealthChecks().AddCheck<PayOSHealthCheck>(name: "PayOS Service", tags: ["payment"]);

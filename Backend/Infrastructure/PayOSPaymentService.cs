@@ -1,5 +1,5 @@
-using Contracts.External.Payment;
-using Domain.Shared.Enums;
+using Contracts.External;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using PayOS;
 using PayOS.Exceptions;
@@ -9,33 +9,32 @@ using Riok.Mapperly.Abstractions;
 using BadRequestException = Domain.Shared.Exceptions.HttpErrorExceptions.BadRequestException;
 using InternalServerErrorException = Domain.Shared.Exceptions.HttpErrorExceptions.InternalServerErrorException;
 
-namespace Infrastructure.Payments;
+namespace Infrastructure;
 
-public class PayOSPaymentService(PayOSClient payOSClient) : IPaymentService
+public class PayOSPaymentService(IConfiguration configuration) : IPayOSPaymentService
 {
-    public PaymentProvider Provider => PaymentProvider.PayOS;
+    private readonly PayOSClient _payOSClient = new(new PayOSOptions
+    {
+        ClientId = configuration["PayOS:ClientId"],
+        ApiKey = configuration["PayOS:ApiKey"],
+        ChecksumKey = configuration["PayOS:ChecksumKey"]
+    });
 
     public async Task<CreatePaymentResponse> CreatePaymentAsync(CreatePaymentRequest request)
     {
-        var payOsCreatePaymentRequest = request as PayOSCreatePaymentRequest ?? throw new BadRequestException(
-            $"{nameof(PayOSCreatePaymentRequest)} là bắt buộc khi sử dụng PayOS.");
         try
         {
-            var result = await payOSClient.PaymentRequests.CreateAsync(new CreatePaymentLinkRequest
+            var result = await _payOSClient.PaymentRequests.CreateAsync(new CreatePaymentLinkRequest
             {
-                OrderCode = payOsCreatePaymentRequest.OrderCode,
-                Amount = decimal.ToInt64(payOsCreatePaymentRequest.Amount),
-                Description = payOsCreatePaymentRequest.Description,
-                CancelUrl = payOsCreatePaymentRequest.CancelUrl,
-                ReturnUrl = payOsCreatePaymentRequest.ReturnUrl,
-                BuyerPhone = payOsCreatePaymentRequest.BuyerPhone,
-                ExpiredAt = payOsCreatePaymentRequest.ExpiredAt.HasValue
-                    ? new DateTimeOffset(payOsCreatePaymentRequest.ExpiredAt.Value.ToUniversalTime())
-                        .ToUnixTimeSeconds()
-                    : null,
+                OrderCode = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
+                Amount = decimal.ToInt64(request.Amount),
+                Description = request.Description,
+                CancelUrl = request.CancelUrl,
+                ReturnUrl = request.ReturnUrl,
+                ExpiredAt = new DateTimeOffset(request.ExpiredAt.ToUniversalTime()).ToUnixTimeSeconds(),
                 Items =
                 [
-                    .. payOsCreatePaymentRequest.Items.Select(i => new PaymentLinkItem
+                    .. request.Items.Select(i => new PaymentLinkItem
                     {
                         Name = i.Name,
                         Price = decimal.ToInt64(i.Price),
@@ -44,7 +43,7 @@ public class PayOSPaymentService(PayOSClient payOSClient) : IPaymentService
                 ]
             });
 
-            return new PayOSCreatePaymentResponse
+            return new CreatePaymentResponse
             {
                 PaymentReferenceId = result.OrderCode.ToString(),
                 PaymentUrl = result.CheckoutUrl
@@ -60,7 +59,7 @@ public class PayOSPaymentService(PayOSClient payOSClient) : IPaymentService
     {
         try
         {
-            await payOSClient.PaymentRequests.CancelAsync(paymentReferenceId);
+            await _payOSClient.PaymentRequests.CancelAsync(paymentReferenceId);
         }
         catch (Exception e)
         {
@@ -68,13 +67,15 @@ public class PayOSPaymentService(PayOSClient payOSClient) : IPaymentService
         }
     }
 
-    public async Task<IpnResponse> ProcessIpnAsync(IpnRequest request)
+    public async Task<WebhookProcessingResult> ProcessWebhookAsync(WebhookRequestDto request)
     {
-        var payOsIpnRequest = request as PayOSIpnRequest ?? throw new BadRequestException(
-            $"{nameof(PayOSIpnRequest)} là bắt buộc khi sử dụng PayOS.");
         try
         {
-            return (await payOSClient.Webhooks.VerifyAsync(payOsIpnRequest.MapToSdkRequest())).MapToDomainResponse();
+            var webhookData = await _payOSClient.Webhooks.VerifyAsync(request.MapToSdkRequest());
+            return new WebhookProcessingResult
+            {
+                PaymentReferenceId = webhookData.OrderCode.ToString()
+            };
         }
         catch (WebhookException we)
         {
@@ -111,8 +112,7 @@ public class PayOSHealthCheck(IHttpClientFactory httpClientFactory) : IHealthChe
 [Mapper(RequiredMappingStrategy = RequiredMappingStrategy.Target)]
 public static partial class PayOSPaymentServiceMapper
 {
-    public static partial Webhook MapToSdkRequest(this PayOSIpnRequest source);
-
-    [MapProperty(nameof(WebhookData.OrderCode), nameof(PayOsIpnResponse.PaymentReferenceId))]
-    public static partial PayOsIpnResponse MapToDomainResponse(this WebhookData source);
+    [MapProperty(nameof(WebhookRequestDto.Desc), nameof(Webhook.Description))]
+    [MapProperty(nameof(WebhookRequestDto.Data.Desc), nameof(Webhook.Data.Description2))]
+    public static partial Webhook MapToSdkRequest(this WebhookRequestDto source);
 }

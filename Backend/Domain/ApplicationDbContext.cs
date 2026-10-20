@@ -2,7 +2,7 @@ using Domain.Models.Address;
 using Domain.Models.EmployerSubscriptions;
 using Domain.Models.Jobs;
 using Domain.Models.Notifications;
-using Domain.Models.Payments;
+using Domain.Models.Orders;
 using Domain.Models.Users;
 using Domain.Shared.Constants;
 using Microsoft.AspNetCore.Identity;
@@ -21,7 +21,6 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<CandidateSchedule> CandidateSchedules { get; set; }
     public DbSet<EmployerProfile> Employers { get; set; }
     public DbSet<EmployerSubscription> EmployerSubscriptions { get; set; }
-    public DbSet<EmployerSubscriptionOrder> EmployerSubscriptionOrders { get; set; }
     public DbSet<EmployerSubscriptionPlan> EmployerSubscriptionPlans { get; set; }
     public DbSet<CensorProfile> Censors { get; set; }
     public DbSet<Industry> Industries { get; set; }
@@ -32,6 +31,8 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<JobReport> JobReports { get; set; }
     public DbSet<Notification> Notifications { get; set; }
     public DbSet<PaymentTransaction> PaymentTransactions { get; set; }
+    public DbSet<OrderBase> Orders { get; set; }
+    public DbSet<EmployerSubscriptionOrder> EmployerSubscriptionOrders { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -249,22 +250,6 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
                 .OnDelete(DeleteBehavior.Restrict);
         });
 
-        builder.Entity<EmployerSubscriptionOrder>(entity =>
-        {
-            entity.Property(e => e.PlanName)
-                .HasMaxLength(BusinessRuleConstants.Models.EmployerSubscriptionPlan.NameMaxLength);
-
-            entity.HasOne(e => e.Employer)
-                .WithMany(em => em.SubscriptionOrders)
-                .HasForeignKey(e => e.EmployerId)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            entity.HasOne(e => e.PaymentTransaction)
-                .WithOne(t => t.EmployerSubscriptionOrder)
-                .HasForeignKey<EmployerSubscriptionOrder>(e => e.PaymentTransactionId)
-                .OnDelete(DeleteBehavior.Restrict);
-        });
-
         builder.Entity<EmployerSubscriptionPlan>(entity =>
         {
             entity.HasKey(e => new { e.Tier, e.Duration });
@@ -288,12 +273,29 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
                 .HasMaxLength(BusinessRuleConstants.Models.PaymentTransaction.PaymentReferenceIdMaxLength);
             entity.HasIndex(e => e.PaymentReferenceId).IsUnique();
             entity.Property(e => e.Amount).HasPrecision(18, 2);
-            entity.Property(e => e.Description)
-                .HasMaxLength(BusinessRuleConstants.Models.PaymentTransaction.DescriptionMaxLength);
 
             entity.HasOne(e => e.User)
                 .WithMany(u => u.PaymentTransactions)
                 .HasForeignKey(e => e.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        builder.Entity<OrderBase>(entity =>
+        {
+            entity.HasOne(e => e.PaymentTransaction)
+                .WithOne(o => o.Order)
+                .HasForeignKey<OrderBase>(o => o.PaymentTransactionId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        builder.Entity<EmployerSubscriptionOrder>(entity =>
+        {
+            entity.Property(e => e.PlanName)
+                .HasMaxLength(BusinessRuleConstants.Models.EmployerSubscriptionPlan.NameMaxLength);
+
+            entity.HasOne(e => e.Employer)
+                .WithMany(em => em.SubscriptionOrders)
+                .HasForeignKey(e => e.EmployerId)
                 .OnDelete(DeleteBehavior.Restrict);
         });
 

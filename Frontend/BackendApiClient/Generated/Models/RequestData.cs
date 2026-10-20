@@ -9,7 +9,7 @@ namespace ApiSdk.Models
 {
     [global::System.CodeDom.Compiler.GeneratedCode("Kiota", "1.0.0")]
     #pragma warning disable CS1591
-    public partial class PayOsIpnResponse : IAdditionalDataHolder, IParsable
+    public partial class RequestData : IAdditionalDataHolder, IParsable
     #pragma warning restore CS1591
     {
         /// <summary>The accountNumber property</summary>
@@ -98,14 +98,6 @@ namespace ApiSdk.Models
 #else
         public string PaymentLinkId { get; set; }
 #endif
-        /// <summary>The paymentReferenceId property</summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-        public string? PaymentReferenceId { get; set; }
-#nullable restore
-#else
-        public string PaymentReferenceId { get; set; }
-#endif
         /// <summary>The reference property</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
@@ -139,21 +131,21 @@ namespace ApiSdk.Models
         public string VirtualAccountNumber { get; set; }
 #endif
         /// <summary>
-        /// Instantiates a new <see cref="global::ApiSdk.Models.PayOsIpnResponse"/> and sets the default values.
+        /// Instantiates a new <see cref="global::ApiSdk.Models.RequestData"/> and sets the default values.
         /// </summary>
-        public PayOsIpnResponse()
+        public RequestData()
         {
             AdditionalData = new Dictionary<string, object>();
         }
         /// <summary>
         /// Creates a new instance of the appropriate class based on discriminator value
         /// </summary>
-        /// <returns>A <see cref="global::ApiSdk.Models.PayOsIpnResponse"/></returns>
+        /// <returns>A <see cref="global::ApiSdk.Models.RequestData"/></returns>
         /// <param name="parseNode">The parse node to use to read the discriminator value and create the object</param>
-        public static global::ApiSdk.Models.PayOsIpnResponse CreateFromDiscriminatorValue(IParseNode parseNode)
+        public static global::ApiSdk.Models.RequestData CreateFromDiscriminatorValue(IParseNode parseNode)
         {
             if(ReferenceEquals(parseNode, null)) throw new ArgumentNullException(nameof(parseNode));
-            return new global::ApiSdk.Models.PayOsIpnResponse();
+            return new global::ApiSdk.Models.RequestData();
         }
         /// <summary>
         /// The deserialization information for the current model
@@ -175,7 +167,6 @@ namespace ApiSdk.Models
                 { "description", n => { Description = n.GetStringValue(); } },
                 { "orderCode", n => { OrderCode = n.GetLongValue(); } },
                 { "paymentLinkId", n => { PaymentLinkId = n.GetStringValue(); } },
-                { "paymentReferenceId", n => { PaymentReferenceId = n.GetStringValue(); } },
                 { "reference", n => { Reference = n.GetStringValue(); } },
                 { "transactionDateTime", n => { TransactionDateTime = n.GetStringValue(); } },
                 { "virtualAccountName", n => { VirtualAccountName = n.GetStringValue(); } },
@@ -201,7 +192,6 @@ namespace ApiSdk.Models
             writer.WriteStringValue("description", Description);
             writer.WriteLongValue("orderCode", OrderCode);
             writer.WriteStringValue("paymentLinkId", PaymentLinkId);
-            writer.WriteStringValue("paymentReferenceId", PaymentReferenceId);
             writer.WriteStringValue("reference", Reference);
             writer.WriteStringValue("transactionDateTime", TransactionDateTime);
             writer.WriteStringValue("virtualAccountName", VirtualAccountName);

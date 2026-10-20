@@ -25,14 +25,14 @@ public class SubscriptionsController(ISubscriptionService subscriptionService) :
     public async Task<IActionResult> GetCurrentSubscription() =>
         Ok(await subscriptionService.GetCurrentSubscriptionAsync(User));
 
-    [HttpPost("checkout")]
-    [ProducesResponseType<CreateSubscriptionCheckoutResponseDto>(StatusCodes.Status200OK)]
+    [HttpPost("payos-checkout")]
+    [ProducesResponseType<CreatePayOSCheckoutResponseDto>(StatusCodes.Status200OK)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status403Forbidden)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> CreateCheckout([FromBody] CreateSubscriptionCheckoutRequestDto request) =>
-        Ok(await subscriptionService.CreateCheckoutAsync(User, request));
+    public async Task<IActionResult> CreatePayOSCheckout([FromBody] CreatePayOSCheckoutRequestDto request) =>
+        Ok(await subscriptionService.CreatePayOSCheckoutAsync(User, request));
 
     [HttpPut("checkout/{transactionId:guid}/cancel")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
@@ -43,7 +43,7 @@ public class SubscriptionsController(ISubscriptionService subscriptionService) :
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status500InternalServerError)]
     public async Task<IActionResult> CancelCheckout(Guid transactionId)
     {
-        await subscriptionService.CancelCheckoutAsync(User, transactionId);
+        await subscriptionService.CancelPayOSCheckoutAsync(User, transactionId);
         return NoContent();
     }
 

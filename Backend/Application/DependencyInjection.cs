@@ -18,10 +18,11 @@ public static class DependencyInjection
         builder.Services.AddScoped<IIdentityService, IdentityService>();
         builder.Services.AddScoped<INotificationsService, NotificationsService>();
         builder.Services.AddScoped<IPaymentTransactionService, PaymentTransactionService>();
+        builder.Services.AddScoped<IIpnDispatcher, IpnDispatcher>();
 
         // Public
         builder.Services.AddScoped<IAddressService, AddressService>();
-        builder.Services.AddScoped<Contracts.Application.Public.IIndustryService, Public.IndustryService>();
+        builder.Services.AddScoped<IIndustryService, IndustryService>();
 
         // Candidate
 

@@ -1,13 +1,10 @@
-using Domain.Models.Payments;
 using Domain.Models.Users;
 using Domain.Shared.Enums;
 
-namespace Domain.Models.EmployerSubscriptions;
+namespace Domain.Models.Orders;
 
-public class EmployerSubscriptionOrder
+public class EmployerSubscriptionOrder : OrderBase
 {
-    public Guid Id { get; set; }
-    public Guid PaymentTransactionId { get; set; }
     public Guid EmployerId { get; set; }
     public required EmployerSubscriptionTier Tier { get; set; }
     public required EmployerSubscriptionDuration Duration { get; set; }
@@ -19,5 +16,4 @@ public class EmployerSubscriptionOrder
     public required bool CanQueryCandidates { get; set; }
 
     public EmployerProfile? Employer { get; set; }
-    public PaymentTransaction? PaymentTransaction { get; set; }
 }
