@@ -58,7 +58,6 @@ public class DataSeeder(ApplicationDbContext db)
             await CreateUserIfNotExistsAsync($"000000000{i}", "Candidate@123", Role.Candidate);
             await CreateUserIfNotExistsAsync($"00000000{i}0", "Employer@123", Role.Employer);
             await CreateUserIfNotExistsAsync($"0000000{i}00", "Censor@123", Role.Censor);
-            await CreateUserIfNotExistsAsync($"000000{i}000", "SupportStaff@123", Role.SupportStaff);
         }
     }
 

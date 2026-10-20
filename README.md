@@ -26,6 +26,7 @@
 
 **Manager**
 - Quản lý user/role
+- CRUD Employer Subscription
 - Thống kê ...
 
 ---

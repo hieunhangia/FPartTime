@@ -15,5 +15,4 @@ public class EmployerSubscriptionPlan
     public bool CanRecommendCandidates { get; set; }
     public bool CanQueryCandidates { get; set; }
     public bool IsActive { get; set; } = true;
-    public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 }

@@ -64,8 +64,7 @@ namespace DbMigrator.Migrations
                     FreeBumps = table.Column<int>(type: "int", nullable: false),
                     CanRecommendCandidates = table.Column<bool>(type: "bit", nullable: false),
                     CanQueryCandidates = table.Column<bool>(type: "bit", nullable: false),
-                    IsActive = table.Column<bool>(type: "bit", nullable: false),
-                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
+                    IsActive = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
