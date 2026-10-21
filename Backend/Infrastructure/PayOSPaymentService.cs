@@ -1,7 +1,6 @@
 using Contracts.External;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
-using Microsoft.Extensions.Logging;
 using PayOS;
 using PayOS.Exceptions;
 using PayOS.Models.V2.PaymentRequests;
@@ -12,7 +11,7 @@ using InternalServerErrorException = Domain.Shared.Exceptions.HttpErrorException
 
 namespace Infrastructure;
 
-public class PayOSPaymentService(IConfiguration configuration, ILogger<PayOSPaymentService> logger) : IPayOSPaymentService
+public class PayOSPaymentService(IConfiguration configuration) : IPayOSPaymentService
 {
     private readonly PayOSClient _payOSClient = new(new PayOSOptions
     {
@@ -81,17 +80,9 @@ public class PayOSPaymentService(IConfiguration configuration, ILogger<PayOSPaym
 
     public async Task<PayOSWebhookProcessingResult> ProcessWebhookAsync(PayOSWebhookRequestDto request)
     {
-        var checksumKey = configuration["PayOS:ChecksumKey"]?.Trim() ?? "";
-        logger.LogWarning(
-            "[PayOSPaymentService] ProcessWebhookAsync: OrderCode={OrderCode}, KeyLength={KeyLength}, Signature={Signature}",
-            request.Data?.OrderCode,
-            checksumKey.Length,
-            request.Signature);
-
         try
         {
-            var sdkRequest = request.MapToSdkRequest();
-            var webhookData = await _payOSClient.Webhooks.VerifyAsync(sdkRequest);
+            var webhookData = await _payOSClient.Webhooks.VerifyAsync(request.MapToSdkRequest());
             return new PayOSWebhookProcessingResult
             {
                 PaymentReferenceId = webhookData.OrderCode.ToString()
@@ -99,15 +90,10 @@ public class PayOSPaymentService(IConfiguration configuration, ILogger<PayOSPaym
         }
         catch (WebhookException we)
         {
-            logger.LogError(we,
-                "[PayOSPaymentService] Xác thực webhook thất bại: {Message}. Signature={Signature}",
-                we.Message,
-                request.Signature);
             throw new BadRequestException($"Xác thực webhook PayOS thất bại: {we.Message}", we);
         }
         catch (Exception e)
         {
-            logger.LogError(e, "[PayOSPaymentService] Xử lý webhook thất bại: {Message}", e.Message);
             throw new InternalServerErrorException($"Xử lý webhook PayOS thất bại: {e.Message}", e);
         }
     }
