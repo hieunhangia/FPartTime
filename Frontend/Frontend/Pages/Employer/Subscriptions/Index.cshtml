@@ -86,6 +86,8 @@
                     var isCurrentPlan = Model.HasActiveSubscription &&
                                         plan.Tier == Model.CurrentSubscription?.Tier &&
                                         plan.Duration == Model.CurrentSubscription?.Duration;
+                    var isSameTier = Model.HasActiveSubscription &&
+                                     plan.Tier == Model.CurrentSubscription?.Tier;
 
                     <div class="col">
                         <div class="card h-100 shadow-sm @(isCurrentPlan ? "border-success" : "")">
@@ -172,6 +174,17 @@
                                                 Hủy gói
                                             </button>
                                         </div>
+                                    }
+                                    else if (isSameTier)
+                                    {
+                                        <button type="button" class="btn btn-success w-100 btn-select-plan"
+                                                data-bs-toggle="modal" data-bs-target="#paymentModal"
+                                                data-tier="@plan.Tier"
+                                                data-duration="@plan.Duration"
+                                                data-name="@plan.Name"
+                                                data-price="@(plan.Price?.ToString("N0", new CultureInfo("vi-VN")) ?? "0")">
+                                            Gia hạn gói
+                                        </button>
                                     }
                                     else
                                     {

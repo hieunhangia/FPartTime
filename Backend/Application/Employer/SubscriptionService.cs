@@ -232,11 +232,11 @@ public class SubscriptionService(
             .OrderByDescending(s => s.EndDate)
             .FirstOrDefaultAsync();
 
-        if (activeSub != null && (activeSub.Tier != order.Tier || activeSub.Duration != order.Duration))
+        if (activeSub != null && activeSub.Tier != order.Tier)
         {
             logger.LogError(
-                "Đơn hàng {OrderId} thanh toán thành công nhưng gói hiện tại ({ActiveTier} {ActiveDuration}) không khớp với gói mới ({NewTier} {NewDuration})",
-                order.Id, activeSub.Tier, activeSub.Duration, order.Tier, order.Duration);
+                "Đơn hàng {OrderId} thanh toán thành công nhưng gói hiện tại ({ActiveTier}) không khớp với hạng gói mới ({NewTier})",
+                order.Id, activeSub.Tier, order.Tier);
 
             transaction.Status = PaymentTransactionStatus.Failed;
             transaction.PaidAt = now;
@@ -269,6 +269,7 @@ public class SubscriptionService(
         }
         else
         {
+            activeSub.Duration = order.Duration;
             activeSub.EndDate = activeSub.EndDate.AddDays(order.DurationDays);
             activeSub.ExtraActivePosts = order.ExtraActivePosts;
             activeSub.CanRecommendCandidates = order.CanRecommendCandidates;
@@ -389,10 +390,10 @@ public class SubscriptionService(
             .OrderByDescending(s => s.EndDate)
             .FirstOrDefaultAsync();
 
-        if (activeSub != null && (activeSub.Tier != plan.Tier || activeSub.Duration != plan.Duration))
+        if (activeSub != null && activeSub.Tier != plan.Tier)
         {
             throw new BadRequestException(
-                $"Bạn đang sử dụng gói {activeSub.Tier} ({activeSub.Duration}). Gói mới không trùng khớp với gói hiện tại. Bạn cần hủy gói cũ để đăng ký gói mới, hoặc gia hạn gói {activeSub.Tier} ({activeSub.Duration}).");
+                $"Bạn đang sử dụng gói {activeSub.Tier} ({activeSub.Duration}). Bạn chỉ có thể gia hạn các gói cùng hạng {activeSub.Tier}, hoặc hủy gói cũ để đăng ký gói mới.");
         }
 
         var (paymentReferenceId, paymentUrl) = await createPaymentFunc(plan);
