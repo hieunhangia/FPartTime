@@ -56,6 +56,11 @@ public class GlobalExceptionHandler(ILogger<GlobalExceptionHandler> logger)
                 }
             });
         }
+        else if (httpContext.Request.Path.StartsWithSegments("/api/PayOSWebhook"))
+        {
+            logger.LogWarning(exception, "[{StatusCode}] Lỗi Webhook tại {Path}: {Message}", statusCode,
+                httpContext.Request.Path, detail);
+        }
 
         httpContext.Response.StatusCode = statusCode;
         httpContext.Response.ContentType = "application/problem+json";
