@@ -3,22 +3,6 @@
 @using Frontend.Extensions
 @inject ApiClient ApiClient
 
-@{
-    bool showBuySubscription = false;
-    if (User.IsLoggedIn && User.IsInRole(Role.Employer))
-    {
-        try
-        {
-            var currentSub = await ApiClient.Api.Employer.Subscriptions.Current.GetAsync();
-            showBuySubscription = !(currentSub?.HasActiveSubscription ?? false);
-        }
-        catch
-        {
-            showBuySubscription = false;
-        }
-    }
-}
-
 <header class="site-header">
     <div class="header-inner">
 
@@ -32,6 +16,22 @@
             {
                 <a href="/Candidate/EmployerRegistrations/MyRegistrations">Trở thành nhà tuyển dụng</a>
             }
+            @if (User.IsInRole(Role.Employer))
+            {
+                try
+                {
+                    @if (!(await ApiClient.Api.Employer.Subscriptions.Current.GetAsync())?.HasActiveSubscription ?? false)
+                    {
+                        <a asp-page="/Employer/Subscriptions/Index" class="btn btn-warning btn-sm fw-bold">
+                            Mua gói dịch vụ
+                        </a>
+                    }
+                }
+                catch
+                {
+                    // ignored
+                }
+            }
         </nav>
 
         <div class="header-actions">
@@ -41,13 +41,6 @@
             }
             else
             {
-                @if (showBuySubscription)
-                {
-                    <a asp-page="/Employer/Subscriptions/Index" class="btn btn-warning btn-sm fw-bold">
-                        Mua gói dịch vụ
-                    </a>
-                }
-
                 <!-- Nút thông báo quả chuông -->
                 <div class="dropdown">
                     <button class="btn btn-outline-secondary btn-sm notification-bell-btn position-relative"
@@ -94,7 +87,8 @@
                     <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
                         @if (User.IsInRole(Role.Candidate))
                         {
-                            <li><a class="dropdown-item" asp-page="/Candidate/EmployerRegistrations/MyRegistrations">Đơn đăng ký nhà tuyển
+                            <li><a class="dropdown-item" asp-page="/Candidate/EmployerRegistrations/MyRegistrations">Đơn
+                                    đăng ký nhà tuyển
                                     dụng</a></li>
                             <li>
                                 <a class="dropdown-item" asp-page="/Candidate/CandidateProfile/EditProfile">
@@ -105,14 +99,16 @@
                         @if (User.IsInRole(Role.Employer))
                         {
                             <li><a class="dropdown-item" asp-page="/Employer/Job/Index">Quản lý công việc</a></li>
-                            <li><a class="dropdown-item" asp-page="/Employer/EmployerProfile/EditProfile">Hồ sơ tuyển dụng</a></li>
+                            <li><a class="dropdown-item" asp-page="/Employer/EmployerProfile/EditProfile">Hồ sơ tuyển
+                                    dụng</a></li>
                             <li><a class="dropdown-item" asp-page="/Employer/Subscriptions/Index">Gói dịch vụ</a></li>
                         }
                         @if (User.IsInRole(Role.Censor))
                         {
                             <li><a class="dropdown-item" asp-page="/Censor/EmployerRegistrations/Index">Quản lý đơn đăng
                                     ký nhà tuyển dụng</a></li>
-                            <li><a class="dropdown-item" asp-page="/Censor/JobReports/Index">Quản lý báo cáo tin tuyển dụng</a></li>
+                            <li><a class="dropdown-item" asp-page="/Censor/JobReports/Index">Quản lý báo cáo tin tuyển
+                                    dụng</a></li>
                         }
                         @if (User.IsInRole(Role.Manager))
                         {
