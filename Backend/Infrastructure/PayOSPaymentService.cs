@@ -5,7 +5,6 @@ using PayOS;
 using PayOS.Exceptions;
 using PayOS.Models.V2.PaymentRequests;
 using PayOS.Models.Webhooks;
-using Riok.Mapperly.Abstractions;
 using BadRequestException = Domain.Shared.Exceptions.HttpErrorExceptions.BadRequestException;
 using InternalServerErrorException = Domain.Shared.Exceptions.HttpErrorExceptions.InternalServerErrorException;
 
@@ -82,7 +81,32 @@ public class PayOSPaymentService(IConfiguration configuration) : IPayOSPaymentSe
     {
         try
         {
-            var webhookData = await _payOSClient.Webhooks.VerifyAsync(request.MapToSdkRequest());
+            var webhookData = await _payOSClient.Webhooks.VerifyAsync(new Webhook
+            {
+                Code = request.Code,
+                Description = request.Desc,
+                Success = request.Success,
+                Signature = request.Signature,
+                Data = new WebhookData
+                {
+                    OrderCode = request.Data.OrderCode,
+                    Amount = request.Data.Amount,
+                    Description = request.Data.Description,
+                    AccountNumber = request.Data.AccountNumber,
+                    Reference = request.Data.Reference,
+                    TransactionDateTime = request.Data.TransactionDateTime,
+                    Currency = request.Data.Currency,
+                    PaymentLinkId = request.Data.PaymentLinkId,
+                    Code = request.Data.Code,
+                    Description2 = request.Data.Desc,
+                    CounterAccountBankId = request.Data.CounterAccountBankId,
+                    CounterAccountBankName = request.Data.CounterAccountBankName,
+                    CounterAccountName = request.Data.CounterAccountName,
+                    CounterAccountNumber = request.Data.CounterAccountNumber,
+                    VirtualAccountName = request.Data.VirtualAccountName,
+                    VirtualAccountNumber = request.Data.VirtualAccountNumber
+                }
+            });
             return new PayOSWebhookProcessingResult
             {
                 PaymentReferenceId = webhookData.OrderCode.ToString()
@@ -118,12 +142,4 @@ public class PayOSHealthCheck(IHttpClientFactory httpClientFactory) : IHealthChe
             return HealthCheckResult.Unhealthy("Kết nối đến PayOS thất bại.", ex);
         }
     }
-}
-
-[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.Target)]
-public static partial class PayOSPaymentServiceMapper
-{
-    [MapProperty(nameof(PayOSWebhookRequestDto.Desc), nameof(Webhook.Description))]
-    [MapProperty(nameof(PayOSWebhookRequestDto.Data.Desc), nameof(Webhook.Data.Description2))]
-    public static partial Webhook MapToSdkRequest(this PayOSWebhookRequestDto source);
 }
