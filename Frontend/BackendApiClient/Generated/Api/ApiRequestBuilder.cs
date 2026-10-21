@@ -14,6 +14,7 @@ using ApiSdk.Api.Jobs;
 using ApiSdk.Api.Manager;
 using ApiSdk.Api.Notifications;
 using ApiSdk.Api.PayOSWebhook;
+using ApiSdk.Api.VNPAYIpn;
 using Microsoft.Kiota.Abstractions.Extensions;
 using Microsoft.Kiota.Abstractions;
 using System.Collections.Generic;
@@ -97,6 +98,11 @@ namespace ApiSdk.Api
         public global::ApiSdk.Api.PayOSWebhook.PayOSWebhookRequestBuilder PayOSWebhook
         {
             get => new global::ApiSdk.Api.PayOSWebhook.PayOSWebhookRequestBuilder(PathParameters, RequestAdapter);
+        }
+        /// <summary>The VNPAYIpn property</summary>
+        public global::ApiSdk.Api.VNPAYIpn.VNPAYIpnRequestBuilder VNPAYIpn
+        {
+            get => new global::ApiSdk.Api.VNPAYIpn.VNPAYIpnRequestBuilder(PathParameters, RequestAdapter);
         }
         /// <summary>
         /// Instantiates a new <see cref="global::ApiSdk.Api.ApiRequestBuilder"/> and sets the default values.

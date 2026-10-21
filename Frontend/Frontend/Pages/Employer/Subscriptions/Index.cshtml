@@ -1,0 +1,303 @@
+@page
+@using System.Globalization
+@using ApiSdk.Models
+@model Frontend.Pages.Employer.Subscriptions.IndexModel
+@{
+    ViewData["Title"] = "Gói dịch vụ Nhà tuyển dụng";
+}
+
+<div class="container my-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="mb-1">Gói dịch vụ Nhà tuyển dụng</h2>
+            <div class="text-muted small">
+                Nâng cấp gói dịch vụ để mở rộng hạn mức tin đăng và nhận thêm các quyền lợi tiếp cận ứng viên.
+            </div>
+        </div>
+        <div>
+            <a asp-page="/Employer/Job/Index" class="btn btn-outline-secondary">
+                Quay lại quản lý công việc
+            </a>
+        </div>
+    </div>
+
+    @if (Model.HasActiveSubscription && Model.CurrentSubscription != null)
+    {
+        <div class="card mb-4 border-success shadow-sm">
+            <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+                <span class="fw-bold">Gói dịch vụ đang kích hoạt</span>
+                <span class="badge bg-light text-success fw-bold">Đang hoạt động</span>
+            </div>
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-md-4 mb-2 mb-md-0">
+                        <div class="text-muted small">Gói & Kỳ hạn</div>
+                        <h4 class="mb-0 text-success fw-bold">@Model.CurrentSubscription.Tier (@Model.CurrentSubscription.Duration)</h4>
+                    </div>
+                    <div class="col-md-4 mb-2 mb-md-0">
+                        <div class="text-muted small">Thời hạn sử dụng</div>
+                        <div class="fw-bold">
+                            @if (Model.CurrentSubscription.EndDate.HasValue)
+                            {
+                                @Model.CurrentSubscription.EndDate.Value.ToLocalTime().ToString("dd/MM/yyyy HH:mm")
+                            }
+                            else
+                            {
+                                <span>-</span>
+                            }
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="text-muted small">Quyền lợi hiện tại</div>
+                        <div class="small">
+                            <div>• Số tin đăng mở rộng: <strong>+@Model.CurrentSubscription.ExtraActivePosts</strong> tin</div>
+                            <div>• Gợi ý ứng viên: <strong>@(Model.CurrentSubscription.CanRecommendCandidates == true ? "Có" : "Không")</strong></div>
+                            <div>• Tìm kiếm ứng viên: <strong>@(Model.CurrentSubscription.CanQueryCandidates == true ? "Có" : "Không")</strong></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+    @{
+        var orderedTiers = new[]
+        {
+            EmployerSubscriptionTier.Plus,
+            EmployerSubscriptionTier.Pro,
+            EmployerSubscriptionTier.Ultra
+        };
+    }
+
+    @foreach (var tier in orderedTiers)
+    {
+        var tierPlans = Model.Plans
+            .Where(p => p.Tier == tier)
+            .OrderBy(p => p.Duration == EmployerSubscriptionDuration.Monthly ? 0 : 1)
+            .ToList();
+
+        if (tierPlans.Count == 0) continue;
+
+        <div class="mb-5">
+            <h4 class="fw-bold mb-3 border-bottom pb-2">Gói @tier</h4>
+            <div class="row row-cols-1 row-cols-md-2 g-4">
+                @foreach (var plan in tierPlans)
+                {
+                    var isCurrentPlan = Model.HasActiveSubscription &&
+                                        plan.Tier == Model.CurrentSubscription?.Tier &&
+                                        plan.Duration == Model.CurrentSubscription?.Duration;
+
+                    <div class="col">
+                        <div class="card h-100 shadow-sm @(isCurrentPlan ? "border-success" : "")">
+                            <div class="card-header py-3 bg-white d-flex justify-content-between align-items-center">
+                                <h5 class="my-0 fw-bold">@plan.Name</h5>
+                                @if (isCurrentPlan)
+                                {
+                                    <span class="badge bg-success">Gói đang dùng</span>
+                                }
+                            </div>
+                            <div class="card-body d-flex flex-column">
+                                <h3 class="card-title pricing-card-title mb-1">
+                                    @(plan.Price?.ToString("N0", new CultureInfo("vi-VN")) ?? "0")
+                                    <small class="text-muted fs-6">VNĐ / @plan.DurationDays ngày</small>
+                                </h3>
+
+                                @if (!string.IsNullOrWhiteSpace(plan.Description))
+                                {
+                                    <p class="text-muted small mb-3">@plan.Description</p>
+                                }
+
+                                <hr class="my-2" />
+
+                                <ul class="list-unstyled mt-2 mb-4 flex-grow-1">
+                                    <li class="mb-2">
+                                        <span class="text-success fw-bold">✓</span>
+                                        <strong>+@plan.ExtraActivePosts</strong> bài đăng mở rộng
+                                    </li>
+                                    <li class="mb-2">
+                                        <span class="text-success fw-bold">✓</span>
+                                        <strong>+@plan.FreeBumps</strong> lượt đẩy bài miễn phí
+                                    </li>
+                                    <li class="mb-2">
+                                        @if (plan.CanRecommendCandidates == true)
+                                        {
+                                            <span class="text-success fw-bold">✓</span>
+                                            <span>Gợi ý ứng viên phù hợp</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">✗</span>
+                                            <span class="text-muted">Không gợi ý ứng viên</span>
+                                        }
+                                    </li>
+                                    <li class="mb-2">
+                                        @if (plan.CanQueryCandidates == true)
+                                        {
+                                            <span class="text-success fw-bold">✓</span>
+                                            <span>Chủ động tìm kiếm ứng viên</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">✗</span>
+                                            <span class="text-muted">Không tìm kiếm ứng viên</span>
+                                        }
+                                    </li>
+                                </ul>
+
+                                <div class="mt-auto">
+                                    @if (!Model.HasActiveSubscription)
+                                    {
+                                        <button type="button" class="btn btn-primary w-100 btn-select-plan"
+                                                data-bs-toggle="modal" data-bs-target="#paymentModal"
+                                                data-tier="@plan.Tier"
+                                                data-duration="@plan.Duration"
+                                                data-name="@plan.Name"
+                                                data-price="@(plan.Price?.ToString("N0", new CultureInfo("vi-VN")) ?? "0")">
+                                            Mua gói
+                                        </button>
+                                    }
+                                    else if (isCurrentPlan)
+                                    {
+                                        <div class="d-flex gap-2">
+                                            <button type="button" class="btn btn-success flex-grow-1 btn-select-plan"
+                                                    data-bs-toggle="modal" data-bs-target="#paymentModal"
+                                                    data-tier="@plan.Tier"
+                                                    data-duration="@plan.Duration"
+                                                    data-name="@plan.Name"
+                                                    data-price="@(plan.Price?.ToString("N0", new CultureInfo("vi-VN")) ?? "0")">
+                                                Gia hạn gói
+                                            </button>
+                                            <button type="button" class="btn btn-outline-danger"
+                                                    data-bs-toggle="modal" data-bs-target="#cancelSubscriptionModal">
+                                                Hủy gói
+                                            </button>
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <button type="button" class="btn btn-secondary w-100" disabled>
+                                            Mua gói
+                                        </button>
+                                        <div class="text-danger small mt-2 text-center">
+                                            Cần hủy gói đang dùng để mua gói mới
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+</div>
+
+<!-- Modal chọn phương thức thanh toán -->
+<div class="modal fade" id="paymentModal" tabindex="-1" aria-labelledby="paymentModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="post" asp-page-handler="Checkout">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="paymentModalLabel">Xác nhận thanh toán</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" asp-for="Input.Tier" id="checkoutTier" />
+                    <input type="hidden" asp-for="Input.Duration" id="checkoutDuration" />
+
+                    <div class="card bg-light mb-3">
+                        <div class="card-body py-2">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="text-muted">Gói đã chọn:</span>
+                                <strong id="modalPlanName">-</strong>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center mt-1">
+                                <span class="text-muted">Số tiền thanh toán:</span>
+                                <span class="text-primary fw-bold fs-5">
+                                    <span id="modalPlanPrice">0</span> VNĐ
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <label class="form-label fw-bold mb-2">Chọn phương thức thanh toán:</label>
+
+                    <div class="form-check p-3 border rounded mb-2">
+                        <input class="form-check-input ms-0 me-3" type="radio" asp-for="Input.PaymentMethod" id="methodPayOS" value="PayOS" checked />
+                        <label class="form-check-label w-100" for="methodPayOS">
+                            <div class="fw-bold">PayOS (Quét mã VietQR)</div>
+                            <div class="text-muted small">Thanh toán nhanh chóng bằng ứng dụng ngân hàng qua mã VietQR</div>
+                        </label>
+                    </div>
+
+                    <div class="form-check p-3 border rounded">
+                        <input class="form-check-input ms-0 me-3" type="radio" asp-for="Input.PaymentMethod" id="methodVNPAY" value="VNPAY" />
+                        <label class="form-check-label w-100" for="methodVNPAY">
+                            <div class="fw-bold">VNPAY</div>
+                            <div class="text-muted small">Thanh toán qua cổng VNPAY (Thẻ ATM nội địa, QR VNPAY, Thẻ quốc tế)</div>
+                        </label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Đóng</button>
+                    <button type="submit" class="btn btn-primary">Xác nhận và Thanh toán</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal xác nhận hủy gói -->
+<div class="modal fade" id="cancelSubscriptionModal" tabindex="-1" aria-labelledby="cancelSubscriptionModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="post" asp-page-handler="CancelSubscription">
+                <div class="modal-header">
+                    <h5 class="modal-title text-danger" id="cancelSubscriptionModalLabel">Xác nhận hủy gói dịch vụ</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Bạn có chắc chắn muốn hủy gói dịch vụ đang hoạt động không?</p>
+                    <div class="alert alert-warning small mb-0">
+                        <strong>Lưu ý:</strong>
+                        <ul class="mb-0 ps-3">
+                            <li>Hạn mức đăng tin tối đa của bạn sẽ trở về mặc định (5 tin).</li>
+                            <li>Nếu số tin đang mở vượt quá 5 tin, các tin có thời gian cập nhật cũ nhất sẽ tự động đóng lại.</li>
+                            <li>Hành động này không thể hoàn tác sau khi xác nhận.</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy bỏ</button>
+                    <button type="submit" class="btn btn-danger">Đồng ý hủy gói</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const planButtons = document.querySelectorAll('.btn-select-plan');
+            const tierInput = document.getElementById('checkoutTier');
+            const durationInput = document.getElementById('checkoutDuration');
+            const modalPlanName = document.getElementById('modalPlanName');
+            const modalPlanPrice = document.getElementById('modalPlanPrice');
+
+            planButtons.forEach(button => {
+                button.addEventListener('click', function () {
+                    const tier = this.getAttribute('data-tier');
+                    const duration = this.getAttribute('data-duration');
+                    const name = this.getAttribute('data-name');
+                    const price = this.getAttribute('data-price');
+
+                    if (tierInput) tierInput.value = tier;
+                    if (durationInput) durationInput.value = duration;
+                    if (modalPlanName) modalPlanName.textContent = name;
+                    if (modalPlanPrice) modalPlanPrice.textContent = price;
+                });
+            });
+        });
+    </script>
+}

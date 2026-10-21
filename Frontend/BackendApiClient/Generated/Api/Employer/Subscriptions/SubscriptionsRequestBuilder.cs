@@ -5,6 +5,7 @@ using ApiSdk.Api.Employer.Subscriptions.Checkout;
 using ApiSdk.Api.Employer.Subscriptions.Current;
 using ApiSdk.Api.Employer.Subscriptions.PayosCheckout;
 using ApiSdk.Api.Employer.Subscriptions.Plans;
+using ApiSdk.Api.Employer.Subscriptions.VnpayCheckout;
 using Microsoft.Kiota.Abstractions.Extensions;
 using Microsoft.Kiota.Abstractions;
 using System.Collections.Generic;
@@ -43,6 +44,11 @@ namespace ApiSdk.Api.Employer.Subscriptions
         public global::ApiSdk.Api.Employer.Subscriptions.Plans.PlansRequestBuilder Plans
         {
             get => new global::ApiSdk.Api.Employer.Subscriptions.Plans.PlansRequestBuilder(PathParameters, RequestAdapter);
+        }
+        /// <summary>The vnpayCheckout property</summary>
+        public global::ApiSdk.Api.Employer.Subscriptions.VnpayCheckout.VnpayCheckoutRequestBuilder VnpayCheckout
+        {
+            get => new global::ApiSdk.Api.Employer.Subscriptions.VnpayCheckout.VnpayCheckoutRequestBuilder(PathParameters, RequestAdapter);
         }
         /// <summary>
         /// Instantiates a new <see cref="global::ApiSdk.Api.Employer.Subscriptions.SubscriptionsRequestBuilder"/> and sets the default values.

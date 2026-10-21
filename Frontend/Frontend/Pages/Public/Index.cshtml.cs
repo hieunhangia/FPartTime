@@ -23,7 +23,8 @@ public class IndexModel(ApiClient apiClient) : PageModel
     {
         try
         {
-            var allJobs = await apiClient.Api.Jobs.GetAsync() ?? [];
+            var response = await apiClient.Api.Jobs.GetAsync();
+            var allJobs = response?.Items ?? [];
 
             // Thu thập danh sách tỉnh/thành để lọc
             Provinces = allJobs

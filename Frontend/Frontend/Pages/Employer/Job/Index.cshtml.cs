@@ -32,6 +32,10 @@ public class IndexModel(ApiClient apiClient) : PageModel
 
     public PostsQuotaResponseDto? PostsQuota { get; private set; }
 
+    public CurrentEmployerSubscriptionResponseDto? CurrentSubscription { get; private set; }
+
+    public bool HasActiveSubscription => CurrentSubscription?.HasActiveSubscription ?? false;
+
     public async Task<IActionResult> OnGetAsync()
     {
         if (PageNumber < 1)
@@ -48,6 +52,15 @@ public class IndexModel(ApiClient apiClient) : PageModel
         catch
         {
             PostsQuota = null;
+        }
+
+        try
+        {
+            CurrentSubscription = await apiClient.Api.Employer.Subscriptions.Current.GetAsync();
+        }
+        catch
+        {
+            CurrentSubscription = null;
         }
 
         try

@@ -1,5 +1,23 @@
+@using ApiSdk
 @using Frontend.Constants
 @using Frontend.Extensions
+@inject ApiClient ApiClient
+
+@{
+    bool showBuySubscription = false;
+    if (User.IsLoggedIn && User.IsInRole(Role.Employer))
+    {
+        try
+        {
+            var currentSub = await ApiClient.Api.Employer.Subscriptions.Current.GetAsync();
+            showBuySubscription = !(currentSub?.HasActiveSubscription ?? false);
+        }
+        catch
+        {
+            showBuySubscription = false;
+        }
+    }
+}
 
 <header class="site-header">
     <div class="header-inner">
@@ -23,6 +41,13 @@
             }
             else
             {
+                @if (showBuySubscription)
+                {
+                    <a asp-page="/Employer/Subscriptions/Index" class="btn btn-warning btn-sm fw-bold">
+                        Mua gói dịch vụ
+                    </a>
+                }
+
                 <!-- Nút thông báo quả chuông -->
                 <div class="dropdown">
                     <button class="btn btn-outline-secondary btn-sm notification-bell-btn position-relative"
@@ -81,6 +106,7 @@
                         {
                             <li><a class="dropdown-item" asp-page="/Employer/Job/Index">Quản lý công việc</a></li>
                             <li><a class="dropdown-item" asp-page="/Employer/EmployerProfile/EditProfile">Hồ sơ tuyển dụng</a></li>
+                            <li><a class="dropdown-item" asp-page="/Employer/Subscriptions/Index">Gói dịch vụ</a></li>
                         }
                         @if (User.IsInRole(Role.Censor))
                         {
