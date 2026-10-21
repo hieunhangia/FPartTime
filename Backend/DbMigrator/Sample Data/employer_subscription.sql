@@ -31,7 +31,7 @@ VALUES
     -- 3. Gói Ultra
     ('Ultra', 'Monthly', N'Gói Ultra (1 Tháng)',
      N'Tăng thêm 20 tin đăng hoạt động, tặng 50 lượt đẩy tin, gợi ý ứng viên cho công việc và chủ động tìm kiếm ứng viên linh hoạt.',
-     1000.00, 30, 20, 50, 1, 1, 1),
+     2000.00, 30, 20, 50, 1, 1, 1),
     ('Ultra', 'Yearly', N'Gói Ultra (1 Năm)',
      N'Tăng thêm 20 tin đăng hoạt động, tặng 100 lượt đẩy tin, gợi ý ứng viên cho công việc và chủ động tìm kiếm ứng viên linh hoạt, gói toàn diện nhất.',
      1000000.00, 365, 20, 100, 1, 1, 1);
