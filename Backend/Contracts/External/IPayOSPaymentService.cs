@@ -4,12 +4,12 @@ namespace Contracts.External;
 
 public interface IPayOSPaymentService
 {
-    Task<CreatePaymentResponse> CreatePaymentAsync(CreatePaymentRequest request);
+    Task<CreatePayOSPaymentResponse> CreatePaymentAsync(CreatePayOSPaymentRequest request);
     Task CancelPaymentAsync(string paymentReferenceId);
-    Task<WebhookProcessingResult> ProcessWebhookAsync(WebhookRequestDto request);
+    Task<PayOSWebhookProcessingResult> ProcessWebhookAsync(PayOSWebhookRequestDto request);
 }
 
-public class CreatePaymentRequest
+public class CreatePayOSPaymentRequest
 {
     public required decimal Amount { get; set; }
     public required string Description { get; set; }
@@ -26,13 +26,13 @@ public class CreatePaymentRequest
     }
 }
 
-public class CreatePaymentResponse
+public class CreatePayOSPaymentResponse
 {
     public required string PaymentReferenceId { get; set; }
     public required string PaymentUrl { get; set; }
 }
 
-public class WebhookRequestDto
+public class PayOSWebhookRequestDto
 {
     [Required] public string Code { get; set; } = string.Empty;
     [Required] public string Desc { get; set; } = string.Empty;
@@ -61,7 +61,7 @@ public class WebhookRequestDto
     }
 }
 
-public class WebhookProcessingResult
+public class PayOSWebhookProcessingResult
 {
     public required string PaymentReferenceId { get; set; }
 }

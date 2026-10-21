@@ -25,6 +25,16 @@ public static class DependencyInjection
         });
         builder.Services.AddHealthChecks().AddCheck<PayOSHealthCheck>(name: "PayOS Service", tags: ["payment"]);
 
+        // VNPAY Service
+        builder.Services.AddScoped<IVNPAYPaymentService, VNPAYPaymentService>();
+        builder.Services.AddHttpClient(VNPAYHealthCheck.HealthCheckHttpClientName, client =>
+        {
+            client.BaseAddress = new Uri(builder.Configuration["VNPAY:HealthCheckUrl"] ??
+                                         throw new InvalidOperationException("VNPAY:HealthCheckUrl is not configured"));
+            client.Timeout = TimeSpan.FromSeconds(5);
+        });
+        builder.Services.AddHealthChecks().AddCheck<VNPAYHealthCheck>(name: "VNPAY Service", tags: ["payment"]);
+
         // Sms Sender Service
         builder.Services.AddSingleton<ISmsSenderService, LoggerSmsSenderService>();
 

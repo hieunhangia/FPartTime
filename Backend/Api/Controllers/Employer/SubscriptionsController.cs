@@ -30,9 +30,20 @@ public class SubscriptionsController(ISubscriptionService subscriptionService) :
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status409Conflict)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status500InternalServerError)]
     public async Task<IActionResult> CreatePayOSCheckout([FromBody] CreatePayOSCheckoutRequestDto request) =>
         Ok(await subscriptionService.CreatePayOSCheckoutAsync(User, request));
+
+    [HttpPost("vnpay-checkout")]
+    [ProducesResponseType<CreateVNPAYCheckoutResponseDto>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status409Conflict)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status500InternalServerError)]
+    public async Task<IActionResult> CreateVNPAYCheckout([FromBody] CreateVNPAYCheckoutRequestDto request) =>
+        Ok(await subscriptionService.CreateVNPAYCheckoutAsync(User, request));
 
     [HttpPut("checkout/{transactionId:guid}/cancel")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]

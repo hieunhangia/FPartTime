@@ -10,6 +10,6 @@ public class PayOSWebhookController(IPayOSPaymentService payOsPaymentService, II
     : ControllerBase
 {
     [HttpPost]
-    public async Task ProcessWebhook([FromBody] WebhookRequestDto request) =>
+    public async Task ProcessWebhook([FromBody] PayOSWebhookRequestDto request) =>
         await ipnDispatcher.DispatchAsync((await payOsPaymentService.ProcessWebhookAsync(request)).PaymentReferenceId);
 }

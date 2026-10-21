@@ -14,6 +14,10 @@ public interface ISubscriptionService
         CreatePayOSCheckoutRequestDto request);
 
     Task CancelPayOSCheckoutAsync(ClaimsPrincipal user, Guid transactionId);
+
+    Task<CreateVNPAYCheckoutResponseDto> CreateVNPAYCheckoutAsync(ClaimsPrincipal user,
+        CreateVNPAYCheckoutRequestDto request);
+
     Task ProcessSubscriptionOrderAsync(Guid transactionId);
     Task<int> ProcessExpiredSubscriptionsAsync(CancellationToken cancellationToken = default);
 }
@@ -54,6 +58,31 @@ public class CreatePayOSCheckoutRequestDto
 }
 
 public class CreatePayOSCheckoutResponseDto
+{
+    public required string PaymentUrl { get; set; }
+}
+
+public class CreateVNPAYCheckoutRequestDto
+{
+    [Required(ErrorMessage = "Gói dịch vụ là bắt buộc.")]
+    [EnumDataType(typeof(EmployerSubscriptionTier), ErrorMessage = "Gói dịch vụ không hợp lệ.")]
+    public EmployerSubscriptionTier? Tier { get; set; }
+
+    [Required(ErrorMessage = "Kỳ hạn gói là bắt buộc.")]
+    [EnumDataType(typeof(EmployerSubscriptionDuration), ErrorMessage = "Kỳ hạn gói không hợp lệ.")]
+    public EmployerSubscriptionDuration? Duration { get; set; }
+
+    [Required(ErrorMessage = "Đường dẫn quay về (ReturnPath) là bắt buộc.")]
+    [RegularExpression(@"^/(?![/\\]).*$",
+        ErrorMessage = "Đường dẫn quay về (ReturnPath) phải là đường dẫn tương đối hợp lệ bắt đầu bằng '/'.")]
+    public string ReturnPath { get; set; } = string.Empty;
+
+    [Required(ErrorMessage = "Địa chỉ IP là bắt buộc.")]
+    [RegularExpression(@"^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$", ErrorMessage = "Địa chỉ IP không hợp lệ.")]
+    public string IpAddress { get; set; } = string.Empty;
+}
+
+public class CreateVNPAYCheckoutResponseDto
 {
     public required string PaymentUrl { get; set; }
 }

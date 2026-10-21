@@ -20,13 +20,24 @@ public class PayOSPaymentService(IConfiguration configuration) : IPayOSPaymentSe
         ChecksumKey = configuration["PayOS:ChecksumKey"]
     });
 
-    public async Task<CreatePaymentResponse> CreatePaymentAsync(CreatePaymentRequest request)
+    public async Task<CreatePayOSPaymentResponse> CreatePaymentAsync(CreatePayOSPaymentRequest request)
     {
         try
         {
+            var orderCode = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+            if (string.IsNullOrWhiteSpace(request.Description))
+            {
+                request.Description = orderCode.ToString();
+            }
+
+            if (request.Description.Length > 9)
+            {
+                request.Description = request.Description[..9];
+            }
+
             var result = await _payOSClient.PaymentRequests.CreateAsync(new CreatePaymentLinkRequest
             {
-                OrderCode = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
+                OrderCode = orderCode,
                 Amount = decimal.ToInt64(request.Amount),
                 Description = request.Description,
                 CancelUrl = request.CancelUrl,
@@ -43,7 +54,7 @@ public class PayOSPaymentService(IConfiguration configuration) : IPayOSPaymentSe
                 ]
             });
 
-            return new CreatePaymentResponse
+            return new CreatePayOSPaymentResponse
             {
                 PaymentReferenceId = result.OrderCode.ToString(),
                 PaymentUrl = result.CheckoutUrl
@@ -67,12 +78,12 @@ public class PayOSPaymentService(IConfiguration configuration) : IPayOSPaymentSe
         }
     }
 
-    public async Task<WebhookProcessingResult> ProcessWebhookAsync(WebhookRequestDto request)
+    public async Task<PayOSWebhookProcessingResult> ProcessWebhookAsync(PayOSWebhookRequestDto request)
     {
         try
         {
             var webhookData = await _payOSClient.Webhooks.VerifyAsync(request.MapToSdkRequest());
-            return new WebhookProcessingResult
+            return new PayOSWebhookProcessingResult
             {
                 PaymentReferenceId = webhookData.OrderCode.ToString()
             };
@@ -112,7 +123,7 @@ public class PayOSHealthCheck(IHttpClientFactory httpClientFactory) : IHealthChe
 [Mapper(RequiredMappingStrategy = RequiredMappingStrategy.Target)]
 public static partial class PayOSPaymentServiceMapper
 {
-    [MapProperty(nameof(WebhookRequestDto.Desc), nameof(Webhook.Description))]
-    [MapProperty(nameof(WebhookRequestDto.Data.Desc), nameof(Webhook.Data.Description2))]
-    public static partial Webhook MapToSdkRequest(this WebhookRequestDto source);
+    [MapProperty(nameof(PayOSWebhookRequestDto.Desc), nameof(Webhook.Description))]
+    [MapProperty(nameof(PayOSWebhookRequestDto.Data.Desc), nameof(Webhook.Data.Description2))]
+    public static partial Webhook MapToSdkRequest(this PayOSWebhookRequestDto source);
 }

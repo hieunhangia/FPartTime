@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Domain;
 using Domain.Shared.Enums;
-using Domain.Models.EmployerSubscriptions;
 using Domain.Models.Users;
 
 namespace DbMigrator;
@@ -19,7 +18,7 @@ public class DataSeeder(ApplicationDbContext db)
         await SeedSqlFileIfEmptyAsync(() => db.Provinces.AnyAsync(), "address.sql");
         await SeedRolesAsync();
         await SeedUsersAsync();
-        await SeedSubscriptionPlansAsync();
+        await SeedSqlFileIfEmptyAsync(() => db.EmployerSubscriptionPlans.AnyAsync(), "employer_subscription.sql");
         await SeedSqlFileIfEmptyAsync(() => db.Notifications.AnyAsync(), "notification.sql");
         await SeedSqlFileIfEmptyAsync(() => db.Jobs.AnyAsync(), "job.sql");
 
@@ -166,105 +165,5 @@ public class DataSeeder(ApplicationDbContext db)
         var sql = await File.ReadAllTextAsync(filePath);
         await db.Database.ExecuteSqlRawAsync(sql);
         Console.WriteLine($"  [+] Đã thực thi {fileName} thành công.");
-    }
-
-    private async Task SeedSubscriptionPlansAsync()
-    {
-        Console.WriteLine("➡️ Đang kiểm tra và tạo dữ liệu gói đăng ký (Subscription Plans)...");
-        if (await db.EmployerSubscriptionPlans.AnyAsync())
-        {
-            Console.WriteLine("ℹ️ Đã có dữ liệu gói đăng ký, bỏ qua.");
-            return;
-        }
-
-        db.EmployerSubscriptionPlans.AddRange(
-            new EmployerSubscriptionPlan
-            {
-                Tier = EmployerSubscriptionTier.Plus,
-                Duration = EmployerSubscriptionDuration.Monthly,
-                Name = "Gói Plus (1 Tháng)",
-                Description = "Tăng thêm 5 tin đăng hoạt động, tặng 5 lượt đẩy tin.",
-                Price = BusinessRuleConstants.Employers.Subscriptions.Plus.MonthlyPrice,
-                DurationDays = BusinessRuleConstants.Employers.Subscriptions.MonthlyDurationDays,
-                ExtraActivePosts = BusinessRuleConstants.Employers.Subscriptions.Plus.ExtraActivePosts,
-                FreeBumps = BusinessRuleConstants.Employers.Subscriptions.Plus.MonthlyFreeBumps,
-                CanRecommendCandidates = false,
-                CanQueryCandidates = false,
-                IsActive = true
-            },
-            new EmployerSubscriptionPlan
-            {
-                Tier = EmployerSubscriptionTier.Plus,
-                Duration = EmployerSubscriptionDuration.Yearly,
-                Name = "Gói Plus (1 Năm)",
-                Description = "Tăng thêm 5 tin đăng hoạt động, tặng 20 lượt đẩy tin, tiết kiệm hơn.",
-                Price = BusinessRuleConstants.Employers.Subscriptions.Plus.YearlyPrice,
-                DurationDays = BusinessRuleConstants.Employers.Subscriptions.YearlyDurationDays,
-                ExtraActivePosts = BusinessRuleConstants.Employers.Subscriptions.Plus.ExtraActivePosts,
-                FreeBumps = BusinessRuleConstants.Employers.Subscriptions.Plus.YearlyFreeBumps,
-                CanRecommendCandidates = false,
-                CanQueryCandidates = false,
-                IsActive = true
-            },
-            new EmployerSubscriptionPlan
-            {
-                Tier = EmployerSubscriptionTier.Pro,
-                Duration = EmployerSubscriptionDuration.Monthly,
-                Name = "Gói Pro (1 Tháng)",
-                Description = "Tăng thêm 10 tin đăng hoạt động, tặng 10 lượt đẩy tin, gợi ý ứng viên phù hợp cho từng công việc.",
-                Price = BusinessRuleConstants.Employers.Subscriptions.Pro.MonthlyPrice,
-                DurationDays = BusinessRuleConstants.Employers.Subscriptions.MonthlyDurationDays,
-                ExtraActivePosts = BusinessRuleConstants.Employers.Subscriptions.Pro.ExtraActivePosts,
-                FreeBumps = BusinessRuleConstants.Employers.Subscriptions.Pro.MonthlyFreeBumps,
-                CanRecommendCandidates = true,
-                CanQueryCandidates = false,
-                IsActive = true
-            },
-            new EmployerSubscriptionPlan
-            {
-                Tier = EmployerSubscriptionTier.Pro,
-                Duration = EmployerSubscriptionDuration.Yearly,
-                Name = "Gói Pro (1 Năm)",
-                Description = "Tăng thêm 10 tin đăng hoạt động, tặng 40 lượt đẩy tin, gợi ý ứng viên phù hợp cho từng công việc, tiết kiệm chi phí.",
-                Price = BusinessRuleConstants.Employers.Subscriptions.Pro.YearlyPrice,
-                DurationDays = BusinessRuleConstants.Employers.Subscriptions.YearlyDurationDays,
-                ExtraActivePosts = BusinessRuleConstants.Employers.Subscriptions.Pro.ExtraActivePosts,
-                FreeBumps = BusinessRuleConstants.Employers.Subscriptions.Pro.YearlyFreeBumps,
-                CanRecommendCandidates = true,
-                CanQueryCandidates = false,
-                IsActive = true
-            },
-            new EmployerSubscriptionPlan
-            {
-                Tier = EmployerSubscriptionTier.Ultra,
-                Duration = EmployerSubscriptionDuration.Monthly,
-                Name = "Gói Ultra (1 Tháng)",
-                Description = "Tăng thêm 20 tin đăng hoạt động, tặng 50 lượt đẩy tin, gợi ý ứng viên cho công việc và chủ động tìm kiếm ứng viên linh hoạt.",
-                Price = BusinessRuleConstants.Employers.Subscriptions.Ultra.MonthlyPrice,
-                DurationDays = BusinessRuleConstants.Employers.Subscriptions.MonthlyDurationDays,
-                ExtraActivePosts = BusinessRuleConstants.Employers.Subscriptions.Ultra.ExtraActivePosts,
-                FreeBumps = BusinessRuleConstants.Employers.Subscriptions.Ultra.MonthlyFreeBumps,
-                CanRecommendCandidates = true,
-                CanQueryCandidates = true,
-                IsActive = true
-            },
-            new EmployerSubscriptionPlan
-            {
-                Tier = EmployerSubscriptionTier.Ultra,
-                Duration = EmployerSubscriptionDuration.Yearly,
-                Name = "Gói Ultra (1 Năm)",
-                Description = "Tăng thêm 20 tin đăng hoạt động, tặng 100 lượt đẩy tin, gợi ý ứng viên cho công việc và chủ động tìm kiếm ứng viên linh hoạt, gói toàn diện nhất.",
-                Price = BusinessRuleConstants.Employers.Subscriptions.Ultra.YearlyPrice,
-                DurationDays = BusinessRuleConstants.Employers.Subscriptions.YearlyDurationDays,
-                ExtraActivePosts = BusinessRuleConstants.Employers.Subscriptions.Ultra.ExtraActivePosts,
-                FreeBumps = BusinessRuleConstants.Employers.Subscriptions.Ultra.YearlyFreeBumps,
-                CanRecommendCandidates = true,
-                CanQueryCandidates = true,
-                IsActive = true
-            }
-        );
-
-        await db.SaveChangesAsync();
-        Console.WriteLine("  [+] Đã khởi tạo 6 gói đăng ký mẫu thành công.");
     }
 }
