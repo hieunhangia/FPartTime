@@ -20,7 +20,7 @@
             {
                 try
                 {
-                    @if (!(await ApiClient.Api.Employer.Subscriptions.Current.GetAsync())?.HasActiveSubscription ?? false)
+                    @if ((await ApiClient.Api.Employer.Subscriptions.Current.GetAsync())?.HasActiveSubscription ?? false)
                     {
                         <a asp-page="/Employer/Subscriptions/Index" class="btn btn-warning btn-sm fw-bold">
                             Mua gói dịch vụ
