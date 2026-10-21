@@ -1,3 +1,5 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace Contracts.External;
 
 public interface IVNPAYPaymentService
@@ -24,33 +26,26 @@ public class CreateVNPAYPaymentResponse
 
 public class VNPAYIpnRequestDto
 {
-    public string? vnp_TmnCode { get; set; }
-    public long? vnp_Amount { get; set; }
-    public string? vnp_BankCode { get; set; }
+    [Required] public string vnp_TmnCode { get; set; } = string.Empty;
+    [Required] public long vnp_Amount { get; set; }
+    [Required] public string vnp_BankCode { get; set; } = string.Empty;
     public string? vnp_BankTranNo { get; set; }
     public string? vnp_CardType { get; set; }
     public string? vnp_PayDate { get; set; }
-    public string? vnp_OrderInfo { get; set; }
-    public string? vnp_TransactionNo { get; set; }
-    public string? vnp_ResponseCode { get; set; }
-    public string? vnp_TransactionStatus { get; set; }
-    public string? vnp_TxnRef { get; set; }
-    public string? vnp_SecureHashType { get; set; }
-    public string? vnp_SecureHash { get; set; }
-    public IDictionary<string, string>? QueryParameters { get; set; }
+    [Required] public string vnp_OrderInfo { get; set; } = string.Empty;
+    [Required] public string vnp_TransactionNo { get; set; } = string.Empty;
+    [Required] public string vnp_ResponseCode { get; set; } = string.Empty;
+    [Required] public string vnp_TransactionStatus { get; set; } = string.Empty;
+    [Required] public string vnp_TxnRef { get; set; } = string.Empty;
+    [Required] public string vnp_SecureHash { get; set; } = string.Empty;
 
     public Dictionary<string, string> ToParameterDictionary()
     {
-        var dict = QueryParameters is { Count: > 0 }
-            ? new Dictionary<string, string>(QueryParameters, StringComparer.Ordinal)
-            : new Dictionary<string, string>(StringComparer.Ordinal);
-
-        AddIfNotEmpty("vnp_TmnCode", vnp_TmnCode);
-        if (vnp_Amount.HasValue)
+        var dict = new Dictionary<string, string>(StringComparer.Ordinal)
         {
-            AddIfNotEmpty("vnp_Amount", vnp_Amount.Value.ToString());
-        }
-
+            ["vnp_Amount"] = vnp_Amount.ToString()
+        };
+        AddIfNotEmpty("vnp_TmnCode", vnp_TmnCode);
         AddIfNotEmpty("vnp_BankCode", vnp_BankCode);
         AddIfNotEmpty("vnp_BankTranNo", vnp_BankTranNo);
         AddIfNotEmpty("vnp_CardType", vnp_CardType);
@@ -60,17 +55,12 @@ public class VNPAYIpnRequestDto
         AddIfNotEmpty("vnp_ResponseCode", vnp_ResponseCode);
         AddIfNotEmpty("vnp_TransactionStatus", vnp_TransactionStatus);
         AddIfNotEmpty("vnp_TxnRef", vnp_TxnRef);
-        AddIfNotEmpty("vnp_SecureHashType", vnp_SecureHashType);
-        AddIfNotEmpty("vnp_SecureHash", vnp_SecureHash);
 
         return dict;
 
         void AddIfNotEmpty(string key, string? value)
         {
-            if (!string.IsNullOrEmpty(value))
-            {
-                dict.TryAdd(key, value);
-            }
+            if (!string.IsNullOrEmpty(value)) dict[key] = value;
         }
     }
 }
@@ -78,12 +68,8 @@ public class VNPAYIpnRequestDto
 public class VNPAYIpnProcessingResult
 {
     public required string PaymentReferenceId { get; set; }
-    public bool IsSuccess { get; set; }
-    public string RspCode { get; set; } = "00";
-    public string Message { get; set; } = "Confirm Success";
-    public string? ResponseCode { get; set; }
-    public string? TransactionStatus { get; set; }
-    public string? TransactionNo { get; set; }
+    public required bool IsValidSignature { get; set; }
+    public required bool IsPaymentSuccess { get; set; }
 }
 
 public class VNPAYIpnResponseDto
