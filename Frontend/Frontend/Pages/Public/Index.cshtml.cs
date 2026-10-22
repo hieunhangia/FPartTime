@@ -10,8 +10,12 @@ namespace Frontend.Pages.Public;
 
 public class IndexModel(ApiClient apiClient) : PageModel
 {
-    public List<JobResponseDto> Jobs { get; private set; } = [];
     public List<string> Provinces { get; private set; } = [];
+    public List<IndustrySummary> Industries { get; private set; } = [];
+    public List<IndustrySummary> PopularIndustries { get; private set; } = [];
+    public bool HasSearchFilters => !string.IsNullOrWhiteSpace(Keyword)
+        || !string.IsNullOrWhiteSpace(Province)
+        || IndustryId.HasValue;
 
     [BindProperty(SupportsGet = true)]
     public string? Keyword { get; set; }
@@ -19,14 +23,21 @@ public class IndexModel(ApiClient apiClient) : PageModel
     [BindProperty(SupportsGet = true)]
     public string? Province { get; set; }
 
+    [BindProperty(SupportsGet = true)]
+    public Guid? IndustryId { get; set; }
+
     public async Task<IActionResult> OnGetAsync()
     {
+        if (HasSearchFilters)
+        {
+            return RedirectToPage("/Public/Jobs", new { Keyword, Province, IndustryId });
+        }
+
         try
         {
             var response = await apiClient.Api.Jobs.GetAsync();
             var allJobs = response?.Items ?? [];
 
-            // Thu thập danh sách tỉnh/thành để lọc
             Provinces = allJobs
                 .Where(j => !string.IsNullOrWhiteSpace(j.ProvinceName))
                 .Select(j => j.ProvinceName!.Trim())
@@ -34,24 +45,22 @@ public class IndexModel(ApiClient apiClient) : PageModel
                 .OrderBy(p => p)
                 .ToList();
 
-            var query = allJobs.AsEnumerable();
+            Industries = allJobs
+                .Where(j => j.IndustryId.HasValue && !string.IsNullOrWhiteSpace(j.IndustryName))
+                .GroupBy(j => j.IndustryId!.Value)
+                .Select(group => new IndustrySummary(group.Key, group.First().IndustryName!.Trim(), group.Count()))
+                .OrderBy(industry => industry.Name)
+                .ToList();
 
-            if (!string.IsNullOrWhiteSpace(Keyword))
-            {
-                var term = Keyword.Trim();
-                query = query.Where(j =>
-                    (j.Title?.Contains(term, StringComparison.OrdinalIgnoreCase) ?? false) ||
-                    (j.EmployerCompanyName?.Contains(term, StringComparison.OrdinalIgnoreCase) ?? false) ||
-                    (j.IndustryName?.Contains(term, StringComparison.OrdinalIgnoreCase) ?? false) ||
-                    (j.Description?.Contains(term, StringComparison.OrdinalIgnoreCase) ?? false));
-            }
-
-            if (!string.IsNullOrWhiteSpace(Province))
-            {
-                query = query.Where(j => string.Equals(j.ProvinceName?.Trim(), Province.Trim(), StringComparison.OrdinalIgnoreCase));
-            }
-
-            Jobs = query.ToList();
+            PopularIndustries = Industries
+                .OrderByDescending(industry => industry.JobCount)
+                .ThenBy(industry => industry.Name)
+                .Take(5)
+                .ToList();
+        }
+        catch (ApiException ex) when (ex.ResponseStatusCode == 401)
+        {
+            throw;
         }
         catch (ApiException ex)
         {
@@ -65,65 +74,5 @@ public class IndexModel(ApiClient apiClient) : PageModel
         return Page();
     }
 
-    public static string FormatSalary(JobSalaryResponseDto salary)
-    {
-        var amountStr = (salary.Amount ?? 0).ToString("N0") + " ₫";
-        var unitStr = salary.TimeUnit switch
-        {
-            JobSalaryTimeUnit.Hour => "giờ",
-            JobSalaryTimeUnit.Session => "ca",
-            JobSalaryTimeUnit.Day => "ngày",
-            JobSalaryTimeUnit.Week => "tuần",
-            JobSalaryTimeUnit.Month => "tháng",
-            JobSalaryTimeUnit.Project => "dự án",
-            _ => "lần"
-        };
-
-        if (salary.TimeQuantity is > 1)
-        {
-            return $"{amountStr} / {salary.TimeQuantity} {unitStr}";
-        }
-
-        return $"{amountStr} / {unitStr}";
-    }
-
-    public static string FormatSalariesSummary(List<JobSalaryResponseDto>? salaries)
-    {
-        if (salaries == null || salaries.Count == 0)
-        {
-            return "Thỏa thuận";
-        }
-
-        if (salaries.Count == 1)
-        {
-            return FormatSalary(salaries[0]);
-        }
-
-        return $"{FormatSalary(salaries[0])} (+{salaries.Count - 1} mức lương)";
-    }
-
-    public static string FormatScheduleSummary(List<JobScheduleResponseDto>? schedules)
-    {
-        if (schedules == null || schedules.Count == 0)
-        {
-            return "Linh hoạt";
-        }
-
-        var count = schedules.Count;
-        return $"{count} buổi/ca trong tuần";
-    }
-
-    public static string FormatLocation(JobResponseDto job)
-    {
-        var parts = new List<string>();
-        if (!string.IsNullOrWhiteSpace(job.CommuneName))
-        {
-            parts.Add(job.CommuneName.Trim());
-        }
-        if (!string.IsNullOrWhiteSpace(job.ProvinceName))
-        {
-            parts.Add(job.ProvinceName.Trim());
-        }
-        return parts.Count > 0 ? string.Join(", ", parts) : "Toàn quốc";
-    }
+    public sealed record IndustrySummary(Guid Id, string Name, int JobCount);
 }

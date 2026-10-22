@@ -15,6 +15,7 @@ public class JobService(ApplicationDbContext dbContext)
         return dbContext.Jobs.AsNoTracking()
             .Where(j => j.Status == JobStatus.Active && j.ExpiryAt >= today)
             .OrderByDescending(j => j.LastBumpedAt)
+            .ThenBy(j => j.Id)
             .ProjectToDto();
     }
 

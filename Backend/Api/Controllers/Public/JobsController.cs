@@ -13,7 +13,7 @@ namespace Api.Controllers.Public;
 public class JobsController(JobService jobService) : ControllerBase
 {
     [HttpGet]
-    [ODataEnableQuery(OutputType.Paged)]
+    [ODataEnableQuery(OutputType.Paged, EnsureStableOrdering = false)]
     [ProducesResponseType<PagedResponseDto<JobResponseDto>>(StatusCodes.Status200OK)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status500InternalServerError)]

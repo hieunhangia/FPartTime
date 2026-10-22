@@ -1,37 +1,64 @@
 @page "/"
 @model IndexModel
 @{
-    ViewData["Title"] = "Danh sách việc làm";
+    ViewData["Title"] = "Tìm việc làm bán thời gian";
 }
 
-<div class="container my-4">
-    <h2 class="mb-3">Danh sách việc làm</h2>
+<div class="my-4">
+    <h1 class="h3 mb-3">Tìm việc làm</h1>
 
-    @if (Model.Jobs.Count == 0)
-    {
-        <p class="text-muted">Chưa có việc làm nào.</p>
-    }
-    else
-    {
-        <div class="list-group">
-            @foreach (var job in Model.Jobs)
-            {
-                <a asp-page="/Public/JobDetail" asp-route-id="@job.Id" class="list-group-item list-group-item-action py-3">
-                    <div class="d-flex w-100 justify-content-between align-items-center mb-1">
-                        <h5 class="mb-0 text-primary">@job.Title</h5>
-                        <small class="text-muted">Hạn: @(job.ExpiryAt != null ? $"{job.ExpiryAt.Value.Day:D2}/{job.ExpiryAt.Value.Month:D2}/{job.ExpiryAt.Value.Year}" : "-")</small>
-                    </div>
-                    <p class="mb-1 text-dark">@(job.EmployerCompanyName ?? "Nhà tuyển dụng")</p>
-                    <div class="d-flex w-100 justify-content-between align-items-center flex-wrap gap-2">
-                        <small class="text-muted">
-                            Địa điểm: @IndexModel.FormatLocation(job) | Lương: @IndexModel.FormatSalariesSummary(job.Salaries)
-                        </small>
-                        <small class="text-muted">
-                            Cập nhật: @(job.UpdatedAt?.ToLocalTime().ToString("dd/MM/yyyy HH:mm") ?? "-")
-                        </small>
-                    </div>
-                </a>
-            }
+    <form method="get" asp-page="/Public/Jobs" class="row g-2 mb-4" role="search">
+        <div class="col-md-4">
+            <label asp-for="Keyword" class="visually-hidden">Từ khóa tìm việc</label>
+            <input asp-for="Keyword" class="form-control" type="search" placeholder="Tìm việc làm..." />
         </div>
-    }
+        <div class="col-md-3">
+            <label asp-for="Province" class="visually-hidden">Khu vực</label>
+            <select asp-for="Province" class="form-select">
+                <option value="">Tất cả khu vực</option>
+                @foreach (var province in Model.Provinces)
+                {
+                    <option value="@province">@province</option>
+                }
+            </select>
+        </div>
+        <div class="col-md-3">
+            <label asp-for="IndustryId" class="visually-hidden">Ngành nghề</label>
+            <select asp-for="IndustryId" class="form-select">
+                <option value="">Tất cả ngành nghề</option>
+                @foreach (var industry in Model.Industries)
+                {
+                    <option value="@industry.Id">@industry.Name</option>
+                }
+            </select>
+        </div>
+        <div class="col-md-2">
+            <button type="submit" class="btn btn-primary w-100">Tìm việc</button>
+        </div>
+    </form>
+
+    <section class="mb-4" aria-labelledby="popular-industries-title">
+        <h2 id="popular-industries-title" class="h5 mb-3">Các ngành nghề phổ biến</h2>
+        @if (Model.PopularIndustries.Count == 0)
+        {
+            <p class="text-muted">Chưa có ngành nghề đang tuyển.</p>
+        }
+        else
+        {
+            <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-5 g-2">
+                @foreach (var industry in Model.PopularIndustries)
+                {
+                    <div class="col">
+                        <a asp-page="/Public/Jobs" asp-route-IndustryId="@industry.Id"
+                           class="list-group-item list-group-item-action border rounded p-3 h-100">
+                            <span class="d-block fw-semibold">@industry.Name</span>
+                            <small class="text-muted">@industry.JobCount việc đang tuyển</small>
+                        </a>
+                    </div>
+                }
+            </div>
+        }
+    </section>
+
+    <a asp-page="/Public/Jobs" class="btn btn-outline-primary">Xem tất cả việc làm</a>
 </div>

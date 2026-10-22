@@ -14,6 +14,11 @@ public class JobDetailModel(ApiClient apiClient) : PageModel
 {
     public JobResponseDto? Job { get; private set; }
 
+    [BindProperty(SupportsGet = true)]
+    public string? ReturnUrl { get; set; }
+
+    public string BackUrl => Url.IsLocalUrl(ReturnUrl) ? ReturnUrl! : Url.Page("/Public/Jobs")!;
+
     [BindProperty]
     public ReportJobInputModel ReportInput { get; set; } = new();
 
@@ -22,25 +27,25 @@ public class JobDetailModel(ApiClient apiClient) : PageModel
         if (!User.IsLoggedIn)
         {
             TempData.SetWarningMessage("Vui lòng đăng nhập để báo cáo tin tuyển dụng.");
-            return RedirectToPage("/Public/JobDetail", new { id });
+            return RedirectToPage("/Public/JobDetail", new { id, ReturnUrl });
         }
 
         if (!User.IsInRole(Role.Candidate))
         {
             TempData.SetErrorMessage("Chỉ tài khoản ứng viên mới có quyền báo cáo tin tuyển dụng.");
-            return RedirectToPage("/Public/JobDetail", new { id });
+            return RedirectToPage("/Public/JobDetail", new { id, ReturnUrl });
         }
 
         if (string.IsNullOrWhiteSpace(ReportInput.Reason) || ReportInput.Reason.Trim().Length < 3)
         {
             TempData.SetErrorMessage("Vui lòng nhập lý do báo cáo hợp lệ (tối thiểu 3 ký tự).");
-            return RedirectToPage("/Public/JobDetail", new { id });
+            return RedirectToPage("/Public/JobDetail", new { id, ReturnUrl });
         }
 
         if (ReportInput.Reason.Length > 500)
         {
             TempData.SetErrorMessage("Lý do báo cáo không được vượt quá 500 ký tự.");
-            return RedirectToPage("/Public/JobDetail", new { id });
+            return RedirectToPage("/Public/JobDetail", new { id, ReturnUrl });
         }
 
         try
@@ -63,7 +68,7 @@ public class JobDetailModel(ApiClient apiClient) : PageModel
             TempData.SetErrorMessage("Đã xảy ra lỗi khi gửi báo cáo tin tuyển dụng.");
         }
 
-        return RedirectToPage("/Public/JobDetail", new { id });
+        return RedirectToPage("/Public/JobDetail", new { id, ReturnUrl });
     }
 
     public async Task<IActionResult> OnGetAsync(Guid id)
@@ -74,18 +79,18 @@ public class JobDetailModel(ApiClient apiClient) : PageModel
             if (Job == null)
             {
                 TempData.SetErrorMessage("Không tìm thấy thông tin công việc hoặc công việc không còn khả dụng.");
-                return RedirectToPage("/Public/Index");
+                return RedirectToPage("/Public/Jobs");
             }
         }
         catch (ApiException ex)
         {
             TempData.SetErrorMessage(ex.ToFriendlyErrorMessage());
-            return RedirectToPage("/Public/Index");
+            return RedirectToPage("/Public/Jobs");
         }
         catch
         {
             TempData.SetErrorMessage("Đã xảy ra lỗi khi tải thông tin chi tiết công việc.");
-            return RedirectToPage("/Public/Index");
+            return RedirectToPage("/Public/Jobs");
         }
 
         return Page();

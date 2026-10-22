@@ -1,0 +1,145 @@
+@page "/jobs"
+@model JobsModel
+@{
+    ViewData["Title"] = "Danh sách việc làm";
+    var returnUrl = Url.Page("/Public/Jobs", Model.GetPageRouteValues(Model.PageNumber));
+}
+
+<div class="my-4">
+    <a asp-page="/Public/Index" class="text-decoration-none">&larr; Trang chủ</a>
+    <h1 class="h3 mt-3 mb-4">Danh sách việc làm</h1>
+
+    <form method="get" asp-page="/Public/Jobs" class="row g-2 mb-4" role="search">
+        <div class="col-md-4">
+            <label asp-for="Keyword" class="form-label">Từ khóa</label>
+            <input asp-for="Keyword" class="form-control" type="search" placeholder="Tên việc làm, công ty..." />
+        </div>
+        <div class="col-md-3">
+            <label asp-for="Province" class="form-label">Khu vực</label>
+            <select asp-for="Province" class="form-select">
+                <option value="">Tất cả khu vực</option>
+                @foreach (var province in Model.Provinces)
+                {
+                    <option value="@province">@province</option>
+                }
+            </select>
+        </div>
+        <div class="col-md-3">
+            <label asp-for="IndustryId" class="form-label">Ngành nghề</label>
+            <select asp-for="IndustryId" class="form-select">
+                <option value="">Tất cả ngành nghề</option>
+                @foreach (var industry in Model.Industries)
+                {
+                    <option value="@industry.Id">@industry.Name</option>
+                }
+            </select>
+        </div>
+        <div class="col-md-2 d-flex align-items-end">
+            <button type="submit" class="btn btn-primary w-100">Tìm việc</button>
+        </div>
+    </form>
+
+    @if (Model.LoadError != null)
+    {
+        <div class="alert alert-danger" role="alert">
+            <pre class="mb-0" style="white-space: pre-wrap; overflow-wrap: anywhere;">@Model.LoadError</pre>
+        </div>
+    }
+    else
+    {
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+            <p class="mb-0">Tìm thấy <strong>@Model.TotalCount</strong> việc làm</p>
+            @if (Model.HasSearchFilters)
+            {
+                <a asp-page="/Public/Jobs" class="btn btn-outline-secondary btn-sm">Xóa bộ lọc</a>
+            }
+        </div>
+
+        @if (Model.Jobs.Count == 0)
+        {
+            <p class="text-muted border rounded p-4">
+                @(Model.HasSearchFilters ? "Không tìm thấy việc làm phù hợp. Thử thay đổi từ khóa hoặc bộ lọc." : "Chưa có việc làm nào đang tuyển.")
+            </p>
+        }
+        else
+        {
+            <div class="list-group mb-3">
+                @foreach (var job in Model.Jobs)
+                {
+                    <a asp-page="/Public/JobDetail" asp-route-id="@job.Id" asp-route-returnUrl="@returnUrl"
+                       class="list-group-item list-group-item-action py-3">
+                        <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-1">
+                            <h2 class="h5 text-primary mb-0">@job.Title</h2>
+                            <span class="fw-semibold text-success">@JobsModel.FormatSalariesSummary(job.Salaries)</span>
+                        </div>
+                        <p class="mb-2">@(job.EmployerCompanyName ?? "Nhà tuyển dụng")</p>
+                        <div class="d-flex flex-wrap gap-2 gap-md-4 text-muted small">
+                            <span>@JobsModel.FormatLocation(job)</span>
+                            <span>@job.IndustryName</span>
+                            <span>Hạn nộp: @(job.ExpiryAt != null ? $"{job.ExpiryAt.Value.Day:D2}/{job.ExpiryAt.Value.Month:D2}/{job.ExpiryAt.Value.Year}" : "-")</span>
+                        </div>
+                    </a>
+                }
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+                <small class="text-muted">
+                    Hiển thị @((Model.PageNumber - 1) * Model.PageSize + 1)–@((Model.PageNumber - 1) * Model.PageSize + Model.Jobs.Count)
+                    trong @Model.TotalCount việc làm · Trang @Model.PageNumber/@Model.TotalPages
+                </small>
+                @if (Model.TotalPages > 1)
+                {
+                    <nav aria-label="Phân trang việc làm">
+                        <ul class="pagination pagination-sm flex-wrap mb-0">
+                            @if (Model.PageNumber > 1)
+                            {
+                                <li class="page-item">
+                                    <a class="page-link" asp-page="/Public/Jobs" asp-all-route-data="Model.GetPageRouteValues(Model.PageNumber - 1)" aria-label="Trang trước">Trước</a>
+                                </li>
+                            }
+                            @if (Model.FirstPage > 1)
+                            {
+                                <li class="page-item">
+                                    <a class="page-link" asp-page="/Public/Jobs" asp-all-route-data="Model.GetPageRouteValues(1)" aria-label="Trang 1">1</a>
+                                </li>
+                                @if (Model.FirstPage > 2)
+                                {
+                                    <li class="page-item disabled"><span class="page-link">…</span></li>
+                                }
+                            }
+                            @for (var pageNumber = Model.FirstPage; pageNumber <= Model.LastPage; pageNumber++)
+                            {
+                                @if (pageNumber == Model.PageNumber)
+                                {
+                                    <li class="page-item active" aria-current="page"><span class="page-link">@pageNumber</span></li>
+                                }
+                                else
+                                {
+                                    <li class="page-item">
+                                        <a class="page-link" asp-page="/Public/Jobs" asp-all-route-data="Model.GetPageRouteValues(pageNumber)" aria-label="Trang @pageNumber">@pageNumber</a>
+                                    </li>
+                                }
+                            }
+                            @if (Model.LastPage < Model.TotalPages)
+                            {
+                                @if (Model.LastPage < Model.TotalPages - 1)
+                                {
+                                    <li class="page-item disabled"><span class="page-link">…</span></li>
+                                }
+                                <li class="page-item">
+                                    <a class="page-link" asp-page="/Public/Jobs" asp-all-route-data="Model.GetPageRouteValues(Model.TotalPages)" aria-label="Trang @Model.TotalPages">@Model.TotalPages</a>
+                                </li>
+                            }
+                            @if (Model.PageNumber < Model.TotalPages)
+                            {
+                                <li class="page-item">
+                                    <a class="page-link" asp-page="/Public/Jobs" asp-all-route-data="Model.GetPageRouteValues(Model.PageNumber + 1)" aria-label="Trang sau">Sau</a>
+                                </li>
+                            }
+                        </ul>
+                    </nav>
+                }
+            </div>
+        }
+    }
+</div>

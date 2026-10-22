@@ -8,7 +8,7 @@
 <div class="container my-4" style="max-width: 900px;">
     <!-- Nút quay lại -->
     <div class="mb-3">
-        <a asp-page="/Public/Index" class="btn btn-outline-secondary btn-sm">
+        <a href="@Model.BackUrl" class="btn btn-outline-secondary btn-sm">
             &larr; Quay lại danh sách việc làm
         </a>
     </div>
@@ -115,7 +115,7 @@
         <div class="modal fade" id="reportJobModal" tabindex="-1" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content">
-                    <form method="post" asp-page-handler="ReportJob" asp-route-id="@job.Id">
+                    <form method="post" asp-page-handler="ReportJob" asp-route-id="@job.Id" asp-route-returnUrl="@Model.ReturnUrl">
                         <div class="modal-header">
                             <h5 class="modal-title text-danger fw-bold">Báo cáo tin tuyển dụng</h5>
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
