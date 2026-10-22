@@ -2,6 +2,7 @@ using System.Security.Claims;
 using Contracts.External;
 using Domain;
 using Domain.Models.Users;
+using Domain.Shared.Constants;
 using Domain.Shared.Enums;
 using Domain.Shared.Exceptions.HttpErrorExceptions;
 using Domain.Shared.Extensions;
@@ -147,5 +148,6 @@ public static partial class CandidateProfileMapper
     public static partial CandidateProfileResponseDto MapToDto(this CandidateProfile profile);
 
     [MapperIgnoreTarget(nameof(CandidateProfile.AvatarFilePath))]
+    [MapperIgnoreTarget(nameof(CandidateProfile.OpenForJobUntil))]
     public static partial void UpdateEntity(this UpdateCandidateProfileDto request, CandidateProfile profile);
 }

@@ -48,15 +48,16 @@ public class CandidateService(
             .Select(ja => ja.CandidateId)
             .ToListAsync();
 
+        var now = DateTime.UtcNow;
         var candidates = await context.Candidates.AsNoTracking()
-            .Where(c => !appliedCandidateIds.Contains(c.UserId))
+            .Where(c => !appliedCandidateIds.Contains(c.UserId) && c.OpenForJobUntil != null && c.OpenForJobUntil > now)
             .Include(c => c.User)
             .Include(c => c.PreferredWorkCommune)
             .ThenInclude(cm => cm!.Province)
             .Include(c => c.PreferredWorkSchedules)
             .ToListAsync();
 
-        var today = DateOnly.FromDateTime(DateTime.UtcNow);
+        var today = DateOnly.FromDateTime(now);
         var recommendedList = new List<RecommendedCandidateResponseDto>();
         foreach (var candidate in candidates)
         {
@@ -222,7 +223,10 @@ public class CandidateService(
                 $"Gói dịch vụ hiện tại ({sub.Tier}) không hỗ trợ tính năng tìm kiếm ứng viên tự do.");
         }
 
-        return context.Candidates.ProjectToSummaryDto();
+        var now = DateTime.UtcNow;
+        return context.Candidates
+            .Where(c => c.OpenForJobUntil != null && c.OpenForJobUntil > now)
+            .ProjectToSummaryDto();
     }
 
     public async Task<CandidateDetailResponseDto> GetCandidateDetailAsync(ClaimsPrincipal user, Guid candidateId)

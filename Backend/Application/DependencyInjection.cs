@@ -1,6 +1,8 @@
+using Application.Candidate;
 using Application.Employer;
 using Application.Public;
 using Contracts.Application;
+using Contracts.Application.Candidate;
 using Contracts.Application.Employer;
 using Contracts.Application.Public;
 using Microsoft.Extensions.DependencyInjection;
@@ -25,6 +27,7 @@ public static class DependencyInjection
         builder.Services.AddScoped<IIndustryService, IndustryService>();
 
         // Candidate
+        builder.Services.AddScoped<ICandidateProfileService, CandidateProfileService>();
 
         // Employer
         builder.Services.AddScoped<IJobService, JobService>();

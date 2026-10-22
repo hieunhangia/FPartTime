@@ -76,6 +76,8 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
                 .WithMany()
                 .HasForeignKey(e => e.PreferredWorkCommuneCode)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasIndex(e => e.OpenForJobUntil);
         });
 
         builder.Entity<CandidateSchedule>(entity =>

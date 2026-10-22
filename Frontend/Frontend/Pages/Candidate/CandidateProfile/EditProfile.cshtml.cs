@@ -18,6 +18,9 @@ namespace Frontend.Pages.Candidate.CandidateProfile
         [BindProperty]
         public EditProfileFormModel Input { get; set; } = new();
         public string? CurrentAvatarUrl { get; set; }
+        public bool IsOpenForJob { get; set; }
+        public bool CanRefresh { get; set; }
+        public DateTimeOffset? OpenForJobUntil { get; set; }
         public HashSet<string> fileValidate = [".jpg", ".jpeg", ".png"];
         //public List<ProvinceDto> Provinces { get; private set; } = [];
         //public List<CommuneDto> Communes { get; private set; } = [];
@@ -45,7 +48,51 @@ namespace Frontend.Pages.Candidate.CandidateProfile
             {
 
             }
+
+            try
+            {
+                var openForJobStatus = await apiClient.Api.CandidateProfiles.OpenForJobStatus.GetAsync();
+                if (openForJobStatus != null)
+                {
+                    IsOpenForJob = openForJobStatus.IsOpenForJob ?? false;
+                    CanRefresh = openForJobStatus.CanRefresh ?? false;
+                    OpenForJobUntil = openForJobStatus.OpenForJobUntil;
+                }
+            }
+            catch
+            {
+
+            }
+
             return Page();
+        }
+
+        public async Task<IActionResult> OnPostToggleOpenForJobStatusAsync(bool enable)
+        {
+            try
+            {
+                await apiClient.Api.CandidateProfiles.OpenForJobStatus.PutAsync(
+                    new ToggleOpenForJobStatusRequestDto { Enable = enable });
+
+                if (enable)
+                {
+                    TempData.SetSuccessMessage("Đã bật/làm mới trạng thái tìm việc thành công (hiệu lực trong 7 ngày).");
+                }
+                else
+                {
+                    TempData.SetSuccessMessage("Đã tắt trạng thái tìm việc thành công.");
+                }
+            }
+            catch (ApiException ex)
+            {
+                TempData.SetErrorMessage(ex.ToFriendlyErrorMessage());
+            }
+            catch
+            {
+                TempData.SetErrorMessage("Đã xảy ra lỗi khi cập nhật trạng thái tìm việc.");
+            }
+
+            return RedirectToPage("./EditProfile");
         }
         public async Task<IActionResult> OnPostAsync()
         {

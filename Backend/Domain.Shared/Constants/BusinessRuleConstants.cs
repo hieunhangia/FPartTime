@@ -110,6 +110,11 @@ public static class BusinessRuleConstants
             public const int DescriptionMaxLength = 500;
         }
     }
+    
+    public static class Candidates
+    {
+        public const int OpenForJobAvailabilityDays = 7;
+    }
 
     public static class Employers
     {

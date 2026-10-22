@@ -13,6 +13,7 @@ public class CandidateProfile
     public DateOnly? DateOfBirth { get; set; }
     public Gender? Gender { get; set; }
     public string? PreferredWorkCommuneCode { get; set; }
+    public DateTime? OpenForJobUntil { get; set; }
 
     public User? User { get; set; }
     public Commune? PreferredWorkCommune { get; set; }

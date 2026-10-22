@@ -31,6 +31,11 @@ public static class BusinessRuleConstants
             public const int CodeMaxLength = 10;
         }
 
+        public static class Candidate
+        {
+            public const int OpenForJobAvailabilityDays = 7;
+        }
+
         public static class Job
         {
             public const int TitleMaxLength = 200;
