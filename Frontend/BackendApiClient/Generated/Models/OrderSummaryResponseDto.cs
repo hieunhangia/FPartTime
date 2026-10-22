@@ -9,35 +9,43 @@ namespace ApiSdk.Models
 {
     [global::System.CodeDom.Compiler.GeneratedCode("Kiota", "1.0.0")]
     #pragma warning disable CS1591
-    public partial class CreateVNPAYCheckoutResponseDto : IAdditionalDataHolder, IParsable
+    public partial class OrderSummaryResponseDto : IAdditionalDataHolder, IParsable
     #pragma warning restore CS1591
     {
         /// <summary>Stores additional data not described in the OpenAPI description found when deserializing. Can be used for serialization as well.</summary>
         public IDictionary<string, object> AdditionalData { get; set; }
-        /// <summary>The paymentUrl property</summary>
+        /// <summary>The createdAt property</summary>
+        public DateTimeOffset? CreatedAt { get; set; }
+        /// <summary>The description property</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
-        public string? PaymentUrl { get; set; }
+        public string? Description { get; set; }
 #nullable restore
 #else
-        public string PaymentUrl { get; set; }
+        public string Description { get; set; }
 #endif
+        /// <summary>The id property</summary>
+        public Guid? Id { get; set; }
+        /// <summary>The status property</summary>
+        public global::ApiSdk.Models.OrderStatus? Status { get; set; }
+        /// <summary>The totalAmount property</summary>
+        public double? TotalAmount { get; set; }
         /// <summary>
-        /// Instantiates a new <see cref="global::ApiSdk.Models.CreateVNPAYCheckoutResponseDto"/> and sets the default values.
+        /// Instantiates a new <see cref="global::ApiSdk.Models.OrderSummaryResponseDto"/> and sets the default values.
         /// </summary>
-        public CreateVNPAYCheckoutResponseDto()
+        public OrderSummaryResponseDto()
         {
             AdditionalData = new Dictionary<string, object>();
         }
         /// <summary>
         /// Creates a new instance of the appropriate class based on discriminator value
         /// </summary>
-        /// <returns>A <see cref="global::ApiSdk.Models.CreateVNPAYCheckoutResponseDto"/></returns>
+        /// <returns>A <see cref="global::ApiSdk.Models.OrderSummaryResponseDto"/></returns>
         /// <param name="parseNode">The parse node to use to read the discriminator value and create the object</param>
-        public static global::ApiSdk.Models.CreateVNPAYCheckoutResponseDto CreateFromDiscriminatorValue(IParseNode parseNode)
+        public static global::ApiSdk.Models.OrderSummaryResponseDto CreateFromDiscriminatorValue(IParseNode parseNode)
         {
             if(ReferenceEquals(parseNode, null)) throw new ArgumentNullException(nameof(parseNode));
-            return new global::ApiSdk.Models.CreateVNPAYCheckoutResponseDto();
+            return new global::ApiSdk.Models.OrderSummaryResponseDto();
         }
         /// <summary>
         /// The deserialization information for the current model
@@ -47,7 +55,11 @@ namespace ApiSdk.Models
         {
             return new Dictionary<string, Action<IParseNode>>
             {
-                { "paymentUrl", n => { PaymentUrl = n.GetStringValue(); } },
+                { "createdAt", n => { CreatedAt = n.GetDateTimeOffsetValue(); } },
+                { "description", n => { Description = n.GetStringValue(); } },
+                { "id", n => { Id = n.GetGuidValue(); } },
+                { "status", n => { Status = n.GetEnumValue<global::ApiSdk.Models.OrderStatus>(); } },
+                { "totalAmount", n => { TotalAmount = n.GetDoubleValue(); } },
             };
         }
         /// <summary>
@@ -57,7 +69,11 @@ namespace ApiSdk.Models
         public virtual void Serialize(ISerializationWriter writer)
         {
             if(ReferenceEquals(writer, null)) throw new ArgumentNullException(nameof(writer));
-            writer.WriteStringValue("paymentUrl", PaymentUrl);
+            writer.WriteDateTimeOffsetValue("createdAt", CreatedAt);
+            writer.WriteStringValue("description", Description);
+            writer.WriteGuidValue("id", Id);
+            writer.WriteEnumValue<global::ApiSdk.Models.OrderStatus>("status", Status);
+            writer.WriteDoubleValue("totalAmount", TotalAmount);
             writer.WriteAdditionalData(AdditionalData);
         }
     }

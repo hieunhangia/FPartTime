@@ -11,4 +11,5 @@ public class User : IdentityUser<Guid>
     public EmployerProfile? EmployerProfile { get; set; }
     public CensorProfile? CensorProfile { get; set; }
     public ICollection<PaymentTransaction>? PaymentTransactions { get; set; }
+    public ICollection<OrderBase>? Orders { get; set; }
 }

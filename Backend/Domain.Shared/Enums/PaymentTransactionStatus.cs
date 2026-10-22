@@ -5,6 +5,5 @@ public enum PaymentTransactionStatus
     Pending,
     Paid,
     Cancelled,
-    Expired,
-    Failed
+    Expired
 }

@@ -97,6 +97,11 @@ public static class BusinessRuleConstants
             public const int ContentMaxLength = 1000;
         }
 
+        public static class OrderBase
+        {
+            public const int DescriptionMaxLength = 500;
+        }
+
         public static class PaymentTransaction
         {
             public const int PaymentReferenceIdMaxLength = 100;
@@ -110,7 +115,7 @@ public static class BusinessRuleConstants
             public const int DescriptionMaxLength = 500;
         }
     }
-    
+
     public static class Candidates
     {
         public const int OpenForJobAvailabilityDays = 7;
@@ -122,7 +127,7 @@ public static class BusinessRuleConstants
 
         public static class Subscriptions
         {
-            public const int OrderExpiresInMinutes = 15;
+            public const int PaymentExpiresInMinutes = 15;
             public const int MonthlyDurationDays = 30;
             public const int YearlyDurationDays = 365;
 

@@ -33,7 +33,7 @@ public class IpnDispatcher(
                 logger.LogError("Giao dịch {TransactionId} không có đơn hàng liên kết.", transaction.Id);
                 await notificationsService.CreateNotificationAsync(transaction.UserId,
                     "Giao dịch không có đơn hàng liên kết",
-                    $"Giao dịch {transaction.Id} không có đơn hàng liên kết.  Vui lòng liên hệ bộ phận hỗ trợ để được trợ giúp.");
+                    $"Giao dịch {transaction.Id} không có đơn hàng liên kết. Vui lòng liên hệ bộ phận hỗ trợ để được trợ giúp.");
                 break;
             default:
                 logger.LogWarning("Chưa hỗ trợ xử lý loại đơn: {OrderType}", transaction.Order.GetType().Name);

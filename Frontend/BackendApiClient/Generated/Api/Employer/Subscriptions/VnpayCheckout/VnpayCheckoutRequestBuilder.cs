@@ -33,7 +33,7 @@ namespace ApiSdk.Api.Employer.Subscriptions.VnpayCheckout
         public VnpayCheckoutRequestBuilder(string rawUrl, IRequestAdapter requestAdapter) : base(requestAdapter, "{+baseurl}/api/employer/Subscriptions/vnpay-checkout", rawUrl)
         {
         }
-        /// <returns>A <see cref="global::ApiSdk.Models.CreateVNPAYCheckoutResponseDto"/></returns>
+        /// <returns>A <see cref="global::ApiSdk.Models.CreateCheckoutResponseDto"/></returns>
         /// <param name="body">The request body</param>
         /// <param name="cancellationToken">Cancellation token to use when cancelling requests</param>
         /// <param name="requestConfiguration">Configuration for the request such as headers, query parameters, and middleware options.</param>
@@ -44,11 +44,11 @@ namespace ApiSdk.Api.Employer.Subscriptions.VnpayCheckout
         /// <exception cref="global::ApiSdk.Models.ProblemDetails">When receiving a 500 status code</exception>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
-        public async Task<global::ApiSdk.Models.CreateVNPAYCheckoutResponseDto?> PostAsync(global::ApiSdk.Models.CreateVNPAYCheckoutRequestDto body, Action<RequestConfiguration<DefaultQueryParameters>>? requestConfiguration = default, CancellationToken cancellationToken = default)
+        public async Task<global::ApiSdk.Models.CreateCheckoutResponseDto?> PostAsync(global::ApiSdk.Models.CreateVNPAYCheckoutRequestDto body, Action<RequestConfiguration<DefaultQueryParameters>>? requestConfiguration = default, CancellationToken cancellationToken = default)
         {
 #nullable restore
 #else
-        public async Task<global::ApiSdk.Models.CreateVNPAYCheckoutResponseDto> PostAsync(global::ApiSdk.Models.CreateVNPAYCheckoutRequestDto body, Action<RequestConfiguration<DefaultQueryParameters>> requestConfiguration = default, CancellationToken cancellationToken = default)
+        public async Task<global::ApiSdk.Models.CreateCheckoutResponseDto> PostAsync(global::ApiSdk.Models.CreateVNPAYCheckoutRequestDto body, Action<RequestConfiguration<DefaultQueryParameters>> requestConfiguration = default, CancellationToken cancellationToken = default)
         {
 #endif
             if(ReferenceEquals(body, null)) throw new ArgumentNullException(nameof(body));
@@ -61,7 +61,7 @@ namespace ApiSdk.Api.Employer.Subscriptions.VnpayCheckout
                 { "409", global::ApiSdk.Models.ProblemDetails.CreateFromDiscriminatorValue },
                 { "500", global::ApiSdk.Models.ProblemDetails.CreateFromDiscriminatorValue },
             };
-            return await RequestAdapter.SendAsync<global::ApiSdk.Models.CreateVNPAYCheckoutResponseDto>(requestInfo, global::ApiSdk.Models.CreateVNPAYCheckoutResponseDto.CreateFromDiscriminatorValue, errorMapping, cancellationToken).ConfigureAwait(false);
+            return await RequestAdapter.SendAsync<global::ApiSdk.Models.CreateCheckoutResponseDto>(requestInfo, global::ApiSdk.Models.CreateCheckoutResponseDto.CreateFromDiscriminatorValue, errorMapping, cancellationToken).ConfigureAwait(false);
         }
         /// <returns>A <see cref="RequestInformation"/></returns>
         /// <param name="body">The request body</param>

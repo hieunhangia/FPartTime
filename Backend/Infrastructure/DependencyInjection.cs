@@ -1,6 +1,8 @@
 using Amazon.S3;
 using Contracts.External;
+using Contracts.External.Payments;
 using Infrastructure.BackgroundServices;
+using Infrastructure.Payments;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
@@ -15,8 +17,10 @@ public static class DependencyInjection
         builder.Services.AddHostedService<ExpiredSubscriptionCleanupService>();
         builder.Services.AddHostedService<ExpiredPaymentTransactionCleanupService>();
 
-        // PayOS Service
-        builder.Services.AddScoped<IPayOSPaymentService, PayOSPaymentService>();
+        // Payment Services
+        builder.Services.AddScoped<IPaymentServiceFactory, PaymentServiceFactory>();
+        // PayOS
+        builder.Services.AddScoped<IPaymentService, PayOSPaymentService>();
         builder.Services.AddHttpClient(PayOSHealthCheck.HealthCheckHttpClientName, client =>
         {
             client.BaseAddress = new Uri(builder.Configuration["PayOS:HealthCheckUrl"] ??
@@ -25,8 +29,8 @@ public static class DependencyInjection
         });
         builder.Services.AddHealthChecks().AddCheck<PayOSHealthCheck>(name: "PayOS Service", tags: ["payment"]);
 
-        // VNPAY Service
-        builder.Services.AddScoped<IVNPAYPaymentService, VNPAYPaymentService>();
+        // VNPAY
+        builder.Services.AddScoped<IPaymentService, VNPAYPaymentService>();
         builder.Services.AddHealthChecks().AddCheck<VNPAYHealthCheck>(name: "VNPAY Service", tags: ["payment"]);
 
         // Sms Sender Service

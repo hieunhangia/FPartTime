@@ -5,7 +5,6 @@ namespace Domain.Models.Orders;
 
 public class EmployerSubscriptionOrder : OrderBase
 {
-    public Guid EmployerId { get; set; }
     public required EmployerSubscriptionTier Tier { get; set; }
     public required EmployerSubscriptionDuration Duration { get; set; }
     public required string PlanName { get; set; }

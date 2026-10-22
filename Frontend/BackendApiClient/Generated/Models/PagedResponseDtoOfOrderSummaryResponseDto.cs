@@ -9,43 +9,37 @@ namespace ApiSdk.Models
 {
     [global::System.CodeDom.Compiler.GeneratedCode("Kiota", "1.0.0")]
     #pragma warning disable CS1591
-    public partial class VNPAYIpnResponseDto : IAdditionalDataHolder, IParsable
+    public partial class PagedResponseDtoOfOrderSummaryResponseDto : IAdditionalDataHolder, IParsable
     #pragma warning restore CS1591
     {
         /// <summary>Stores additional data not described in the OpenAPI description found when deserializing. Can be used for serialization as well.</summary>
         public IDictionary<string, object> AdditionalData { get; set; }
-        /// <summary>The message property</summary>
+        /// <summary>The items property</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
-        public string? Message { get; set; }
+        public List<global::ApiSdk.Models.OrderSummaryResponseDto>? Items { get; set; }
 #nullable restore
 #else
-        public string Message { get; set; }
+        public List<global::ApiSdk.Models.OrderSummaryResponseDto> Items { get; set; }
 #endif
-        /// <summary>The rspCode property</summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-        public string? RspCode { get; set; }
-#nullable restore
-#else
-        public string RspCode { get; set; }
-#endif
+        /// <summary>The totalCount property</summary>
+        public long? TotalCount { get; set; }
         /// <summary>
-        /// Instantiates a new <see cref="global::ApiSdk.Models.VNPAYIpnResponseDto"/> and sets the default values.
+        /// Instantiates a new <see cref="global::ApiSdk.Models.PagedResponseDtoOfOrderSummaryResponseDto"/> and sets the default values.
         /// </summary>
-        public VNPAYIpnResponseDto()
+        public PagedResponseDtoOfOrderSummaryResponseDto()
         {
             AdditionalData = new Dictionary<string, object>();
         }
         /// <summary>
         /// Creates a new instance of the appropriate class based on discriminator value
         /// </summary>
-        /// <returns>A <see cref="global::ApiSdk.Models.VNPAYIpnResponseDto"/></returns>
+        /// <returns>A <see cref="global::ApiSdk.Models.PagedResponseDtoOfOrderSummaryResponseDto"/></returns>
         /// <param name="parseNode">The parse node to use to read the discriminator value and create the object</param>
-        public static global::ApiSdk.Models.VNPAYIpnResponseDto CreateFromDiscriminatorValue(IParseNode parseNode)
+        public static global::ApiSdk.Models.PagedResponseDtoOfOrderSummaryResponseDto CreateFromDiscriminatorValue(IParseNode parseNode)
         {
             if(ReferenceEquals(parseNode, null)) throw new ArgumentNullException(nameof(parseNode));
-            return new global::ApiSdk.Models.VNPAYIpnResponseDto();
+            return new global::ApiSdk.Models.PagedResponseDtoOfOrderSummaryResponseDto();
         }
         /// <summary>
         /// The deserialization information for the current model
@@ -55,8 +49,8 @@ namespace ApiSdk.Models
         {
             return new Dictionary<string, Action<IParseNode>>
             {
-                { "message", n => { Message = n.GetStringValue(); } },
-                { "rspCode", n => { RspCode = n.GetStringValue(); } },
+                { "items", n => { Items = n.GetCollectionOfObjectValues<global::ApiSdk.Models.OrderSummaryResponseDto>(global::ApiSdk.Models.OrderSummaryResponseDto.CreateFromDiscriminatorValue)?.AsList(); } },
+                { "totalCount", n => { TotalCount = n.GetLongValue(); } },
             };
         }
         /// <summary>
@@ -66,8 +60,8 @@ namespace ApiSdk.Models
         public virtual void Serialize(ISerializationWriter writer)
         {
             if(ReferenceEquals(writer, null)) throw new ArgumentNullException(nameof(writer));
-            writer.WriteStringValue("message", Message);
-            writer.WriteStringValue("rspCode", RspCode);
+            writer.WriteCollectionOfObjectValues<global::ApiSdk.Models.OrderSummaryResponseDto>("items", Items);
+            writer.WriteLongValue("totalCount", TotalCount);
             writer.WriteAdditionalData(AdditionalData);
         }
     }

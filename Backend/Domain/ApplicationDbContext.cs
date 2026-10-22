@@ -280,14 +280,23 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
                 .WithMany(u => u.PaymentTransactions)
                 .HasForeignKey(e => e.UserId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(e => e.Order)
+                .WithMany(o => o.PaymentTransactions)
+                .HasForeignKey(e => e.OrderId)
+                .OnDelete(DeleteBehavior.Cascade);
         });
 
         builder.Entity<OrderBase>(entity =>
         {
-            entity.HasOne(e => e.PaymentTransaction)
-                .WithOne(o => o.Order)
-                .HasForeignKey<OrderBase>(o => o.PaymentTransactionId)
-                .OnDelete(DeleteBehavior.Cascade);
+            entity.Property(e => e.TotalAmount).HasPrecision(18, 2);
+            entity.Property(e => e.Description)
+                .HasMaxLength(BusinessRuleConstants.Models.OrderBase.DescriptionMaxLength);
+
+            entity.HasOne(e => e.User)
+                .WithMany(u => u.Orders)
+                .HasForeignKey(e => e.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
         });
 
         builder.Entity<EmployerSubscriptionOrder>(entity =>
@@ -297,7 +306,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 
             entity.HasOne(e => e.Employer)
                 .WithMany(em => em.SubscriptionOrders)
-                .HasForeignKey(e => e.EmployerId)
+                .HasForeignKey(e => e.UserId)
                 .OnDelete(DeleteBehavior.Restrict);
         });
 
