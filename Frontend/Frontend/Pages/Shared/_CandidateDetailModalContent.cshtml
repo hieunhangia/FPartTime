@@ -1,0 +1,133 @@
+@model Frontend.ViewModels.CandidateDetailModalViewModel
+
+<div class="modal-header">
+    <h5 class="modal-title fw-bold" id="candidateDetailModalLabel">
+        Hồ sơ ứng viên: @(Model.FullName ?? "Ứng viên")
+    </h5>
+    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+</div>
+<div class="modal-body">
+    <div class="d-flex align-items-center gap-3 mb-4 pb-3 border-bottom">
+        <div>
+            @if (!string.IsNullOrWhiteSpace(Model.AvatarUrl))
+            {
+                <img src="@Model.AvatarUrl"
+                     alt="@Model.FullName"
+                     class="rounded-circle border"
+                     style="width: 80px; height: 80px; object-fit: cover;"/>
+            }
+            else
+            {
+                <div class="rounded-circle bg-primary bg-opacity-10 text-primary d-flex align-items-center justify-content-center fw-bold fs-2 border border-primary border-opacity-25"
+                     style="width: 80px; height: 80px;">
+                    @(string.IsNullOrWhiteSpace(Model.FullName) ? "?" : Model.FullName.Trim().Substring(0, 1).ToUpper())
+                </div>
+            }
+        </div>
+        <div>
+            <h4 class="mb-1 fw-bold">@(Model.FullName ?? "-")</h4>
+            @if (Model.MatchScore.HasValue)
+            {
+                <span class="badge @Model.ScoreBadgeClass fs-6">
+                    Điểm phù hợp: @Model.MatchScore/100
+                </span>
+            }
+        </div>
+    </div>
+
+    <dl class="row mb-3">
+        <dt class="col-sm-4 text-muted">Số điện thoại</dt>
+        <dd class="col-sm-8 fw-semibold">
+            @if (!string.IsNullOrWhiteSpace(Model.PhoneNumber))
+            {
+                <a href="tel:@Model.PhoneNumber" class="text-decoration-none">
+                    @Model.PhoneNumber
+                </a>
+            }
+            else
+            {
+                <span class="text-muted">-</span>
+            }
+        </dd>
+
+        <dt class="col-sm-4 text-muted">Giới tính</dt>
+        <dd class="col-sm-8">@Model.GenderDisplay</dd>
+
+        <dt class="col-sm-4 text-muted">Ngày sinh / Độ tuổi</dt>
+        <dd class="col-sm-8">
+            @Model.DateOfBirthDisplay
+            @(Model.Age.HasValue ? $" ({Model.Age} tuổi)" : "")
+        </dd>
+
+        <dt class="col-sm-4 text-muted">Khu vực làm việc mong muốn</dt>
+        <dd class="col-sm-8">@(string.IsNullOrWhiteSpace(Model.Location) ? "Không có yêu cầu cụ thể" : Model.Location)</dd>
+
+        <dt class="col-sm-4 text-muted">Giới thiệu bản thân</dt>
+        <dd class="col-sm-8">
+            @if (!string.IsNullOrWhiteSpace(Model.Bio))
+            {
+                <div class="p-3 bg-light rounded border text-secondary" style="white-space: pre-line;">
+                    @Model.Bio
+                </div>
+            }
+            else
+            {
+                <span class="text-muted fst-italic">Ứng viên chưa cập nhật lời giới thiệu.</span>
+            }
+        </dd>
+    </dl>
+
+    @if (Model.MatchReasons.Count > 0)
+    {
+        <div class="mb-3">
+            <h6 class="fw-bold border-bottom pb-2">Các tiêu chí phù hợp với công việc</h6>
+            <ul class="list-group list-group-flush">
+                @foreach (var reason in Model.MatchReasons)
+                {
+                    <li class="list-group-item px-0 py-1 border-0">
+                        <i class="bi bi-check-circle-fill text-success me-2"></i>@reason
+                    </li>
+                }
+            </ul>
+        </div>
+    }
+
+    <div>
+        <h6 class="fw-bold border-bottom pb-2">Lịch làm việc mong muốn của ứng viên</h6>
+        @if (Model.PreferredWorkSchedules.Count > 0)
+        {
+            <div class="table-responsive">
+                <table class="table table-sm table-bordered mb-0 align-middle">
+                    <thead class="table-light">
+                    <tr>
+                        <th>Thứ trong tuần</th>
+                        <th>Ca làm việc</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    @foreach (var sched in Model.PreferredWorkSchedules)
+                    {
+                        <tr>
+                            <td class="fw-semibold">@ViewModels.CandidateDetailModalViewModel.GetDayOfWeekDisplay(sched.DayOfWeek)</td>
+                            <td>@ViewModels.CandidateDetailModalViewModel.GetShiftDisplay(sched.Shift)</td>
+                        </tr>
+                    }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <p class="text-muted small mb-0">Ứng viên chưa cập nhật lịch rảnh mong muốn.</p>
+        }
+    </div>
+</div>
+<div class="modal-footer">
+    @if (!string.IsNullOrWhiteSpace(Model.PhoneNumber))
+    {
+        <a href="tel:@Model.PhoneNumber" class="btn btn-outline-success">
+            <i class="bi bi-telephone me-1"></i> Gọi @Model.PhoneNumber
+        </a>
+    }
+    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+</div>

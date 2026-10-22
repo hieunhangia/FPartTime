@@ -1,0 +1,327 @@
+@page "{jobId:guid}"
+@model Frontend.Pages.Employer.Job.RecommendedCandidatesModel
+@{
+    ViewData["Title"] = "Gợi ý ứng viên phù hợp";
+}
+
+<div class="container my-4">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="mb-1">Gợi ý ứng viên phù hợp</h2>
+            @if (Model.Job != null)
+            {
+                <span class="text-muted">
+                    Công việc: <strong class="text-dark">@Model.Job.Title</strong>
+                </span>
+            }
+        </div>
+        <div class="d-flex gap-2">
+            @if (Model.JobId != Guid.Empty)
+            {
+                <a asp-page="./Detail" asp-route-id="@Model.JobId" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-left"></i> Quay lại chi tiết công việc
+                </a>
+            }
+            <a asp-page="./Index" class="btn btn-outline-secondary">Danh sách công việc</a>
+        </div>
+    </div>
+
+    <!-- Tóm tắt tiêu chí công việc đối chiếu -->
+    @if (Model.Job != null)
+    {
+        <div class="card mb-4 shadow-sm">
+            <div class="card-header bg-white py-2">
+                <span class="fw-bold small text-muted text-uppercase">Tiêu chí công việc để đối chiếu gợi ý</span>
+            </div>
+            <div class="card-body py-3">
+                <div class="row g-3 small">
+                    <div class="col-md-3">
+                        <span class="text-muted d-block">Khu vực làm việc:</span>
+                        <strong>
+                            @{
+                                var location = string.Join(", ", new[] { Model.Job.CommuneName, Model.Job.ProvinceName }.Where(s => !string.IsNullOrWhiteSpace(s)));
+                            }
+                            @(string.IsNullOrWhiteSpace(location) ? "Không xác định" : location)
+                        </strong>
+                    </div>
+                    <div class="col-md-3">
+                        <span class="text-muted d-block">Yêu cầu giới tính:</span>
+                        <strong>@Model.GetGenderDisplay(Model.Job.GenderRequirement)</strong>
+                    </div>
+                    <div class="col-md-3">
+                        <span class="text-muted d-block">Yêu cầu độ tuổi:</span>
+                        <strong>
+                            @if (Model.Job.MinAgeRequirement.HasValue && Model.Job.MaxAgeRequirement.HasValue)
+                            {
+                                <span>Từ @Model.Job.MinAgeRequirement đến @Model.Job.MaxAgeRequirement tuổi</span>
+                            }
+                            else if (Model.Job.MinAgeRequirement.HasValue)
+                            {
+                                <span>Từ @Model.Job.MinAgeRequirement tuổi</span>
+                            }
+                            else if (Model.Job.MaxAgeRequirement.HasValue)
+                            {
+                                <span>Đến @Model.Job.MaxAgeRequirement tuổi</span>
+                            }
+                            else
+                            {
+                                <span>Không yêu cầu</span>
+                            }
+                        </strong>
+                    </div>
+                    <div class="col-md-3">
+                        <span class="text-muted d-block">Lịch làm việc yêu cầu:</span>
+                        @if (Model.Job.JobSchedules is { Count: > 0 })
+                        {
+                            <span class="fw-bold">@Model.Job.JobSchedules.Count ca làm việc</span>
+                        }
+                        else
+                        {
+                            <span class="fw-bold">Linh hoạt</span>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- Xử lý lỗi gói dịch vụ -->
+    @if (Model.HasPermissionError)
+    {
+        <div class="card border-warning mb-4 shadow-sm">
+            <div class="card-body text-center py-5">
+                <div class="text-warning mb-3">
+                    <i class="bi bi-lock" style="font-size: 2.5rem;"></i>
+                </div>
+                <h4 class="fw-bold mb-2">Quyền lợi gói dịch vụ</h4>
+                <p class="text-muted mb-4 mx-auto" style="max-width: 600px;">
+                    @(Model.PermissionErrorMessage ?? "Gói dịch vụ hiện tại của bạn không hỗ trợ tính năng gợi ý ứng viên phù hợp. Vui lòng nâng cấp gói để tiếp cận danh sách ứng viên tiềm năng.")
+                </p>
+                <a asp-page="/Employer/Subscriptions/Index" class="btn btn-warning fw-bold text-dark px-4">
+                    Xem và Nâng cấp gói dịch vụ
+                </a>
+            </div>
+        </div>
+    }
+    else if (Model.IsJobInactive)
+    {
+        <div class="alert alert-warning border text-center py-4 mb-4 shadow-sm" role="alert">
+            <h5 class="alert-heading fw-bold mb-2">Công việc không ở trạng thái hoạt động</h5>
+            <p class="mb-0">@(Model.InactiveJobMessage ?? "Chỉ có thể tìm ứng viên phù hợp cho công việc đang ở trạng thái hoạt động.")</p>
+        </div>
+    }
+    else if (Model.Candidates.Count == 0)
+    {
+        <div class="alert alert-light border text-center py-5 mb-4 shadow-sm" role="alert">
+            <div class="text-muted mb-2">
+                <i class="bi bi-people" style="font-size: 2.5rem;"></i>
+            </div>
+            <h5 class="fw-bold mb-2">Chưa tìm thấy ứng viên phù hợp</h5>
+            <p class="text-muted mb-0 mx-auto" style="max-width: 550px;">
+                Hiện tại chưa có ứng viên nào đạt điểm phù hợp tối thiểu (≥ 30 điểm) với các tiêu chí của công việc này. Các ứng viên đã nộp đơn trước đó sẽ không hiển thị lại ở đây.
+            </p>
+        </div>
+    }
+    else
+    {
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <p class="text-muted mb-0">
+                Tìm thấy <strong>@Model.TotalCount</strong> ứng viên phù hợp
+                (Trang @Model.PageNumber / @Model.TotalPages)
+            </p>
+        </div>
+
+        <div class="d-flex flex-column gap-3 mb-4">
+            @foreach (var candidate in Model.Candidates)
+            {
+                var candidateLocation = string.Join(", ", new[] { candidate.PreferredWorkCommuneName, candidate.PreferredWorkProvinceName }.Where(s => !string.IsNullOrWhiteSpace(s)));
+                var badgeClass = Model.GetScoreBadgeClass(candidate.MatchScore);
+
+                <div class="card shadow-sm border">
+                    <div class="card-body">
+                        <div class="d-flex flex-column flex-md-row justify-content-between align-items-start gap-3">
+                            <!-- Cột thông tin ứng viên -->
+                            <div class="d-flex align-items-start gap-3 flex-grow-1">
+                                <!-- Avatar -->
+                                <div>
+                                    @if (!string.IsNullOrWhiteSpace(candidate.AvatarUrl))
+                                    {
+                                        <img src="@candidate.AvatarUrl"
+                                             alt="@candidate.FullName"
+                                             class="rounded-circle border"
+                                             style="width: 70px; height: 70px; object-fit: cover;"/>
+                                    }
+                                    else
+                                    {
+                                        <div class="rounded-circle bg-primary bg-opacity-10 text-primary d-flex align-items-center justify-content-center fw-bold fs-3 border border-primary border-opacity-25"
+                                             style="width: 70px; height: 70px;">
+                                            @(string.IsNullOrWhiteSpace(candidate.FullName) ? "?" : candidate.FullName.Trim().Substring(0, 1).ToUpper())
+                                        </div>
+                                    }
+                                </div>
+
+                                <!-- Chi tiết -->
+                                <div class="flex-grow-1">
+                                    <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
+                                        <h5 class="mb-0 fw-bold text-dark">@(candidate.FullName ?? "Chưa cập nhật tên")</h5>
+                                        <span class="badge @badgeClass">
+                                            Độ phù hợp: @(candidate.MatchScore ?? 0)/100
+                                        </span>
+                                    </div>
+
+                                    <div class="text-muted small d-flex flex-wrap gap-3 mb-2">
+                                        @if (candidate.Age.HasValue)
+                                        {
+                                            <span>
+                                                <i class="bi bi-person me-1"></i>@candidate.Age tuổi
+                                            </span>
+                                        }
+                                        <span>
+                                            <i class="bi bi-gender-ambiguous me-1"></i>@Model.GetCandidateGenderDisplay(candidate.Gender)
+                                        </span>
+                                        @if (!string.IsNullOrWhiteSpace(candidateLocation))
+                                        {
+                                            <span>
+                                                <i class="bi bi-geo-alt me-1"></i>@candidateLocation
+                                            </span>
+                                        }
+                                    </div>
+
+                                    <!-- Lý do phù hợp -->
+                                    @if (candidate.MatchReasons is { Count: > 0 })
+                                    {
+                                        <div class="mb-2">
+                                            <span class="text-muted small fw-bold d-block mb-1">Tiêu chí phù hợp:</span>
+                                            <div class="d-flex flex-wrap gap-1">
+                                                @foreach (var reason in candidate.MatchReasons)
+                                                {
+                                                    <span class="badge bg-light text-dark border fw-normal py-1 px-2">
+                                                        <i class="bi bi-check-circle-fill text-success me-1"></i>@reason
+                                                    </span>
+                                                }
+                                            </div>
+                                        </div>
+                                    }
+
+                                    <!-- Ca làm việc rảnh -->
+                                    @if (candidate.PreferredWorkSchedules is { Count: > 0 })
+                                    {
+                                        <div class="mb-2">
+                                            <span class="text-muted small fw-bold d-block mb-1">Ca rảnh mong muốn:</span>
+                                            <div class="d-flex flex-wrap gap-1">
+                                                @foreach (var sched in candidate.PreferredWorkSchedules)
+                                                {
+                                                    <span class="badge bg-secondary-subtle text-secondary-emphasis border fw-normal">
+                                                        @Model.GetDayOfWeekDisplay(sched.DayOfWeek) (@Model.GetShiftDisplay(sched.Shift))
+                                                    </span>
+                                                }
+                                            </div>
+                                        </div>
+                                    }
+
+                                    <!-- Bio ngắn -->
+                                    @if (!string.IsNullOrWhiteSpace(candidate.Bio))
+                                    {
+                                        <p class="text-muted small mb-0 mt-2 text-truncate" style="max-width: 650px;">
+                                            <strong class="text-secondary">Giới thiệu:</strong> @candidate.Bio
+                                        </p>
+                                    }
+                                </div>
+                            </div>
+
+                            <!-- Cột thao tác nhanh -->
+                            <div class="d-flex flex-md-column gap-2 align-items-stretch align-self-stretch align-self-md-start text-nowrap mt-2 mt-md-0">
+                                @if (!string.IsNullOrWhiteSpace(candidate.PhoneNumber))
+                                {
+                                    <a href="tel:@candidate.PhoneNumber" class="btn btn-sm btn-outline-success">
+                                        <i class="bi bi-telephone me-1"></i> Gọi @candidate.PhoneNumber
+                                    </a>
+                                }
+                                <button type="button" class="btn btn-sm btn-outline-primary"
+                                        data-bs-toggle="modal" data-bs-target="#candidateModal-@candidate.UserId">
+                                    Xem chi tiết hồ sơ
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Modal Chi Tiết Ứng Viên -->
+                <div class="modal fade" id="candidateModal-@candidate.UserId" tabindex="-1"
+                     aria-labelledby="candidateModalLabel-@candidate.UserId" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered modal-lg">
+                        <div class="modal-content">
+                            <partial name="_CandidateDetailModalContent"
+                                     model="ViewModels.CandidateDetailModalViewModel.FromRecommendedDto(candidate)" />
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <!-- Phân trang -->
+        @if (Model.TotalPages > 1)
+        {
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-center gap-3 mt-4">
+                <nav aria-label="Page navigation">
+                    <ul class="pagination mb-0 flex-wrap justify-content-center">
+                        <li class="page-item @(Model.PageNumber <= 1 ? "disabled" : "")">
+                            <a class="page-link" asp-page="./RecommendedCandidates"
+                               asp-route-jobId="@Model.JobId"
+                               asp-route-PageNumber="1"
+                               title="Về trang đầu tiên">&laquo; Đầu</a>
+                        </li>
+                        <li class="page-item @(Model.PageNumber <= 1 ? "disabled" : "")">
+                            <a class="page-link" asp-page="./RecommendedCandidates"
+                               asp-route-jobId="@Model.JobId"
+                               asp-route-PageNumber="@(Model.PageNumber - 1)"
+                               title="Trang trước">&lsaquo; Trước</a>
+                        </li>
+
+                        @for (var i = 1; i <= Model.TotalPages; i++)
+                        {
+                            if (i == 1 || i == Model.TotalPages || (i >= Model.PageNumber - 2 && i <= Model.PageNumber + 2))
+                            {
+                                <li class="page-item @(i == Model.PageNumber ? "active" : "")">
+
+                                    @{
+                                        var i1 = i;
+                                    }
+                                    <a class="page-link" asp-page="./RecommendedCandidates"
+                                       asp-route-jobId="@Model.JobId"
+                                       asp-route-PageNumber="@i1">@i1</a>
+                                </li>
+                            }
+                            else if (i == Model.PageNumber - 3 || i == Model.PageNumber + 3)
+                            {
+                                <li class="page-item disabled"><span class="page-link">...</span></li>
+                            }
+                        }
+
+                        <li class="page-item @(Model.PageNumber >= Model.TotalPages ? "disabled" : "")">
+                            <a class="page-link" asp-page="./RecommendedCandidates"
+                               asp-route-jobId="@Model.JobId"
+                               asp-route-PageNumber="@(Model.PageNumber + 1)"
+                               title="Trang sau">Sau &rsaquo;</a>
+                        </li>
+                        <li class="page-item @(Model.PageNumber >= Model.TotalPages ? "disabled" : "")">
+                            <a class="page-link" asp-page="./RecommendedCandidates"
+                               asp-route-jobId="@Model.JobId"
+                               asp-route-PageNumber="@Model.TotalPages"
+                               title="Xuống trang cuối cùng">Cuối &raquo;</a>
+                        </li>
+                    </ul>
+                </nav>
+
+                <form method="get" class="d-flex align-items-center gap-2">
+                    <label for="jumpPageNumber" class="text-muted small text-nowrap mb-0">Nhảy đến trang:</label>
+                    <input type="number" id="jumpPageNumber" name="PageNumber"
+                           min="1" max="@Model.TotalPages" value="@Model.PageNumber"
+                           class="form-control form-control-sm text-center" style="width: 70px;"/>
+                    <button type="submit" class="btn btn-sm btn-outline-primary">Đi</button>
+                </form>
+            </div>
+        }
+    }
+</div>

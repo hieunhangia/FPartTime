@@ -18,7 +18,7 @@ public class IndexModel(ApiClient apiClient) : PageModel
 
     [BindProperty(SupportsGet = true)] public JobStatus? StatusFilter { get; set; }
 
-    [BindProperty(SupportsGet = true)] public string? OrderBy { get; set; } = "CreatedAt_Desc";
+    [BindProperty(SupportsGet = true)] public string? OrderBy { get; set; } = "UpdatedAt_Desc";
 
     [BindProperty(SupportsGet = true)] public int PageNumber { get; set; } = 1;
 
@@ -85,8 +85,8 @@ public class IndexModel(ApiClient apiClient) : PageModel
 
                     switch (OrderBy)
                     {
-                        case "CreatedAt_Asc":
-                            q.OrderBy(j => j.CreatedAt);
+                        case "UpdatedAt_Asc":
+                            q.OrderBy(j => j.UpdatedAt);
                             break;
                         case "Title_Asc":
                             q.OrderBy(j => j.Title);
@@ -95,7 +95,7 @@ public class IndexModel(ApiClient apiClient) : PageModel
                             q.OrderByDescending(j => j.Title);
                             break;
                         default:
-                            q.OrderByDescending(j => j.CreatedAt);
+                            q.OrderByDescending(j => j.UpdatedAt);
                             break;
                     }
 
@@ -134,34 +134,4 @@ public class IndexModel(ApiClient apiClient) : PageModel
         JobStatus.AdminHidden => ("Bị ẩn bởi Admin", "bg-warning text-dark"),
         _ => (status?.ToString() ?? "-", "bg-secondary")
     };
-
-    public string FormatMaxSalary(List<JobSalaryResponseDto>? salaries)
-    {
-        if (salaries == null || salaries.Count == 0)
-        {
-            return "Thỏa thuận";
-        }
-
-        var maxSalary = salaries.OrderByDescending(s => s.Amount ?? 0).FirstOrDefault();
-        if (maxSalary?.Amount == null)
-        {
-            return "Thỏa thuận";
-        }
-
-        var amountText = maxSalary.Amount.Value.ToString("N0", new CultureInfo("vi-VN"));
-        var unitText = maxSalary.TimeUnit switch
-        {
-            JobSalaryTimeUnit.Hour => "giờ",
-            JobSalaryTimeUnit.Session => "ca",
-            JobSalaryTimeUnit.Day => "ngày",
-            JobSalaryTimeUnit.Week => "tuần",
-            JobSalaryTimeUnit.Month => "tháng",
-            JobSalaryTimeUnit.Project => "dự án",
-            _ => "tháng"
-        };
-
-        var quantityText = maxSalary.TimeQuantity is > 1 ? $"{maxSalary.TimeQuantity} " : "";
-
-        return $"Đến {amountText} VNĐ/{quantityText}{unitText}";
-    }
 }

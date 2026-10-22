@@ -16,44 +16,10 @@ namespace ApiSdk.Models
         public IDictionary<string, object> AdditionalData { get; set; }
         /// <summary>The applicationCount property</summary>
         public int? ApplicationCount { get; set; }
-        /// <summary>The communeName property</summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-        public string? CommuneName { get; set; }
-#nullable restore
-#else
-        public string CommuneName { get; set; }
-#endif
-        /// <summary>The createdAt property</summary>
-        public DateTimeOffset? CreatedAt { get; set; }
-        /// <summary>The detailAddress property</summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-        public string? DetailAddress { get; set; }
-#nullable restore
-#else
-        public string DetailAddress { get; set; }
-#endif
         /// <summary>The id property</summary>
         public Guid? Id { get; set; }
-        /// <summary>The jobSalaries property</summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-        public List<global::ApiSdk.Models.JobSalaryResponseDto>? JobSalaries { get; set; }
-#nullable restore
-#else
-        public List<global::ApiSdk.Models.JobSalaryResponseDto> JobSalaries { get; set; }
-#endif
         /// <summary>The lastBumpedAt property</summary>
         public DateTimeOffset? LastBumpedAt { get; set; }
-        /// <summary>The provinceName property</summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-        public string? ProvinceName { get; set; }
-#nullable restore
-#else
-        public string ProvinceName { get; set; }
-#endif
         /// <summary>The status property</summary>
         public global::ApiSdk.Models.JobStatus? Status { get; set; }
         /// <summary>The title property</summary>
@@ -92,13 +58,8 @@ namespace ApiSdk.Models
             return new Dictionary<string, Action<IParseNode>>
             {
                 { "applicationCount", n => { ApplicationCount = n.GetIntValue(); } },
-                { "communeName", n => { CommuneName = n.GetStringValue(); } },
-                { "createdAt", n => { CreatedAt = n.GetDateTimeOffsetValue(); } },
-                { "detailAddress", n => { DetailAddress = n.GetStringValue(); } },
                 { "id", n => { Id = n.GetGuidValue(); } },
-                { "jobSalaries", n => { JobSalaries = n.GetCollectionOfObjectValues<global::ApiSdk.Models.JobSalaryResponseDto>(global::ApiSdk.Models.JobSalaryResponseDto.CreateFromDiscriminatorValue)?.AsList(); } },
                 { "lastBumpedAt", n => { LastBumpedAt = n.GetDateTimeOffsetValue(); } },
-                { "provinceName", n => { ProvinceName = n.GetStringValue(); } },
                 { "status", n => { Status = n.GetEnumValue<global::ApiSdk.Models.JobStatus>(); } },
                 { "title", n => { Title = n.GetStringValue(); } },
                 { "updatedAt", n => { UpdatedAt = n.GetDateTimeOffsetValue(); } },
@@ -112,13 +73,8 @@ namespace ApiSdk.Models
         {
             if(ReferenceEquals(writer, null)) throw new ArgumentNullException(nameof(writer));
             writer.WriteIntValue("applicationCount", ApplicationCount);
-            writer.WriteStringValue("communeName", CommuneName);
-            writer.WriteDateTimeOffsetValue("createdAt", CreatedAt);
-            writer.WriteStringValue("detailAddress", DetailAddress);
             writer.WriteGuidValue("id", Id);
-            writer.WriteCollectionOfObjectValues<global::ApiSdk.Models.JobSalaryResponseDto>("jobSalaries", JobSalaries);
             writer.WriteDateTimeOffsetValue("lastBumpedAt", LastBumpedAt);
-            writer.WriteStringValue("provinceName", ProvinceName);
             writer.WriteEnumValue<global::ApiSdk.Models.JobStatus>("status", Status);
             writer.WriteStringValue("title", Title);
             writer.WriteDateTimeOffsetValue("updatedAt", UpdatedAt);

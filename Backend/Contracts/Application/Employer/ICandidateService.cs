@@ -36,13 +36,13 @@ public class CandidateSummaryResponseDto
 {
     public required Guid UserId { get; set; }
     public string? FullName { get; set; }
-    public string? AvatarUrl { get; set; }
     public string? Bio { get; set; }
     public string? PhoneNumber { get; set; }
     public DateOnly? DateOfBirth { get; set; }
     public Gender? Gender { get; set; }
     public string? PreferredWorkCommuneCode { get; set; }
     public string? PreferredWorkCommuneName { get; set; }
+    public string? PreferredWorkProvinceCode { get; set; }
     public string? PreferredWorkProvinceName { get; set; }
 }
 

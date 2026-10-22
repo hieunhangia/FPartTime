@@ -17,6 +17,23 @@
         <div class="d-flex gap-2 align-items-center">
             @if (Model.Job != null)
             {
+                if (Model.Job.Status == ApiSdk.Models.JobStatus.Active)
+                {
+                    <a asp-page="RecommendedCandidates" asp-route-jobId="@Model.Job.Id" class="btn btn-outline-success">
+                        Tìm ứng viên phù hợp
+                    </a>
+                }
+                else
+                {
+                    <span class="d-inline-block" tabindex="0" data-bs-toggle="tooltip" data-bs-placement="bottom"
+                          title="Chỉ có thể tìm ứng viên phù hợp cho công việc đang ở trạng thái hoạt động.">
+                        <button type="button" class="btn btn-outline-secondary opacity-50" disabled
+                                style="pointer-events: none;">
+                            Tìm ứng viên phù hợp
+                        </button>
+                    </span>
+                }
+
                 if (Model.CanUpdateResult?.CanUpdate == true)
                 {
                     <a asp-page="Edit" asp-route-id="@Model.Job.Id" class="btn btn-outline-primary">
@@ -27,7 +44,8 @@
                 {
                     <span class="d-inline-block" tabindex="0" data-bs-toggle="tooltip" data-bs-placement="bottom"
                           title="@(Model.CanUpdateResult?.Reason ?? "Không thể chỉnh sửa công việc này.")">
-                        <button type="button" class="btn btn-outline-secondary opacity-50" disabled style="pointer-events: none;">
+                        <button type="button" class="btn btn-outline-secondary opacity-50" disabled
+                                style="pointer-events: none;">
                             Chỉnh sửa
                         </button>
                     </span>
@@ -110,7 +128,16 @@
                 <div class="card mb-4 shadow-sm">
                     <div class="card-header bg-white d-flex justify-content-between align-items-center">
                         <h5 class="card-title mb-0">Danh sách ứng viên ứng tuyển</h5>
-                        <span class="badge bg-primary">@(Model.Job.JobApplications?.Count ?? 0) ứng viên</span>
+                        <div class="d-flex align-items-center gap-2">
+                            @if (Model.Job.Status == ApiSdk.Models.JobStatus.Active)
+                            {
+                                <a asp-page="RecommendedCandidates" asp-route-jobId="@Model.Job.Id"
+                                   class="btn btn-sm btn-outline-success">
+                                    Tìm ứng viên phù hợp
+                                </a>
+                            }
+                            <span class="badge bg-primary">@(Model.Job.JobApplications?.Count ?? 0) ứng viên</span>
+                        </div>
                     </div>
                     <div class="card-body">
                         @if (Model.Job.JobApplications is { Count: > 0 })
@@ -136,7 +163,8 @@
                                             <td>@(app.AppliedAt?.ToLocalTime().ToString("dd/MM/yyyy HH:mm") ?? "-")</td>
                                             <td><span class="badge @appStatusCss">@appStatusLabel</span></td>
                                             <td class="text-end">
-                                                <a asp-page="ApplicationDetail" asp-route-id="@app.Id" asp-route-jobId="@Model.Job.Id"
+                                                <a asp-page="ApplicationDetail" asp-route-id="@app.Id"
+                                                   asp-route-jobId="@Model.Job.Id"
                                                    class="btn btn-sm btn-outline-primary">
                                                     Chi tiết
                                                 </a>
@@ -228,7 +256,8 @@
                                 @foreach (var salary in Model.Job.JobSalaries)
                                 {
                                     <li class="list-group-item d-flex align-items-center px-0">
-                                        <span class="fw-bold text-success">@Model.FormatSalary(salary.Amount, salary.TimeQuantity, salary.TimeUnit)</span>
+                                        <span
+                                            class="fw-bold text-success">@Model.FormatSalary(salary.Amount, salary.TimeQuantity, salary.TimeUnit)</span>
                                     </li>
                                 }
                             </ul>

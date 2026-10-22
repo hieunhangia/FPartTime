@@ -15,14 +15,6 @@ namespace ApiSdk.Models
     {
         /// <summary>Stores additional data not described in the OpenAPI description found when deserializing. Can be used for serialization as well.</summary>
         public IDictionary<string, object> AdditionalData { get; set; }
-        /// <summary>The avatarUrl property</summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-        public string? AvatarUrl { get; set; }
-#nullable restore
-#else
-        public string AvatarUrl { get; set; }
-#endif
         /// <summary>The bio property</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
@@ -67,6 +59,14 @@ namespace ApiSdk.Models
 #else
         public string PreferredWorkCommuneName { get; set; }
 #endif
+        /// <summary>The preferredWorkProvinceCode property</summary>
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
+#nullable enable
+        public string? PreferredWorkProvinceCode { get; set; }
+#nullable restore
+#else
+        public string PreferredWorkProvinceCode { get; set; }
+#endif
         /// <summary>The preferredWorkProvinceName property</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
@@ -102,7 +102,6 @@ namespace ApiSdk.Models
         {
             return new Dictionary<string, Action<IParseNode>>
             {
-                { "avatarUrl", n => { AvatarUrl = n.GetStringValue(); } },
                 { "bio", n => { Bio = n.GetStringValue(); } },
                 { "dateOfBirth", n => { DateOfBirth = n.GetDateValue(); } },
                 { "fullName", n => { FullName = n.GetStringValue(); } },
@@ -110,6 +109,7 @@ namespace ApiSdk.Models
                 { "phoneNumber", n => { PhoneNumber = n.GetStringValue(); } },
                 { "preferredWorkCommuneCode", n => { PreferredWorkCommuneCode = n.GetStringValue(); } },
                 { "preferredWorkCommuneName", n => { PreferredWorkCommuneName = n.GetStringValue(); } },
+                { "preferredWorkProvinceCode", n => { PreferredWorkProvinceCode = n.GetStringValue(); } },
                 { "preferredWorkProvinceName", n => { PreferredWorkProvinceName = n.GetStringValue(); } },
                 { "userId", n => { UserId = n.GetGuidValue(); } },
             };
@@ -121,7 +121,6 @@ namespace ApiSdk.Models
         public virtual void Serialize(ISerializationWriter writer)
         {
             if(ReferenceEquals(writer, null)) throw new ArgumentNullException(nameof(writer));
-            writer.WriteStringValue("avatarUrl", AvatarUrl);
             writer.WriteStringValue("bio", Bio);
             writer.WriteDateValue("dateOfBirth", DateOfBirth);
             writer.WriteStringValue("fullName", FullName);
@@ -129,6 +128,7 @@ namespace ApiSdk.Models
             writer.WriteStringValue("phoneNumber", PhoneNumber);
             writer.WriteStringValue("preferredWorkCommuneCode", PreferredWorkCommuneCode);
             writer.WriteStringValue("preferredWorkCommuneName", PreferredWorkCommuneName);
+            writer.WriteStringValue("preferredWorkProvinceCode", PreferredWorkProvinceCode);
             writer.WriteStringValue("preferredWorkProvinceName", PreferredWorkProvinceName);
             writer.WriteGuidValue("userId", UserId);
             writer.WriteAdditionalData(AdditionalData);

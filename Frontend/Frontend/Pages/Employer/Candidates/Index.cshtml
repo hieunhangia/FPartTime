@@ -1,0 +1,373 @@
+@page
+@using ApiSdk.Models
+@model Frontend.Pages.Employer.Candidates.IndexModel
+@{
+    ViewData["Title"] = "Tìm kiếm ứng viên";
+}
+
+<div class="container my-4">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="mb-1">Tìm kiếm ứng viên</h2>
+            <span class="text-muted small">
+                Tìm kiếm và kết nối với các ứng viên phù hợp theo tiêu chí giới tính, độ tuổi và khu vực làm việc.
+            </span>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+            <a asp-page="/Employer/Job/Index" class="btn btn-outline-secondary">
+                <i class="bi bi-briefcase me-1"></i> Quản lý công việc
+            </a>
+        </div>
+    </div>
+
+    @if (Model.HasPermissionError)
+    {
+        <div class="card border-warning mb-4 shadow-sm">
+            <div class="card-body text-center py-5">
+                <div class="text-warning mb-3">
+                    <i class="bi bi-lock" style="font-size: 2.5rem;"></i>
+                </div>
+                <h4 class="fw-bold mb-2">Quyền lợi gói dịch vụ</h4>
+                <p class="text-muted mb-4 mx-auto" style="max-width: 600px;">
+                    @(Model.PermissionErrorMessage ?? "Gói dịch vụ hiện tại của bạn không hỗ trợ tính năng tìm kiếm ứng viên tự do. Vui lòng đăng ký hoặc nâng cấp gói dịch vụ để tiếp cận danh sách ứng viên tiềm năng.")
+                </p>
+                <a asp-page="/Employer/Subscriptions/Index" class="btn btn-warning text-dark fw-bold">
+                    <i class="bi bi-arrow-up-circle me-1"></i> Xem các gói dịch vụ
+                </a>
+            </div>
+        </div>
+    }
+    else
+    {
+        <!-- Form Bộ Lọc Tìm Kiếm -->
+        <div class="card mb-4 shadow-sm">
+            <div class="card-body">
+                <form method="get" class="row g-3">
+                    <div class="col-md-2">
+                        <label asp-for="GenderFilter" class="form-label fw-bold">Giới tính:</label>
+                        <select asp-for="GenderFilter" class="form-select">
+                            <option value="">-- Tất cả --</option>
+                            <option value="@Gender.Male">Nam</option>
+                            <option value="@Gender.Female">Nữ</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-2">
+                        <label asp-for="MinAge" class="form-label fw-bold">Tuổi từ:</label>
+                        <input asp-for="MinAge" class="form-control" type="number" min="15" max="100" placeholder="VD: 18"/>
+                    </div>
+
+                    <div class="col-md-2">
+                        <label asp-for="MaxAge" class="form-label fw-bold">Tuổi đến:</label>
+                        <input asp-for="MaxAge" class="form-control" type="number" min="15" max="100" placeholder="VD: 30"/>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label asp-for="ProvinceCode" class="form-label fw-bold">Tỉnh / Thành phố:</label>
+                        <select asp-for="ProvinceCode" id="provinceSelect" class="form-select">
+                            <option value="">-- Tất cả Tỉnh/TP --</option>
+                            @foreach (var p in Model.Provinces)
+                            {
+                                <option value="@p.Code" selected="@(p.Code == Model.ProvinceCode)">@p.Name</option>
+                            }
+                        </select>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label asp-for="CommuneCode" class="form-label fw-bold">Xã / Phường:</label>
+                        <select asp-for="CommuneCode" id="communeSelect" class="form-select"
+                                disabled="@(string.IsNullOrWhiteSpace(Model.ProvinceCode))">
+                            <option value="">-- Tất cả Xã/Phường --</option>
+                            @foreach (var c in Model.Communes)
+                            {
+                                <option value="@c.Code" selected="@(c.Code == Model.CommuneCode)">@c.Name</option>
+                            }
+                        </select>
+                    </div>
+
+                    <div class="col-12 d-flex justify-content-end gap-2 pt-2 border-top">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-search me-1"></i> Tìm kiếm
+                        </button>
+                        <a asp-page="./Index" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-counterclockwise me-1"></i> Xóa lọc
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Thống kê kết quả -->
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <p class="text-muted mb-0">
+                Tìm thấy <strong>@Model.TotalCount</strong> ứng viên
+                @if (Model.TotalPages > 0)
+                {
+                    <span>(Trang @Model.PageNumber / @Model.TotalPages)</span>
+                }
+            </p>
+        </div>
+
+        @if (Model.Candidates.Count == 0)
+        {
+            <div class="alert alert-light border text-center py-5 shadow-sm" role="alert">
+                <div class="text-muted mb-2">
+                    <i class="bi bi-people" style="font-size: 2.5rem;"></i>
+                </div>
+                <h5 class="fw-bold mb-2">Không tìm thấy ứng viên phù hợp</h5>
+                <p class="text-muted mb-0 mx-auto" style="max-width: 500px;">
+                    Không có ứng viên nào khớp với các tiêu chí tìm kiếm hiện tại. Vui lòng thử nới lỏng bộ lọc hoặc xóa lọc để xem toàn bộ danh sách.
+                </p>
+            </div>
+        }
+        else
+        {
+            <div class="d-flex flex-column gap-3 mb-4">
+                @foreach (var candidate in Model.Candidates)
+                {
+                    var age = Model.CalculateAge(candidate.DateOfBirth);
+                    var location = string.Join(", ", new[] { candidate.PreferredWorkCommuneName, candidate.PreferredWorkProvinceName }.Where(s => !string.IsNullOrWhiteSpace(s)));
+
+                    <div class="card shadow-sm border">
+                        <div class="card-body">
+                            <div class="d-flex flex-column flex-md-row justify-content-between align-items-start gap-3">
+                                <!-- Cột thông tin ứng viên -->
+                                <div class="d-flex align-items-start gap-3 flex-grow-1">
+                                    <!-- Avatar Chữ Cái Viết Hoa -->
+                                    <div>
+                                        <div class="rounded-circle bg-primary bg-opacity-10 text-primary d-flex align-items-center justify-content-center fw-bold fs-3 border border-primary border-opacity-25"
+                                             style="width: 70px; height: 70px;">
+                                            @(string.IsNullOrWhiteSpace(candidate.FullName) ? "?" : candidate.FullName.Trim().Substring(0, 1).ToUpper())
+                                        </div>
+                                    </div>
+
+                                    <!-- Chi tiết tóm tắt -->
+                                    <div class="flex-grow-1">
+                                        <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
+                                            <h5 class="mb-0 fw-bold text-dark">@(candidate.FullName ?? "Chưa cập nhật tên")</h5>
+                                        </div>
+
+                                        <div class="text-muted small d-flex flex-wrap gap-3 mb-2">
+                                            @if (age.HasValue)
+                                            {
+                                                <span>
+                                                    <i class="bi bi-person me-1"></i>@age tuổi
+                                                </span>
+                                            }
+                                            <span>
+                                                <i class="bi bi-gender-ambiguous me-1"></i>@Model.GetCandidateGenderDisplay(candidate.Gender)
+                                            </span>
+                                            @if (!string.IsNullOrWhiteSpace(location))
+                                            {
+                                                <span>
+                                                    <i class="bi bi-geo-alt me-1"></i>@location
+                                                </span>
+                                            }
+                                        </div>
+
+                                        <!-- Giới thiệu ngắn -->
+                                        @if (!string.IsNullOrWhiteSpace(candidate.Bio))
+                                        {
+                                            <p class="text-muted small mb-0 mt-1 text-truncate" style="max-width: 650px;">
+                                                <strong class="text-secondary">Giới thiệu:</strong> @candidate.Bio
+                                            </p>
+                                        }
+                                    </div>
+                                </div>
+
+                                <!-- Cột thao tác nhanh -->
+                                <div class="d-flex flex-md-column gap-2 align-items-stretch align-self-stretch align-self-md-start text-nowrap mt-2 mt-md-0">
+                                    @if (!string.IsNullOrWhiteSpace(candidate.PhoneNumber))
+                                    {
+                                        <a href="tel:@candidate.PhoneNumber" class="btn btn-sm btn-outline-success">
+                                            <i class="bi bi-telephone me-1"></i> Gọi @candidate.PhoneNumber
+                                        </a>
+                                    }
+                                    <button type="button" class="btn btn-sm btn-outline-primary"
+                                            onclick="openCandidateModal('@candidate.UserId')">
+                                        Xem chi tiết hồ sơ
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+
+            <!-- Phân trang -->
+            @if (Model.TotalPages > 1)
+            {
+                <div class="d-flex flex-column flex-md-row justify-content-between align-items-center gap-3 mt-4">
+                    <nav aria-label="Page navigation">
+                        <ul class="pagination mb-0 flex-wrap justify-content-center">
+                            <li class="page-item @(Model.PageNumber <= 1 ? "disabled" : "")">
+                                <a class="page-link" asp-page="./Index"
+                                   asp-route-GenderFilter="@Model.GenderFilter"
+                                   asp-route-MinAge="@Model.MinAge"
+                                   asp-route-MaxAge="@Model.MaxAge"
+                                   asp-route-ProvinceCode="@Model.ProvinceCode"
+                                   asp-route-CommuneCode="@Model.CommuneCode"
+                                   asp-route-PageNumber="1"
+                                   title="Về trang đầu tiên">&laquo; Đầu</a>
+                            </li>
+                            <li class="page-item @(Model.PageNumber <= 1 ? "disabled" : "")">
+                                <a class="page-link" asp-page="./Index"
+                                   asp-route-GenderFilter="@Model.GenderFilter"
+                                   asp-route-MinAge="@Model.MinAge"
+                                   asp-route-MaxAge="@Model.MaxAge"
+                                   asp-route-ProvinceCode="@Model.ProvinceCode"
+                                   asp-route-CommuneCode="@Model.CommuneCode"
+                                   asp-route-PageNumber="@(Model.PageNumber - 1)"
+                                   title="Trang trước">&lsaquo; Trước</a>
+                            </li>
+
+                            @for (var i = 1; i <= Model.TotalPages; i++)
+                            {
+                                if (i == 1 || i == Model.TotalPages || (i >= Model.PageNumber - 2 && i <= Model.PageNumber + 2))
+                                {
+                                    <li class="page-item @(i == Model.PageNumber ? "active" : "")">
+                                        @{
+                                            var i1 = i;
+                                        }
+                                        <a class="page-link" asp-page="./Index"
+                                           asp-route-GenderFilter="@Model.GenderFilter"
+                                           asp-route-MinAge="@Model.MinAge"
+                                           asp-route-MaxAge="@Model.MaxAge"
+                                           asp-route-ProvinceCode="@Model.ProvinceCode"
+                                           asp-route-CommuneCode="@Model.CommuneCode"
+                                           asp-route-PageNumber="@i1">@i1</a>
+                                    </li>
+                                }
+                                else if (i == Model.PageNumber - 3 || i == Model.PageNumber + 3)
+                                {
+                                    <li class="page-item disabled"><span class="page-link">...</span></li>
+                                }
+                            }
+
+                            <li class="page-item @(Model.PageNumber >= Model.TotalPages ? "disabled" : "")">
+                                <a class="page-link" asp-page="./Index"
+                                   asp-route-GenderFilter="@Model.GenderFilter"
+                                   asp-route-MinAge="@Model.MinAge"
+                                   asp-route-MaxAge="@Model.MaxAge"
+                                   asp-route-ProvinceCode="@Model.ProvinceCode"
+                                   asp-route-CommuneCode="@Model.CommuneCode"
+                                   asp-route-PageNumber="@(Model.PageNumber + 1)"
+                                   title="Trang sau">Sau &rsaquo;</a>
+                            </li>
+                            <li class="page-item @(Model.PageNumber >= Model.TotalPages ? "disabled" : "")">
+                                <a class="page-link" asp-page="./Index"
+                                   asp-route-GenderFilter="@Model.GenderFilter"
+                                   asp-route-MinAge="@Model.MinAge"
+                                   asp-route-MaxAge="@Model.MaxAge"
+                                   asp-route-ProvinceCode="@Model.ProvinceCode"
+                                   asp-route-CommuneCode="@Model.CommuneCode"
+                                   asp-route-PageNumber="@Model.TotalPages"
+                                   title="Xuống trang cuối cùng">Cuối &raquo;</a>
+                            </li>
+                        </ul>
+                    </nav>
+
+                    <form method="get" class="d-flex align-items-center gap-2">
+                        <input type="hidden" name="GenderFilter" value="@Model.GenderFilter"/>
+                        <input type="hidden" name="MinAge" value="@Model.MinAge"/>
+                        <input type="hidden" name="MaxAge" value="@Model.MaxAge"/>
+                        <input type="hidden" name="ProvinceCode" value="@Model.ProvinceCode"/>
+                        <input type="hidden" name="CommuneCode" value="@Model.CommuneCode"/>
+                        <label for="jumpPageNumber" class="text-muted small text-nowrap mb-0">Nhảy đến trang:</label>
+                        <input type="number" id="jumpPageNumber" name="PageNumber"
+                               min="1" max="@Model.TotalPages" value="@Model.PageNumber"
+                               class="form-control form-control-sm text-center" style="width: 70px;"/>
+                        <button type="submit" class="btn btn-sm btn-outline-primary">Đi</button>
+                    </form>
+                </div>
+            }
+        }
+    }
+</div>
+
+<!-- Modal Chi Tiết Ứng Viên Dùng Chung -->
+<div class="modal fade" id="candidateDetailModal" tabindex="-1" aria-labelledby="candidateDetailModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content" id="candidateDetailModalContent">
+            <!-- Nội dung nạp động từ handler OnGetCandidateDetailModal -->
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            // Cascade Tỉnh/TP -> Xã/Phường
+            $('#provinceSelect').on('change', function () {
+                const provinceCode = $(this).val();
+                const $communeSelect = $('#communeSelect');
+
+                $communeSelect.empty();
+                $communeSelect.append('<option value="">-- Tất cả Xã/Phường --</option>');
+
+                if (!provinceCode) {
+                    $communeSelect.prop('disabled', true);
+                    return;
+                }
+
+                $communeSelect.prop('disabled', true);
+                fetch(`?handler=Communes&provinceCode=${encodeURIComponent(provinceCode)}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (Array.isArray(data)) {
+                            data.forEach(item => {
+                                $communeSelect.append(`<option value="${item.code}">${item.name}</option>`);
+                            });
+                        }
+                    })
+                    .catch(err => {
+                        console.error('Lỗi khi tải danh sách xã/phường:', err);
+                    })
+                    .finally(() => {
+                        $communeSelect.prop('disabled', false);
+                    });
+            });
+        });
+
+        // Nạp và mở Modal chi tiết hồ sơ ứng viên
+        function openCandidateModal(userId) {
+            const $content = $('#candidateDetailModalContent');
+            $content.html(`
+                <div class="p-5 text-center">
+                    <div class="spinner-border text-primary" role="status"></div>
+                    <p class="mt-2 text-muted mb-0">Đang tải hồ sơ ứng viên...</p>
+                </div>
+            `);
+
+            const modal = new bootstrap.Modal(document.getElementById('candidateDetailModal'));
+            modal.show();
+
+            fetch(`?handler=CandidateDetailModal&id=${encodeURIComponent(userId)}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Lỗi khi tải thông tin');
+                    }
+                    return response.text();
+                })
+                .then(html => {
+                    $content.html(html);
+                })
+                .catch(err => {
+                    $content.html(`
+                        <div class="modal-header">
+                            <h5 class="modal-title fw-bold text-danger">Thông báo</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+                        </div>
+                        <div class="modal-body text-center py-4">
+                            <i class="bi bi-exclamation-triangle text-danger" style="font-size: 2.5rem;"></i>
+                            <p class="mt-2 text-muted mb-0">Không thể tải thông tin hồ sơ ứng viên hoặc bạn không có quyền truy cập.</p>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                        </div>
+                    `);
+                });
+        }
+    </script>
+}

@@ -18,9 +18,10 @@
             }
             @if (User.IsInRole(Role.Employer))
             {
+                <a asp-page="/Employer/Candidates/Index">Tìm ứng viên phù hợp</a>
                 try
                 {
-                    @if ((await ApiClient.Api.Employer.Subscriptions.Current.GetAsync())?.HasActiveSubscription ?? false)
+                    @if (!((await ApiClient.Api.Employer.Subscriptions.Current.GetAsync())?.HasActiveSubscription ?? false))
                     {
                         <a asp-page="/Employer/Subscriptions/Index" class="btn btn-warning btn-sm fw-bold">
                             Mua gói dịch vụ
@@ -98,6 +99,7 @@
                         }
                         @if (User.IsInRole(Role.Employer))
                         {
+                            <li><a class="dropdown-item" asp-page="/Employer/Candidates/Index">Tìm ứng viên phù hợp</a></li>
                             <li><a class="dropdown-item" asp-page="/Employer/Job/Index">Quản lý công việc</a></li>
                             <li><a class="dropdown-item" asp-page="/Employer/EmployerProfile/EditProfile">Hồ sơ tuyển
                                     dụng</a></li>

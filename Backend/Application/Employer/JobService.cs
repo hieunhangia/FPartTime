@@ -545,9 +545,6 @@ public class JobService(
 [Mapper(RequiredMappingStrategy = RequiredMappingStrategy.Target)]
 public static partial class JobMapper
 {
-    [MapProperty($"{nameof(Job.Commune)}.{nameof(Job.Commune.Name)}", nameof(JobSummaryResponseDto.CommuneName))]
-    [MapProperty($"{nameof(Job.Commune)}.{nameof(Job.Commune.Province)}.{nameof(Job.Commune.Province.Name)}",
-        nameof(JobSummaryResponseDto.ProvinceName))]
     [MapProperty($"{nameof(Job.JobApplications)}.{nameof(Job.JobApplications.Count)}",
         nameof(JobSummaryResponseDto.ApplicationCount))]
     private static partial JobSummaryResponseDto MapToSummaryDto(Job job);

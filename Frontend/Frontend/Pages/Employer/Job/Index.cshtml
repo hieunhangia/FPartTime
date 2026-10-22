@@ -25,6 +25,9 @@
                     Mua gói dịch vụ
                 </a>
             }
+            <a asp-page="/Employer/Candidates/Index" class="btn btn-outline-primary">
+                Tìm ứng viên phù hợp
+            </a>
             <a asp-page="./Create" class="btn btn-primary">
                 + Tạo mới công việc
             </a>
@@ -50,8 +53,8 @@
                 <div class="col-md-3">
                     <label asp-for="OrderBy" class="form-label fw-bold">Sắp xếp:</label>
                     <select asp-for="OrderBy" class="form-select">
-                        <option value="CreatedAt_Desc">Mới nhất (Ngày tạo giảm dần)</option>
-                        <option value="CreatedAt_Asc">Cũ nhất (Ngày tạo tăng dần)</option>
+                        <option value="UpdatedAt_Desc">Cập nhật mới nhất</option>
+                        <option value="UpdatedAt_Asc">Cập nhật cũ nhất</option>
                         <option value="Title_Asc">Tiêu đề (A - Z)</option>
                         <option value="Title_Desc">Tiêu đề (Z - A)</option>
                     </select>
@@ -86,9 +89,6 @@
                 <tr>
                     <th>Tiêu đề công việc</th>
                     <th>Số ứng viên</th>
-                    <th>Địa điểm</th>
-                    <th>Mức lương</th>
-                    <th>Ngày tạo</th>
                     <th>Ngày cập nhật</th>
                     <th>Đẩy bài lần cuối</th>
                     <th>Trạng thái</th>
@@ -99,19 +99,21 @@
                 @foreach (var job in Model.Jobs)
                 {
                     var (statusLabel, statusCss) = Model.GetStatusDisplay(job.Status);
-                    var location = string.Join(", ", new[] { job.CommuneName, job.ProvinceName }.Where(s => !string.IsNullOrWhiteSpace(s)));
                     <tr>
                         <td class="fw-bold">@job.Title</td>
                         <td>@(job.ApplicationCount ?? 0)</td>
-                        <td>@(string.IsNullOrWhiteSpace(location) ? "-" : location)</td>
-                        <td>@Model.FormatMaxSalary(job.JobSalaries)</td>
-                        <td class="text-nowrap">@(job.CreatedAt?.ToLocalTime().ToString("dd/MM/yyyy HH:mm") ?? "-")</td>
                         <td class="text-nowrap">@(job.UpdatedAt?.ToLocalTime().ToString("dd/MM/yyyy HH:mm") ?? "-")</td>
                         <td class="text-nowrap">@(job.LastBumpedAt?.ToLocalTime().ToString("dd/MM/yyyy HH:mm") ?? "-")</td>
                         <td><span class="badge @statusCss">@statusLabel</span></td>
-                        <td class="text-end">
-                            @if (job.Id is not null)
+                        <td class="text-end text-nowrap">
+                            @if (job.Id != null)
                             {
+                                @if (job.Status == JobStatus.Active)
+                                {
+                                    <a asp-page="./RecommendedCandidates" asp-route-jobId="@job.Id"
+                                       class="btn btn-sm btn-outline-success me-1">Gợi ý ứng viên</a>
+                                }
+
                                 <a asp-page="./Detail" asp-route-id="@job.Id"
                                    class="btn btn-sm btn-outline-primary">Xem chi tiết</a>
                             }

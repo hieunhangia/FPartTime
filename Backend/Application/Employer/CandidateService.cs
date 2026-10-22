@@ -318,6 +318,9 @@ public class CandidateService(
 public static partial class EmployerCandidateMapper
 {
     [MapProperty(
+        $"{nameof(CandidateProfile.PreferredWorkCommune)}.{nameof(CandidateProfile.PreferredWorkCommune.Province)}.{nameof(CandidateProfile.PreferredWorkCommune.Province.Code)}",
+        nameof(CandidateSummaryResponseDto.PreferredWorkProvinceCode))]
+    [MapProperty(
         $"{nameof(CandidateProfile.PreferredWorkCommune)}.{nameof(CandidateProfile.PreferredWorkCommune.Name)}",
         nameof(CandidateSummaryResponseDto.PreferredWorkCommuneName))]
     [MapProperty(
@@ -326,9 +329,6 @@ public static partial class EmployerCandidateMapper
     [MapProperty(
         $"{nameof(CandidateProfile.User)}.{nameof(CandidateProfile.User.PhoneNumber)}",
         nameof(CandidateSummaryResponseDto.PhoneNumber))]
-    [MapProperty(
-        nameof(CandidateProfile.AvatarFilePath),
-        nameof(CandidateSummaryResponseDto.AvatarUrl))]
     private static partial CandidateSummaryResponseDto MapToSummaryDto(this CandidateProfile candidate);
 
     public static partial IQueryable<CandidateSummaryResponseDto> ProjectToSummaryDto(
