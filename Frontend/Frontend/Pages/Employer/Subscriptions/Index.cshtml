@@ -26,13 +26,19 @@
         <div class="card mb-4 border-success shadow-sm">
             <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
                 <span class="fw-bold">Gói dịch vụ đang kích hoạt</span>
-                <span class="badge bg-light text-success fw-bold">Đang hoạt động</span>
+                <div class="d-flex align-items-center gap-2">
+                    <span class="badge bg-light text-success fw-bold">Đang hoạt động</span>
+                    <button type="button" class="btn btn-sm btn-outline-light"
+                            data-bs-toggle="modal" data-bs-target="#cancelSubscriptionModal">
+                        Hủy gói
+                    </button>
+                </div>
             </div>
             <div class="card-body">
                 <div class="row align-items-center">
                     <div class="col-md-4 mb-2 mb-md-0">
-                        <div class="text-muted small">Gói & Kỳ hạn</div>
-                        <h4 class="mb-0 text-success fw-bold">@Model.CurrentSubscription.Tier (@Model.CurrentSubscription.Duration)</h4>
+                        <div class="text-muted small">Gói dịch vụ</div>
+                        <h4 class="mb-0 text-success fw-bold">Gói @Model.CurrentSubscription.Tier</h4>
                     </div>
                     <div class="col-md-4 mb-2 mb-md-0">
                         <div class="text-muted small">Thời hạn sử dụng</div>
@@ -78,25 +84,27 @@
 
         if (tierPlans.Count == 0) continue;
 
+        var isSubscribedToThisTier = Model.HasActiveSubscription &&
+                                     Model.CurrentSubscription?.Tier == tier;
+
         <div class="mb-5">
-            <h4 class="fw-bold mb-3 border-bottom pb-2">Gói @tier</h4>
+            <div class="d-flex justify-content-between align-items-center mb-3 border-bottom pb-2">
+                <h4 class="fw-bold mb-0">Gói @tier</h4>
+                @if (isSubscribedToThisTier)
+                {
+                    <span class="badge bg-success">Hạng gói đang kích hoạt</span>
+                }
+            </div>
             <div class="row row-cols-1 row-cols-md-2 g-4">
                 @foreach (var plan in tierPlans)
                 {
-                    var isCurrentPlan = Model.HasActiveSubscription &&
-                                        plan.Tier == Model.CurrentSubscription?.Tier &&
-                                        plan.Duration == Model.CurrentSubscription?.Duration;
                     var isSameTier = Model.HasActiveSubscription &&
                                      plan.Tier == Model.CurrentSubscription?.Tier;
 
                     <div class="col">
-                        <div class="card h-100 shadow-sm @(isCurrentPlan ? "border-success" : "")">
+                        <div class="card h-100 shadow-sm @(isSameTier ? "border-success" : "")">
                             <div class="card-header py-3 bg-white d-flex justify-content-between align-items-center">
                                 <h5 class="my-0 fw-bold">@plan.Name</h5>
-                                @if (isCurrentPlan)
-                                {
-                                    <span class="badge bg-success">Gói đang dùng</span>
-                                }
                             </div>
                             <div class="card-body d-flex flex-column">
                                 <h3 class="card-title pricing-card-title mb-1">
@@ -157,23 +165,6 @@
                                                 data-price="@(plan.Price?.ToString("N0", new CultureInfo("vi-VN")) ?? "0")">
                                             Mua gói
                                         </button>
-                                    }
-                                    else if (isCurrentPlan)
-                                    {
-                                        <div class="d-flex gap-2">
-                                            <button type="button" class="btn btn-success flex-grow-1 btn-select-plan"
-                                                    data-bs-toggle="modal" data-bs-target="#paymentModal"
-                                                    data-tier="@plan.Tier"
-                                                    data-duration="@plan.Duration"
-                                                    data-name="@plan.Name"
-                                                    data-price="@(plan.Price?.ToString("N0", new CultureInfo("vi-VN")) ?? "0")">
-                                                Gia hạn gói
-                                            </button>
-                                            <button type="button" class="btn btn-outline-danger"
-                                                    data-bs-toggle="modal" data-bs-target="#cancelSubscriptionModal">
-                                                Hủy gói
-                                            </button>
-                                        </div>
                                     }
                                     else if (isSameTier)
                                     {

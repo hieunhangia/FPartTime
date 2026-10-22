@@ -78,12 +78,12 @@ public class SubscriptionService(
             }
 
             await notificationsService.CreateNotificationAsync(userId, "Gói đăng ký đã bị hủy",
-                $"Bạn đã hủy gói đăng ký {activeSub.Tier} ({activeSub.Duration}). Hệ thống đã tự động đóng {excessCount} tin tuyển dụng có thời gian cập nhật cũ nhất để phù hợp với hạn mức mặc định ({BusinessRuleConstants.Employers.DefaultMaxActivePosts} tin).");
+                $"Bạn đã hủy gói đăng ký {activeSub.Tier}. Hệ thống đã tự động đóng {excessCount} tin tuyển dụng có thời gian cập nhật cũ nhất để phù hợp với hạn mức mặc định ({BusinessRuleConstants.Employers.DefaultMaxActivePosts} tin).");
         }
         else
         {
             await notificationsService.CreateNotificationAsync(userId, "Gói đăng ký đã bị hủy",
-                $"Bạn đã hủy gói đăng ký {activeSub.Tier} ({activeSub.Duration}). Hạn mức đăng tin đã trở về mặc định ({BusinessRuleConstants.Employers.DefaultMaxActivePosts} tin).");
+                $"Bạn đã hủy gói đăng ký {activeSub.Tier}. Hạn mức đăng tin đã trở về mặc định ({BusinessRuleConstants.Employers.DefaultMaxActivePosts} tin).");
         }
 
         await context.SaveChangesAsync();
@@ -244,7 +244,7 @@ public class SubscriptionService(
 
             await notificationsService.CreateNotificationAsync(order.EmployerId,
                 "Kích hoạt gói dịch vụ không thành công",
-                $"Đơn hàng #{transactionId} đã thanh toán thành công ({transaction.Amount:N0} đ) nhưng chưa thể kích hoạt do bạn đang có gói {activeSub.Tier} ({activeSub.Duration}) còn hạn đến {activeSub.EndDate:dd/MM/yyyy HH:mm} (UTC). Vui lòng liên hệ bộ phận hỗ trợ để được trợ giúp.");
+                $"Đơn hàng #{transactionId} đã thanh toán thành công ({transaction.Amount:N0} đ) nhưng chưa thể kích hoạt do bạn đang có gói {activeSub.Tier} còn hạn đến {activeSub.EndDate:dd/MM/yyyy HH:mm} (UTC). Vui lòng liên hệ bộ phận hỗ trợ để được trợ giúp.");
             return;
         }
 
@@ -259,7 +259,6 @@ public class SubscriptionService(
             {
                 EmployerId = order.EmployerId,
                 Tier = order.Tier,
-                Duration = order.Duration,
                 EndDate = now.AddDays(order.DurationDays),
                 Status = EmployerSubscriptionStatus.Active,
                 ExtraActivePosts = order.ExtraActivePosts,
@@ -269,7 +268,6 @@ public class SubscriptionService(
         }
         else
         {
-            activeSub.Duration = order.Duration;
             activeSub.EndDate = activeSub.EndDate.AddDays(order.DurationDays);
             activeSub.ExtraActivePosts = order.ExtraActivePosts;
             activeSub.CanRecommendCandidates = order.CanRecommendCandidates;
@@ -393,7 +391,7 @@ public class SubscriptionService(
         if (activeSub != null && activeSub.Tier != plan.Tier)
         {
             throw new BadRequestException(
-                $"Bạn đang sử dụng gói {activeSub.Tier} ({activeSub.Duration}). Bạn chỉ có thể gia hạn các gói cùng hạng {activeSub.Tier}, hoặc hủy gói cũ để đăng ký gói mới.");
+                $"Bạn đang sử dụng gói {activeSub.Tier}. Bạn chỉ có thể gia hạn các gói cùng hạng {activeSub.Tier}, hoặc hủy gói cũ để đăng ký gói mới.");
         }
 
         var (paymentReferenceId, paymentUrl) = await createPaymentFunc(plan);

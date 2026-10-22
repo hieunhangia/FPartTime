@@ -8,7 +8,6 @@ public class EmployerSubscription
     public Guid Id { get; set; }
     public Guid EmployerId { get; set; }
     public required EmployerSubscriptionTier Tier { get; set; }
-    public required EmployerSubscriptionDuration Duration { get; set; }
     public DateTime StartDate { get; set; } = DateTime.UtcNow;
     public required DateTime EndDate { get; set; }
     public EmployerSubscriptionStatus Status { get; set; } = EmployerSubscriptionStatus.Active;

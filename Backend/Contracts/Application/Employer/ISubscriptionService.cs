@@ -90,7 +90,6 @@ public class CreateVNPAYCheckoutResponseDto
 public class CurrentEmployerSubscriptionResponseDto
 {
     public EmployerSubscriptionTier? Tier { get; set; }
-    public EmployerSubscriptionDuration? Duration { get; set; }
     public DateTime? StartDate { get; set; }
     public DateTime? EndDate { get; set; }
     public required bool HasActiveSubscription { get; set; }
