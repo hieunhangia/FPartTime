@@ -32,8 +32,7 @@ public class IndexModel(ApiClient apiClient, ILogger<IndexModel> logger) : PageM
         public string PaymentMethod { get; set; } = "PayOS";
     }
 
-    [BindProperty]
-    public CheckoutInput Input { get; set; } = new();
+    [BindProperty] public CheckoutInput Input { get; set; } = new();
 
     public async Task<IActionResult> OnGetAsync()
     {
@@ -73,18 +72,11 @@ public class IndexModel(ApiClient apiClient, ILogger<IndexModel> logger) : PageM
 
             if (Input.PaymentMethod == "VNPAY")
             {
-                var ipAddress = HttpContext.Connection.RemoteIpAddress?.MapToIPv4().ToString();
-                if (string.IsNullOrWhiteSpace(ipAddress) || ipAddress == "0.0.0.1")
-                {
-                    ipAddress = "127.0.0.1";
-                }
-
                 var request = new CreateVNPAYCheckoutRequestDto
                 {
                     Tier = Input.Tier,
                     Duration = Input.Duration,
-                    ReturnPath = "/Employer/Subscriptions/PaymentResult",
-                    IpAddress = ipAddress
+                    ReturnPath = "/Employer/Subscriptions/PaymentResult"
                 };
 
                 var response = await apiClient.Api.Employer.Subscriptions.VnpayCheckout.PostAsync(request);

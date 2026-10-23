@@ -4,6 +4,7 @@ using ApiSdk.Api.Employer.Candidates;
 using ApiSdk.Api.Employer.Jobs;
 using ApiSdk.Api.Employer.JobsEscaped;
 using ApiSdk.Api.Employer.Orders;
+using ApiSdk.Api.Employer.PaymentTransactions;
 using ApiSdk.Api.Employer.Subscriptions;
 using Microsoft.Kiota.Abstractions.Extensions;
 using Microsoft.Kiota.Abstractions;
@@ -38,6 +39,11 @@ namespace ApiSdk.Api.Employer
         public global::ApiSdk.Api.Employer.Orders.OrdersRequestBuilder Orders
         {
             get => new global::ApiSdk.Api.Employer.Orders.OrdersRequestBuilder(PathParameters, RequestAdapter);
+        }
+        /// <summary>The PaymentTransactions property</summary>
+        public global::ApiSdk.Api.Employer.PaymentTransactions.PaymentTransactionsRequestBuilder PaymentTransactions
+        {
+            get => new global::ApiSdk.Api.Employer.PaymentTransactions.PaymentTransactionsRequestBuilder(PathParameters, RequestAdapter);
         }
         /// <summary>The Subscriptions property</summary>
         public global::ApiSdk.Api.Employer.Subscriptions.SubscriptionsRequestBuilder Subscriptions

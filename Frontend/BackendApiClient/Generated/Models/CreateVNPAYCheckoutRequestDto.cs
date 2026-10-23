@@ -16,14 +16,6 @@ namespace ApiSdk.Models
         public IDictionary<string, object> AdditionalData { get; set; }
         /// <summary>The duration property</summary>
         public global::ApiSdk.Models.EmployerSubscriptionDuration? Duration { get; set; }
-        /// <summary>The ipAddress property</summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-        public string? IpAddress { get; set; }
-#nullable restore
-#else
-        public string IpAddress { get; set; }
-#endif
         /// <summary>The returnPath property</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
@@ -60,7 +52,6 @@ namespace ApiSdk.Models
             return new Dictionary<string, Action<IParseNode>>
             {
                 { "duration", n => { Duration = n.GetEnumValue<global::ApiSdk.Models.EmployerSubscriptionDuration>(); } },
-                { "ipAddress", n => { IpAddress = n.GetStringValue(); } },
                 { "returnPath", n => { ReturnPath = n.GetStringValue(); } },
                 { "tier", n => { Tier = n.GetEnumValue<global::ApiSdk.Models.EmployerSubscriptionTier>(); } },
             };
@@ -73,7 +64,6 @@ namespace ApiSdk.Models
         {
             if(ReferenceEquals(writer, null)) throw new ArgumentNullException(nameof(writer));
             writer.WriteEnumValue<global::ApiSdk.Models.EmployerSubscriptionDuration>("duration", Duration);
-            writer.WriteStringValue("ipAddress", IpAddress);
             writer.WriteStringValue("returnPath", ReturnPath);
             writer.WriteEnumValue<global::ApiSdk.Models.EmployerSubscriptionTier>("tier", Tier);
             writer.WriteAdditionalData(AdditionalData);
