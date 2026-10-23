@@ -29,4 +29,12 @@ public class OrdersController(IOrderService orderService) : ControllerBase
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status500InternalServerError)]
     public async Task<IActionResult> GetOrderDetail(Guid id) =>
         Ok(await orderService.GetOrderDetailAsync(User, id));
+
+    [HttpPut("{id:guid}/cancel")]
+    [ProducesResponseType<OrderDetailResponseDto>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status500InternalServerError)]
+    public async Task<IActionResult> CancelOrder(Guid id) => Ok(await orderService.CancelOrderAsync(User, id));
 }

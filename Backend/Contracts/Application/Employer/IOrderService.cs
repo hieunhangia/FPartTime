@@ -7,6 +7,7 @@ public interface IOrderService
 {
     IQueryable<OrderSummaryResponseDto> GetMyOrdersQueryable(ClaimsPrincipal user);
     Task<OrderDetailResponseDto> GetOrderDetailAsync(ClaimsPrincipal user, Guid orderId);
+    Task<OrderDetailResponseDto> CancelOrderAsync(ClaimsPrincipal user, Guid orderId);
 }
 
 public class OrderSummaryResponseDto

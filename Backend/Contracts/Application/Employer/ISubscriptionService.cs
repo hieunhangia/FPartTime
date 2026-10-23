@@ -13,7 +13,7 @@ public interface ISubscriptionService
     Task<CreateCheckoutResponseDto> CreatePayOSCheckoutAsync(ClaimsPrincipal user,
         CreatePayOSCheckoutRequestDto request);
 
-    Task<CreateCheckoutResponseDto> CreateVNPAYCheckoutAsync(ClaimsPrincipal user,
+    Task<CreateCheckoutResponseDto> CreateVNPAYCheckoutAsync(ClaimsPrincipal user, string clientIpAddress,
         CreateVNPAYCheckoutRequestDto request);
 
     Task ProcessSubscriptionOrderAsync(Guid transactionId);
@@ -58,12 +58,7 @@ public class CreatePayOSCheckoutRequestDto : SubscriptionCheckoutRequestBase
     public string CancelPath { get; set; } = string.Empty;
 }
 
-public class CreateVNPAYCheckoutRequestDto : SubscriptionCheckoutRequestBase
-{
-    [Required(ErrorMessage = "Địa chỉ IP là bắt buộc.")]
-    [RegularExpression(@"^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$", ErrorMessage = "Địa chỉ IP không hợp lệ.")]
-    public string IpAddress { get; set; } = string.Empty;
-}
+public class CreateVNPAYCheckoutRequestDto : SubscriptionCheckoutRequestBase;
 
 public class CreateCheckoutResponseDto
 {

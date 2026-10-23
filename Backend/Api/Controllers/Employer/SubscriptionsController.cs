@@ -43,7 +43,8 @@ public class SubscriptionsController(ISubscriptionService subscriptionService) :
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status409Conflict)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status500InternalServerError)]
     public async Task<IActionResult> CreateVNPAYCheckout([FromBody] CreateVNPAYCheckoutRequestDto request) =>
-        Ok(await subscriptionService.CreateVNPAYCheckoutAsync(User, request));
+        Ok(await subscriptionService.CreateVNPAYCheckoutAsync(User,
+            HttpContext.Connection.RemoteIpAddress?.ToString() ?? "127.0.0.1", request));
 
     [HttpPost("cancel")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]

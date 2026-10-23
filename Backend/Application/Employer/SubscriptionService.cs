@@ -100,14 +100,14 @@ public class SubscriptionService(
             Items = [new CreatePayOSPaymentRequest.PaymentItem { Name = plan.Name, Price = plan.Price, Quantity = 1 }]
         });
 
-    public async Task<CreateCheckoutResponseDto> CreateVNPAYCheckoutAsync(ClaimsPrincipal user,
+    public async Task<CreateCheckoutResponseDto> CreateVNPAYCheckoutAsync(ClaimsPrincipal user, string clientIpAddress,
         CreateVNPAYCheckoutRequestDto request) =>
         await CreateCheckoutBaseAsync(user, request, PaymentProvider.VNPAY, plan => new CreateVNPAYPaymentRequest
         {
             Amount = plan.Price,
             Description = $"Dang ki goi {plan.Tier} {plan.Duration}",
             ReturnUrl = frontendUrlBuilder.BuildUrl(request.ReturnPath),
-            IpAddress = request.IpAddress,
+            IpAddress = clientIpAddress,
             ExpiredAt = DateTime.UtcNow.AddMinutes(
                 BusinessRuleConstants.Employers.Subscriptions.PaymentExpiresInMinutes)
         });
@@ -124,7 +124,8 @@ public class SubscriptionService(
             return;
         }
 
-        if (transaction.Status != PaymentTransactionStatus.Pending)
+        if (transaction.Status != PaymentTransactionStatus.Pending &&
+            transaction.Status != PaymentTransactionStatus.Expired)
         {
             logger.LogError("Giao dịch {TransactionId} đã được xử lý trước đó với trạng thái {Status}", transactionId,
                 transaction.Status);
@@ -298,11 +299,12 @@ public class SubscriptionService(
             throw new ForbiddenException("Bạn không có quyền thực hiện hành động này.");
         }
 
-        if (await context.EmployerSubscriptionOrders.AnyAsync(o =>
-                o.UserId == userId && o.Status == OrderStatus.PendingPayment))
+        if (await context.PaymentTransactions.AnyAsync(t =>
+                t.UserId == userId && t.Status == PaymentTransactionStatus.Pending &&
+                t.Order is EmployerSubscriptionOrder))
         {
             throw new BadRequestException(
-                "Bạn đang có đơn hàng Gói đăng ký chờ thanh toán. Vui lòng hoàn tất hoặc hủy các đơn hàng đó trước khi tạo đơn mới.");
+                "Bạn đang có giao dịch Gói đăng ký chờ thanh toán. Vui lòng hoàn tất hoặc hủy các giao dịch đó trước khi tạo đơn mới.");
         }
 
         if (!request.Tier.HasValue || !request.Duration.HasValue)

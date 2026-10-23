@@ -86,11 +86,15 @@ builder.Services.AddOpenApi(options =>
 
 var app = builder.Build();
 
-app.UseForwardedHeaders(new ForwardedHeadersOptions
+var forwardedHeadersOptions = new ForwardedHeadersOptions
 {
-    ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
-});
+    ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto,
+    ForwardedForHeaderName = "CF-Connecting-IP"
+};
+forwardedHeadersOptions.KnownIPNetworks.Clear();
+forwardedHeadersOptions.KnownProxies.Clear();
 
+app.UseForwardedHeaders(forwardedHeadersOptions);
 app.UseExceptionHandler();
 
 // Configure the HTTP request pipeline.

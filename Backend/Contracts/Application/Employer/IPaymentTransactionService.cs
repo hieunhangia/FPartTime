@@ -6,6 +6,7 @@ namespace Contracts.Application.Employer;
 public interface IPaymentTransactionService
 {
     IQueryable<PaymentTransactionResponseDto> GetMyPaymentTransactionQueryable(ClaimsPrincipal user);
+    Task<PaymentTransactionResponseDto> CancelPaymentTransactionAsync(ClaimsPrincipal user, Guid transactionId);
 }
 
 public class PaymentTransactionResponseDto

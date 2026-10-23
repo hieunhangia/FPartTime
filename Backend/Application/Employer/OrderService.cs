@@ -23,6 +23,32 @@ public class OrderService(ApplicationDbContext context) : IOrderService
             .Where(o => o.Id == orderId && o.UserId == user.GetUserId())
             .ProjectToDetailDto()
             .FirstOrDefaultAsync() ?? throw new NotFoundException("Không tìm thấy đơn hàng.");
+
+    public async Task<OrderDetailResponseDto> CancelOrderAsync(ClaimsPrincipal user, Guid orderId)
+    {
+        var order = context.Orders
+                        .Include(o => o.PaymentTransactions)
+                        .FirstOrDefault(o => o.Id == orderId && o.UserId == user.GetUserId())
+                    ?? throw new NotFoundException("Không tìm thấy đơn hàng.");
+
+        if (order.Status != OrderStatus.PendingPayment)
+        {
+            throw new BadRequestException("Chỉ có thể hủy các đơn hàng đang chờ thanh toán.");
+        }
+
+        order.Status = OrderStatus.Cancelled;
+        order.CompletedAt = DateTime.UtcNow;
+
+        foreach (var pendingTransaction in order.PaymentTransactions
+                     .Where(t => t.Status == PaymentTransactionStatus.Pending))
+        {
+            pendingTransaction.Status = PaymentTransactionStatus.Cancelled;
+            pendingTransaction.PaidAt = DateTime.UtcNow;
+        }
+
+        await context.SaveChangesAsync();
+        return order.MapToDetailDto();
+    }
 }
 
 [Mapper(RequiredMappingStrategy = RequiredMappingStrategy.Target)]
@@ -36,7 +62,7 @@ public static partial class OrderMapper
     private static partial OrderDetailResponseDto.PaymentTransactionResponseDto MapToPaymentTransactionDto(
         PaymentTransaction transaction);
 
-    private static partial OrderDetailResponseDto MapToDetailDto(OrderBase order);
+    public static partial OrderDetailResponseDto MapToDetailDto(this OrderBase order);
     public static partial IQueryable<OrderDetailResponseDto> ProjectToDetailDto(this IQueryable<OrderBase> orders);
 
     private static string? MapToPaymentUrl(PaymentTransaction transaction) =>
