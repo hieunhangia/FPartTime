@@ -39,7 +39,6 @@ public class IndexModel(ApiClient apiClient) : PageModel
             var response = await apiClient.Api.Jobs.GetAsync();
             var allJobs = response?.Items ?? [];
 
-            // Giữ thứ tự ưu tiên đẩy tin do API trả về.
             PopularJobs = allJobs.Take(6).ToList();
 
             Provinces = allJobs

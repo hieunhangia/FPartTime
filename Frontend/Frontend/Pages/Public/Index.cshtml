@@ -39,12 +39,6 @@
 
     <section class="mb-4" aria-labelledby="popular-industries-title">
         <h2 id="popular-industries-title" class="h5 mb-3">Các ngành nghề phổ biến</h2>
-        @if (Model.PopularIndustries.Count == 0)
-        {
-            <p class="text-muted">Chưa có ngành nghề đang tuyển.</p>
-        }
-        else
-        {
             <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-5 g-2">
                 @foreach (var industry in Model.PopularIndustries)
                 {
@@ -57,17 +51,10 @@
                     </div>
                 }
             </div>
-        }
     </section>
 
     <section class="mb-4" aria-labelledby="popular-jobs-title">
         <h2 id="popular-jobs-title" class="h5 mb-3">Việc làm phổ biến</h2>
-        @if (Model.PopularJobs.Count == 0)
-        {
-            <p class="text-muted">Chưa có việc làm nào đang tuyển.</p>
-        }
-        else
-        {
             <div class="row row-cols-1 row-cols-md-3 g-3">
                 @foreach (var job in Model.PopularJobs)
                 {
@@ -83,7 +70,6 @@
                     </div>
                 }
             </div>
-        }
     </section>
 
     <a asp-page="/Public/Jobs" class="btn btn-outline-primary">Xem tất cả việc làm</a>
