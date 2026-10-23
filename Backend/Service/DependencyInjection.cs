@@ -18,6 +18,8 @@ public static class DependencyInjection
         builder.Services.AddScoped<JobReportService>();
         builder.Services.AddScoped<EmployerRegistrationService>();
         builder.Services.AddScoped<CandidateScheduleService>();
+        builder.Services.AddScoped<JobApplicationService>();
+
 
         // Employer Services
         builder.Services.AddScoped<EmployerProfileService>();
