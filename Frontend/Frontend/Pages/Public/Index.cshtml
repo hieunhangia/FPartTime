@@ -5,7 +5,10 @@
 }
 
 <div class="my-4">
-    <h1 class="h3 mb-3">Tìm việc làm</h1>
+    @if (Model.OpenForJobStatus != null)
+    {
+        <partial name="_OpenForJobStatusBanner" model="Model.OpenForJobStatus" />
+    }
 
     <form method="get" asp-page="/Public/Jobs" class="row g-2 mb-4" role="search">
         <div class="col-md-4">

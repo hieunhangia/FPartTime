@@ -1,0 +1,65 @@
+@model Frontend.ViewModels.OpenForJobBannerViewModel
+
+<div class="card border shadow-none mb-3">
+    <div class="card-body py-2 px-3 d-flex flex-column flex-sm-row align-items-sm-center justify-content-between gap-2">
+        <div class="d-flex align-items-center gap-2 flex-wrap">
+            @if (!Model.IsOpenForJob)
+            {
+                <span class="badge bg-primary border">Bạn có đang đi tìm việc?</span>
+                <span class="text-dark small">Bật tìm việc để nhà tuyển dụng có thể chủ động tiếp cận hồ sơ của bạn (duy trì 7 ngày).</span>
+            }
+            else
+            {
+                <span class="badge bg-success-subtle text-success border border-success-subtle">Đang tìm việc</span>
+                <span class="text-dark small">
+                    Hồ sơ đang hiển thị với nhà tuyển dụng &middot; Hiệu lực đến:
+                    <span
+                        class="text-dark fw-medium">@Model.OpenForJobUntil?.ToLocalTime().ToString("HH:mm - dd/MM/yyyy")</span>
+                </span>
+            }
+        </div>
+
+        <div class="d-flex align-items-center gap-2 text-nowrap">
+            @if (!Model.IsOpenForJob)
+            {
+                <form method="post" asp-page-handler="ToggleOpenForJobStatus" asp-route-enable="true" class="d-inline">
+                    @if (!string.IsNullOrEmpty(Model.ReturnUrl))
+                    {
+                        <input type="hidden" name="returnUrl" value="@Model.ReturnUrl"/>
+                    }
+                    <button type="submit" class="btn btn-sm btn-primary">
+                        Bật tìm việc
+                    </button>
+                </form>
+            }
+            else
+            {
+                if (Model.CanRefresh)
+                {
+                    <form method="post" asp-page-handler="ToggleOpenForJobStatus" asp-route-enable="true"
+                          class="d-inline">
+                        @if (!string.IsNullOrEmpty(Model.ReturnUrl))
+                        {
+                            <input type="hidden" name="returnUrl" value="@Model.ReturnUrl"/>
+                        }
+                        <button type="submit" class="btn btn-sm btn-outline-primary"
+                                title="Làm mới trạng thái thêm 7 ngày tính từ hôm nay">
+                            Làm mới (7 ngày)
+                        </button>
+                    </form>
+                }
+
+                <form method="post" asp-page-handler="ToggleOpenForJobStatus" asp-route-enable="false" class="d-inline"
+                      onsubmit="return confirm('Bạn có chắc chắn muốn tắt trạng thái tìm việc?');">
+                    @if (!string.IsNullOrEmpty(Model.ReturnUrl))
+                    {
+                        <input type="hidden" name="returnUrl" value="@Model.ReturnUrl"/>
+                    }
+                    <button type="submit" class="btn btn-sm btn-outline-secondary">
+                        Tắt
+                    </button>
+                </form>
+            }
+        </div>
+    </div>
+</div>

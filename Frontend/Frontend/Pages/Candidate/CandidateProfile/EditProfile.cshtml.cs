@@ -5,6 +5,7 @@ using ApiSdk.Models;
 using BackendApiClient.Extensions;
 using Frontend.Constants;
 using Frontend.Extensions;
+using Frontend.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -18,9 +19,10 @@ namespace Frontend.Pages.Candidate.CandidateProfile
         [BindProperty]
         public EditProfileFormModel Input { get; set; } = new();
         public string? CurrentAvatarUrl { get; set; }
-        public bool IsOpenForJob { get; set; }
-        public bool CanRefresh { get; set; }
-        public DateTimeOffset? OpenForJobUntil { get; set; }
+        public OpenForJobBannerViewModel OpenForJobStatus { get; set; } = new();
+        public bool IsOpenForJob => OpenForJobStatus.IsOpenForJob;
+        public bool CanRefresh => OpenForJobStatus.CanRefresh;
+        public DateTimeOffset? OpenForJobUntil => OpenForJobStatus.OpenForJobUntil;
         public HashSet<string> fileValidate = [".jpg", ".jpeg", ".png"];
         //public List<ProvinceDto> Provinces { get; private set; } = [];
         //public List<CommuneDto> Communes { get; private set; } = [];
@@ -54,9 +56,13 @@ namespace Frontend.Pages.Candidate.CandidateProfile
                 var openForJobStatus = await apiClient.Api.CandidateProfiles.OpenForJobStatus.GetAsync();
                 if (openForJobStatus != null)
                 {
-                    IsOpenForJob = openForJobStatus.IsOpenForJob ?? false;
-                    CanRefresh = openForJobStatus.CanRefresh ?? false;
-                    OpenForJobUntil = openForJobStatus.OpenForJobUntil;
+                    OpenForJobStatus = new OpenForJobBannerViewModel
+                    {
+                        IsOpenForJob = openForJobStatus.IsOpenForJob ?? false,
+                        CanRefresh = openForJobStatus.CanRefresh ?? false,
+                        OpenForJobUntil = openForJobStatus.OpenForJobUntil,
+                        ReturnUrl = Url.Page("./EditProfile")
+                    };
                 }
             }
             catch
@@ -67,7 +73,7 @@ namespace Frontend.Pages.Candidate.CandidateProfile
             return Page();
         }
 
-        public async Task<IActionResult> OnPostToggleOpenForJobStatusAsync(bool enable)
+        public async Task<IActionResult> OnPostToggleOpenForJobStatusAsync(bool enable, string? returnUrl = null)
         {
             try
             {
@@ -90,6 +96,11 @@ namespace Frontend.Pages.Candidate.CandidateProfile
             catch
             {
                 TempData.SetErrorMessage("Đã xảy ra lỗi khi cập nhật trạng thái tìm việc.");
+            }
+
+            if (!string.IsNullOrWhiteSpace(returnUrl) && Url.IsLocalUrl(returnUrl))
+            {
+                return Redirect(returnUrl);
             }
 
             return RedirectToPage("./EditProfile");

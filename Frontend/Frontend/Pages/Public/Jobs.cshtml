@@ -9,6 +9,11 @@
     <a asp-page="/Public/Index" class="text-decoration-none">&larr; Trang chủ</a>
     <h1 class="h3 mt-3 mb-4">Danh sách việc làm</h1>
 
+    @if (Model.OpenForJobStatus != null)
+    {
+        <partial name="_OpenForJobStatusBanner" model="Model.OpenForJobStatus" />
+    }
+
     <form method="get" asp-page="/Public/Jobs" class="row g-2 mb-4" role="search">
         <div class="col-md-4">
             <label asp-for="Keyword" class="form-label">Từ khóa</label>

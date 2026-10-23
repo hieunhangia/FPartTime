@@ -1,6 +1,9 @@
 using ApiSdk;
 using ApiSdk.Models;
 using BackendApiClient.Extensions;
+using Frontend.Constants;
+using Frontend.Extensions;
+using Frontend.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Kiota.Abstractions;
@@ -23,6 +26,7 @@ public class JobsModel(ApiClient apiClient) : PageModel
     public int FirstPage => Math.Max(1, Math.Min(PageNumber - 2, TotalPages - 4));
     public int LastPage => Math.Min(TotalPages, FirstPage + 4);
     public string? LoadError { get; private set; }
+    public OpenForJobBannerViewModel? OpenForJobStatus { get; private set; }
     public bool HasSearchFilters => !string.IsNullOrWhiteSpace(Keyword)
         || !string.IsNullOrWhiteSpace(Province) || IndustryId.HasValue;
 
@@ -31,6 +35,28 @@ public class JobsModel(ApiClient apiClient) : PageModel
         Keyword = Keyword?.Trim();
         Province = Province?.Trim();
         PageNumber = Math.Clamp(PageNumber, 1, int.MaxValue / PageSize);
+
+        if (User.IsInRole(Role.Candidate))
+        {
+            try
+            {
+                var status = await apiClient.Api.CandidateProfiles.OpenForJobStatus.GetAsync();
+                if (status != null)
+                {
+                    OpenForJobStatus = new OpenForJobBannerViewModel
+                    {
+                        IsOpenForJob = status.IsOpenForJob ?? false,
+                        CanRefresh = status.CanRefresh ?? false,
+                        OpenForJobUntil = status.OpenForJobUntil,
+                        ReturnUrl = Url.Page("/Public/Jobs", GetPageRouteValues(PageNumber))
+                    };
+                }
+            }
+            catch
+            {
+                //ignored
+            }
+        }
 
         try
         {
@@ -129,4 +155,42 @@ public class JobsModel(ApiClient apiClient) : PageModel
         1 => JobDetailModel.FormatSalary(salaries[0]),
         _ => $"{JobDetailModel.FormatSalary(salaries[0])} (+{salaries.Count - 1} mức lương)"
     };
+
+    public async Task<IActionResult> OnPostToggleOpenForJobStatusAsync(bool enable, string? returnUrl = null)
+    {
+        if (!User.IsInRole(Role.Candidate))
+        {
+            return Forbid();
+        }
+
+        try
+        {
+            await apiClient.Api.CandidateProfiles.OpenForJobStatus.PutAsync(
+                new ToggleOpenForJobStatusRequestDto { Enable = enable });
+
+            if (enable)
+            {
+                TempData.SetSuccessMessage("Đã bật/làm mới trạng thái tìm việc thành công (hiệu lực trong 7 ngày).");
+            }
+            else
+            {
+                TempData.SetSuccessMessage("Đã tắt trạng thái tìm việc thành công.");
+            }
+        }
+        catch (ApiException ex)
+        {
+            TempData.SetErrorMessage(ex.ToFriendlyErrorMessage());
+        }
+        catch
+        {
+            TempData.SetErrorMessage("Đã xảy ra lỗi khi cập nhật trạng thái tìm việc.");
+        }
+
+        if (!string.IsNullOrWhiteSpace(returnUrl) && Url.IsLocalUrl(returnUrl))
+        {
+            return Redirect(returnUrl);
+        }
+
+        return RedirectToPage("/Public/Jobs");
+    }
 }
