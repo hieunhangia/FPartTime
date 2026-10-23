@@ -19,7 +19,7 @@ public class Job
     public JobStatus Status { get; set; } = JobStatus.Active;
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
-    public DateTime LastBumpedAt { get; set; } = DateTime.UtcNow;
+    public DateTime? LastBumpedAt { get; set; }
     public Guid EmployerId { get; set; }
     public Guid IndustryId { get; set; }
 

@@ -202,7 +202,7 @@ namespace DbMigrator.Migrations
                     b.Property<Guid>("IndustryId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("LastBumpedAt")
+                    b.Property<DateTime?>("LastBumpedAt")
                         .HasColumnType("datetime2");
 
                     b.Property<int?>("MaxAgeRequirement")

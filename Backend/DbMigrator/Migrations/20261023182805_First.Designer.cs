@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DbMigrator.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20261023100347_First")]
+    [Migration("20261023182805_First")]
     partial class First
     {
         /// <inheritdoc />
@@ -205,7 +205,7 @@ namespace DbMigrator.Migrations
                     b.Property<Guid>("IndustryId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("LastBumpedAt")
+                    b.Property<DateTime?>("LastBumpedAt")
                         .HasColumnType("datetime2");
 
                     b.Property<int?>("MaxAgeRequirement")

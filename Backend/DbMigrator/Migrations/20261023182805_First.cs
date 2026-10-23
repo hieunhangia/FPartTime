@@ -396,7 +396,7 @@ namespace DbMigrator.Migrations
                     Status = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    LastBumpedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    LastBumpedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
                     EmployerId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     IndustryId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },

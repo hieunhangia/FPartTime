@@ -54,8 +54,8 @@ public class JobDetailResponseDto
     public required DateOnly ExpiryAt { get; set; }
     public required JobStatus Status { get; set; }
     public required DateTime CreatedAt { get; set; }
-    public DateTime? UpdatedAt { get; set; }
-    public required DateTime LastBumpedAt { get; set; }
+    public required DateTime UpdatedAt { get; set; }
+    public required DateTime? LastBumpedAt { get; set; }
     public required string IndustryName { get; set; }
     public required List<JobScheduleResponseDto> JobSchedules { get; set; }
     public required List<JobSalaryResponseDto> JobSalaries { get; set; }
@@ -72,7 +72,7 @@ public class PostsQuotaResponseDto
 public class BumpJobResponseDto
 {
     public required Guid JobId { get; set; }
-    public required DateTime LastBumpedAt { get; set; }
+    public required DateTime? LastBumpedAt { get; set; }
     public required int RemainingBumpBalance { get; set; }
 }
 
