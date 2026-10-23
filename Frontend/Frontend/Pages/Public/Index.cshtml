@@ -60,5 +60,31 @@
         }
     </section>
 
+    <section class="mb-4" aria-labelledby="popular-jobs-title">
+        <h2 id="popular-jobs-title" class="h5 mb-3">Việc làm phổ biến</h2>
+        @if (Model.PopularJobs.Count == 0)
+        {
+            <p class="text-muted">Chưa có việc làm nào đang tuyển.</p>
+        }
+        else
+        {
+            <div class="row row-cols-1 row-cols-md-3 g-3">
+                @foreach (var job in Model.PopularJobs)
+                {
+                    <div class="col">
+                        <a asp-page="/Public/JobDetail" asp-route-id="@job.Id" asp-route-returnUrl="@Url.Page("/Public/Index")"
+                           class="list-group-item list-group-item-action border rounded p-3 h-100">
+                            <h3 class="h6 text-primary text-break mb-2">@job.Title</h3>
+                            <p class="text-break mb-2">@(job.EmployerCompanyName ?? "Nhà tuyển dụng")</p>
+                            <p class="fw-semibold text-success mb-2">@JobsModel.FormatSalariesSummary(job.Salaries)</p>
+                            <p class="text-muted small mb-1">@JobsModel.FormatLocation(job)</p>
+                            <p class="text-muted small mb-0">Hạn nộp: @(job.ExpiryAt != null ? $"{job.ExpiryAt.Value.Day:D2}/{job.ExpiryAt.Value.Month:D2}/{job.ExpiryAt.Value.Year}" : "-")</p>
+                        </a>
+                    </div>
+                }
+            </div>
+        }
+    </section>
+
     <a asp-page="/Public/Jobs" class="btn btn-outline-primary">Xem tất cả việc làm</a>
 </div>

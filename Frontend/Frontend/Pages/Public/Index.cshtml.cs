@@ -13,6 +13,7 @@ public class IndexModel(ApiClient apiClient) : PageModel
     public List<string> Provinces { get; private set; } = [];
     public List<IndustrySummary> Industries { get; private set; } = [];
     public List<IndustrySummary> PopularIndustries { get; private set; } = [];
+    public List<JobResponseDto> PopularJobs { get; private set; } = [];
     public bool HasSearchFilters => !string.IsNullOrWhiteSpace(Keyword)
         || !string.IsNullOrWhiteSpace(Province)
         || IndustryId.HasValue;
@@ -37,6 +38,9 @@ public class IndexModel(ApiClient apiClient) : PageModel
         {
             var response = await apiClient.Api.Jobs.GetAsync();
             var allJobs = response?.Items ?? [];
+
+            // Giữ thứ tự ưu tiên đẩy tin do API trả về.
+            PopularJobs = allJobs.Take(6).ToList();
 
             Provinces = allJobs
                 .Where(j => !string.IsNullOrWhiteSpace(j.ProvinceName))
