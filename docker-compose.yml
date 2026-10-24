@@ -6,6 +6,7 @@ services:
     environment:
       - ACCEPT_EULA=Y
       - MSSQL_SA_PASSWORD=${DB_PASSWORD}
+      - TZ=${TZ}
     volumes:
       - mssql_data:/var/opt/mssql
     networks:
@@ -20,6 +21,7 @@ services:
     profiles: ["tools"]
     environment:
       - ConnectionStrings__DefaultConnection=Server=database,1433;Database=FPartTime;User Id=sa;Password=${DB_PASSWORD};TrustServerCertificate=True;
+      - TZ=${TZ}
     depends_on:
       - database
     networks:
@@ -34,6 +36,7 @@ services:
     restart: unless-stopped
     environment:
       - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT}
+      - TZ=${TZ}
       - ConnectionStrings__DefaultConnection=Server=database,1433;Database=FPartTime;User Id=sa;Password=${DB_PASSWORD};TrustServerCertificate=True;
       - JwtSettings__SecretKey=${JWT_SECRET_KEY}
       - JwtSettings__Issuer=${JWT_ISSUER}
@@ -68,6 +71,7 @@ services:
     restart: unless-stopped
     environment:
       - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT}
+      - TZ=${TZ}
       - BackendApi__BaseUrl=${BACKEND_API_BASE_URL}
       - BackendApi__AccessTokenAllowedHosts=${BACKEND_API_ALLOWED_HOSTS}
       - BetterStack__ApiToken=${BETTER_STACK_API_TOKEN}
@@ -82,6 +86,7 @@ services:
     restart: unless-stopped
     environment:
       - TUNNEL_TOKEN=${CLOUDFLARE_TUNNEL_TOKEN}
+      - TZ=${TZ}
     command: tunnel --no-autoupdate run
     depends_on:
       - frontend
