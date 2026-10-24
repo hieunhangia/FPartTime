@@ -1,4 +1,5 @@
 @page "/jobs/{id:guid}"
+@using Frontend.Extensions
 @model JobDetailModel
 @{
     var job = Model.Job;
@@ -110,6 +111,42 @@
                 }
             </div>
         </div>
+
+@if (User.IsLoggedIn && User.IsInRole(Frontend.Constants.Role.Candidate))
+{
+    <div class="d-flex justify-content-start mt-3">
+        <button type="button" class="btn btn-success"
+                data-bs-toggle="modal" data-bs-target="#applyJobModal">
+            Ứng tuyển ngay
+        </button>
+    </div>
+}
+
+<!-- Modal Ứng tuyển -->
+<div class="modal fade" id="applyJobModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <form method="post" asp-page-handler="ApplyJob"
+                  asp-route-id="@job.Id" asp-route-returnUrl="@Model.ReturnUrl">
+                <div class="modal-header">
+                    <h5 class="modal-title text-success fw-bold">Xác nhận ứng tuyển</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="mb-1">Bạn muốn ứng tuyển vào vị trí:</p>
+                    <p class="fw-bold fs-6">@job.Title</p>
+                    <p class="text-muted small">Nhà tuyển dụng: @(job.EmployerCompanyName ?? "Nhà tuyển dụng")</p>
+                    <p class="text-muted small mb-0">Sau khi ứng tuyển, nhà tuyển dụng sẽ xem xét hồ sơ và liên hệ với bạn.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-success">Xác nhận ứng tuyển</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 
         <!-- Modal Báo cáo đơn giản -->
         <div class="modal fade" id="reportJobModal" tabindex="-1" aria-hidden="true">
