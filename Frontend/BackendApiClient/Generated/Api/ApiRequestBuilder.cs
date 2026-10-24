@@ -10,7 +10,7 @@ using ApiSdk.Api.EmployerProfiles;
 using ApiSdk.Api.EmployerRegistrations;
 using ApiSdk.Api.Identity;
 using ApiSdk.Api.Industries;
-using ApiSdk.Api.JobApplications;
+using ApiSdk.Api.Ipn;
 using ApiSdk.Api.Jobs;
 using ApiSdk.Api.Manager;
 using ApiSdk.Api.Notifications;
@@ -78,10 +78,10 @@ namespace ApiSdk.Api
         {
             get => new global::ApiSdk.Api.Industries.IndustriesRequestBuilder(PathParameters, RequestAdapter);
         }
-        /// <summary>The JobApplications property</summary>
-        public global::ApiSdk.Api.JobApplications.JobApplicationsRequestBuilder JobApplications
+        /// <summary>The Ipn property</summary>
+        public global::ApiSdk.Api.Ipn.IpnRequestBuilder Ipn
         {
-            get => new global::ApiSdk.Api.JobApplications.JobApplicationsRequestBuilder(PathParameters, RequestAdapter);
+            get => new global::ApiSdk.Api.Ipn.IpnRequestBuilder(PathParameters, RequestAdapter);
         }
         /// <summary>The jobs property</summary>
         public global::ApiSdk.Api.Jobs.JobsRequestBuilder Jobs

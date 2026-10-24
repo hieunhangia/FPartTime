@@ -9,28 +9,28 @@ using System.IO;
 using System.Threading.Tasks;
 using System.Threading;
 using System;
-namespace ApiSdk.Api.JobApplications.Item
+namespace ApiSdk.Api.Candidate.JobApplications.Item
 {
     /// <summary>
-    /// Builds and executes requests for operations under \api\JobApplications\{id}
+    /// Builds and executes requests for operations under \api\candidate\job-applications\{id}
     /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("Kiota", "1.0.0")]
     public partial class JobApplicationsItemRequestBuilder : BaseRequestBuilder
     {
         /// <summary>
-        /// Instantiates a new <see cref="global::ApiSdk.Api.JobApplications.Item.JobApplicationsItemRequestBuilder"/> and sets the default values.
+        /// Instantiates a new <see cref="global::ApiSdk.Api.Candidate.JobApplications.Item.JobApplicationsItemRequestBuilder"/> and sets the default values.
         /// </summary>
         /// <param name="pathParameters">Path parameters for the request</param>
         /// <param name="requestAdapter">The request adapter to use to execute the requests.</param>
-        public JobApplicationsItemRequestBuilder(Dictionary<string, object> pathParameters, IRequestAdapter requestAdapter) : base(requestAdapter, "{+baseurl}/api/JobApplications/{id}", pathParameters)
+        public JobApplicationsItemRequestBuilder(Dictionary<string, object> pathParameters, IRequestAdapter requestAdapter) : base(requestAdapter, "{+baseurl}/api/candidate/job-applications/{id}", pathParameters)
         {
         }
         /// <summary>
-        /// Instantiates a new <see cref="global::ApiSdk.Api.JobApplications.Item.JobApplicationsItemRequestBuilder"/> and sets the default values.
+        /// Instantiates a new <see cref="global::ApiSdk.Api.Candidate.JobApplications.Item.JobApplicationsItemRequestBuilder"/> and sets the default values.
         /// </summary>
         /// <param name="rawUrl">The raw URL to use for the request builder.</param>
         /// <param name="requestAdapter">The request adapter to use to execute the requests.</param>
-        public JobApplicationsItemRequestBuilder(string rawUrl, IRequestAdapter requestAdapter) : base(requestAdapter, "{+baseurl}/api/JobApplications/{id}", rawUrl)
+        public JobApplicationsItemRequestBuilder(string rawUrl, IRequestAdapter requestAdapter) : base(requestAdapter, "{+baseurl}/api/candidate/job-applications/{id}", rawUrl)
         {
         }
         /// <param name="cancellationToken">Cancellation token to use when cancelling requests</param>
@@ -77,11 +77,11 @@ namespace ApiSdk.Api.JobApplications.Item
         /// <summary>
         /// Returns a request builder with the provided arbitrary URL. Using this method means any other path or query parameters are ignored.
         /// </summary>
-        /// <returns>A <see cref="global::ApiSdk.Api.JobApplications.Item.JobApplicationsItemRequestBuilder"/></returns>
+        /// <returns>A <see cref="global::ApiSdk.Api.Candidate.JobApplications.Item.JobApplicationsItemRequestBuilder"/></returns>
         /// <param name="rawUrl">The raw URL to use for the request builder.</param>
-        public global::ApiSdk.Api.JobApplications.Item.JobApplicationsItemRequestBuilder WithUrl(string rawUrl)
+        public global::ApiSdk.Api.Candidate.JobApplications.Item.JobApplicationsItemRequestBuilder WithUrl(string rawUrl)
         {
-            return new global::ApiSdk.Api.JobApplications.Item.JobApplicationsItemRequestBuilder(rawUrl, RequestAdapter);
+            return new global::ApiSdk.Api.Candidate.JobApplications.Item.JobApplicationsItemRequestBuilder(rawUrl, RequestAdapter);
         }
     }
 }
