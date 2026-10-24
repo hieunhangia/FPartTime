@@ -71,6 +71,7 @@ namespace Service.Candidate
             await dbContext.SaveChangesAsync();
             return new JobApplicationResponseDto
             {
+                Id = application.Id,
                 JobId = jobId,
                 JobTitle = job.Title,
                 Status = application.Status,
@@ -79,6 +80,28 @@ namespace Service.Candidate
 
         }
 
+
+        public async Task WithdrawAsync(ClaimsPrincipal user, Guid applicationId)
+        {
+            var userId = user.GetUserId();
+
+            var application = await dbContext.JobApplications
+          .FirstOrDefaultAsync(a => a.Id == applicationId && a.CandidateId == userId);
+
+            if (application == null)
+            {
+                throw new NotFoundException("Không tìm thấy đơn ứng tuyển");
+            }
+
+            if (application.Status != JobApplicationStatus.Pending)
+            {
+                throw new BadRequestException("Chỉ có thể hủy đơn ứng tuyển khi trạng thái là đang chờ xử lý");
+            }
+
+            dbContext.JobApplications.Remove(application);
+            await dbContext.SaveChangesAsync();
+
+        }
 
         public IQueryable<JobApplicationResponseDto> GetAllApplication(ClaimsPrincipal user)
         {
@@ -97,6 +120,7 @@ namespace Service.Candidate
 
     public class JobApplicationResponseDto
     {
+        public Guid Id { get; set; }
         public Guid JobId { get; set; }
         public string? JobTitle { get; set; }
         public JobApplicationStatus Status { get; set; }
