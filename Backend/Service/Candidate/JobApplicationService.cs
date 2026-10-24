@@ -59,6 +59,44 @@ namespace Service.Candidate
                 throw new ConflictException("Bạn đã ứng tuyển vào tin tuyển dụng này rồi.");
             }
 
+            var newJobSchedules = await dbContext.JobSchedules
+            .AsNoTracking()
+            .Where(s => s.JobId == jobId)
+            .ToListAsync();
+
+            if (newJobSchedules.Count > 0)
+            {
+                var acceptedJobSchedules = await dbContext.JobApplications
+                    .AsNoTracking()
+                    .Where(a => a.CandidateId == candidateId
+                             && a.Status == JobApplicationStatus.Accepted
+                             && a.Job!.Status == JobStatus.Active)
+                    .SelectMany(a => a.Job!.JobSchedules!)
+                    .Select(s => new
+                    {
+                        s.Job!.Title,
+                        s.DayOfWeek,
+                        s.StartTime,
+                        s.EndTime
+                    })
+                    .ToListAsync();
+                foreach (var newSchedule in newJobSchedules)
+                {
+                    var conflictingSchedule = acceptedJobSchedules.FirstOrDefault(accepted =>
+                        accepted.DayOfWeek == newSchedule.DayOfWeek &&
+                        newSchedule.StartTime < accepted.EndTime &&
+                        accepted.StartTime < newSchedule.EndTime);
+                    if (conflictingSchedule != null)
+                    {
+                        var dayName = FormatDayOfWeek(newSchedule.DayOfWeek);
+                        throw new ConflictException(
+                            $"Lịch làm việc ({dayName}: {newSchedule.StartTime:HH\\:mm} - {newSchedule.EndTime:HH\\:mm}) " +
+                            $"bị trùng với công việc '{conflictingSchedule.Title}' mà bạn đang làm " +
+                            $"({conflictingSchedule.StartTime:HH\\:mm} - {conflictingSchedule.EndTime:HH\\:mm})."
+                        );
+                    }
+                }
+            }
             var application = new JobApplication
             {
                 Id = Guid.NewGuid(),
@@ -115,7 +153,21 @@ namespace Service.Candidate
 
             return response;
         }
+        private static string FormatDayOfWeek(DayOfWeek day) => day switch
+        {
+            DayOfWeek.Monday => "Thứ Hai",
+            DayOfWeek.Tuesday => "Thứ Ba",
+            DayOfWeek.Wednesday => "Thứ Tư",
+            DayOfWeek.Thursday => "Thứ Năm",
+            DayOfWeek.Friday => "Thứ Sáu",
+            DayOfWeek.Saturday => "Thứ Bảy",
+            DayOfWeek.Sunday => "Chủ Nhật",
+            _ => day.ToString()
+        };
+
     }
+
+
 
 
     public class JobApplicationResponseDto
