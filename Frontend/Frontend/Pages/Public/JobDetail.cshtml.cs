@@ -71,6 +71,38 @@ public class JobDetailModel(ApiClient apiClient) : PageModel
         return RedirectToPage("/Public/JobDetail", new { id, ReturnUrl });
     }
 
+    public async Task<IActionResult> OnPostApplyJobAsync(Guid id)
+    {
+        if (!User.IsLoggedIn)
+        {
+            TempData.SetWarningMessage("Vui lòng đăng nhập để ứng tuyển.");
+            return RedirectToPage("/Public/JobDetail", new { id, ReturnUrl });
+        }
+
+        if (!User.IsInRole(Role.Candidate))
+        {
+            TempData.SetErrorMessage("Chỉ tài khoản ứng viên mới có quyền ứng tuyển.");
+            return RedirectToPage("/Public/JobDetail", new { id, ReturnUrl });
+        }
+
+        try
+        {
+            await apiClient.Api.Candidate.Jobs[id].Apply.PostAsync();
+            TempData.SetSuccessMessage("Ứng tuyển thành công! Nhà tuyển dụng sẽ liên hệ với bạn sớm.");
+        }
+        catch (ApiException ex)
+        {
+            TempData.SetErrorMessage(ex.ToFriendlyErrorMessage());
+        }
+        catch
+        {
+            TempData.SetErrorMessage("Đã xảy ra lỗi khi ứng tuyển. Vui lòng thử lại.");
+        }
+
+        return RedirectToPage("/Public/JobDetail", new { id, ReturnUrl });
+    }
+
+
     public async Task<IActionResult> OnGetAsync(Guid id)
     {
         try
