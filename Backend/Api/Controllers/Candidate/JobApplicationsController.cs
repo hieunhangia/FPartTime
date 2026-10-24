@@ -12,7 +12,7 @@ namespace Api.Controllers.Candidate
     [Authorize(Roles =Role.Candidate)]
     public class JobApplicationsController(JobApplicationService service) : ControllerBase
     {
-        [HttpPost("~/api/candidate/jobs/{jobId:guid}/apply")]
+        [HttpPost("/jobs/{jobId:guid}/apply")]
         [ProducesResponseType<JobApplicationResponseDto>(StatusCodes.Status201Created)]
         [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
         [ProducesResponseType<ProblemDetails>(StatusCodes.Status401Unauthorized)]
@@ -24,6 +24,19 @@ namespace Api.Controllers.Candidate
             var result = await service.ApplyJobAsync(User, jobId);
             return CreatedAtAction(nameof(GetMyApplications), null, result);
         }
+
+        [HttpDelete("{id:guid}")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType<ProblemDetails>(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
+        [ProducesResponseType<ProblemDetails>(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> WithdrawApplication(Guid id)
+        {
+            await service.WithdrawAsync(User, id);
+            return NoContent();
+        }
+
 
         [HttpGet]
         [EnableQuery]
