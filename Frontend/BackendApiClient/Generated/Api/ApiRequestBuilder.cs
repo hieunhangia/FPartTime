@@ -87,7 +87,7 @@ namespace ApiSdk.Api
         /// <summary>The JobApplications property</summary>
         public global::ApiSdk.Api.JobApplications.JobApplicationsRequestBuilder JobApplications
         {
-            get => new global::ApiSdk.Api.JobApplications.JobApplicationsRequestBuilder(PathParameters, RequestAdapter);
+            get => new global::ApiSdk.Api.Ipn.IpnRequestBuilder(PathParameters, RequestAdapter);
         }
         /// <summary>The jobs property</summary>
         public global::ApiSdk.Api.Jobs.JobsRequestBuilder Jobs
