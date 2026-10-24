@@ -8,6 +8,7 @@ using Domain.Shared.Constants;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Domain;
 
@@ -320,5 +321,40 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
                 }
             }
         }
+    }
+
+    protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
+    {
+        base.ConfigureConventions(configurationBuilder);
+
+        configurationBuilder.Properties<DateTime>()
+            .HaveConversion<UtcDateTimeConverter>();
+
+        configurationBuilder.Properties<DateTime?>()
+            .HaveConversion<NullableUtcDateTimeConverter>();
+    }
+}
+
+public class UtcDateTimeConverter : ValueConverter<DateTime, DateTime>
+{
+    public UtcDateTimeConverter() : base(
+        d => d.Kind == DateTimeKind.Unspecified
+            ? DateTime.SpecifyKind(d, DateTimeKind.Utc)
+            : d.ToUniversalTime(),
+        d => DateTime.SpecifyKind(d, DateTimeKind.Utc))
+    {
+    }
+}
+
+public class NullableUtcDateTimeConverter : ValueConverter<DateTime?, DateTime?>
+{
+    public NullableUtcDateTimeConverter() : base(
+        d => !d.HasValue
+            ? d
+            : (d.Value.Kind == DateTimeKind.Unspecified
+                ? DateTime.SpecifyKind(d.Value, DateTimeKind.Utc)
+                : d.Value.ToUniversalTime()),
+        d => !d.HasValue ? d : DateTime.SpecifyKind(d.Value, DateTimeKind.Utc))
+    {
     }
 }

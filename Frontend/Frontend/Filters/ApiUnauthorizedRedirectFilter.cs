@@ -1,3 +1,4 @@
+using BackendApiClient.Extensions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Kiota.Abstractions;
@@ -15,7 +16,8 @@ public class ApiUnauthorizedRedirectFilter : IAsyncPageFilter
         if (executedContext is { Exception: ApiException { ResponseStatusCode: 401 }, ExceptionHandled: false })
         {
             executedContext.ExceptionHandled = true;
-            context.Result = new RedirectToPageResult("/Identity/LoginOrRegister");
+            await executedContext.HttpContext.SignOutApiTokenAsync();
+            executedContext.Result = new RedirectToPageResult("/Identity/LoginOrRegister");
         }
     }
 }

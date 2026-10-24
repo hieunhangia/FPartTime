@@ -43,7 +43,6 @@ public class OrderService(ApplicationDbContext context) : IOrderService
                      .Where(t => t.Status == PaymentTransactionStatus.Pending))
         {
             pendingTransaction.Status = PaymentTransactionStatus.Cancelled;
-            pendingTransaction.PaidAt = DateTime.UtcNow;
         }
 
         await context.SaveChangesAsync();

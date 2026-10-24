@@ -1,0 +1,229 @@
+@page
+@using ApiSdk.Models
+@model Frontend.Pages.Employer.PaymentTransactions.IndexModel
+@{
+    ViewData["Title"] = "Lịch sử giao dịch";
+}
+
+<div class="container my-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="mb-1">Lịch sử giao dịch</h2>
+            <span class="text-muted small">Theo dõi chi tiết các giao dịch thanh toán qua các cổng thanh toán</span>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+            <a asp-page="/Employer/Orders/Index" class="btn btn-outline-secondary">
+                Quản lý đơn hàng
+            </a>
+            <a asp-page="/Employer/Subscriptions/Index" class="btn btn-outline-primary">
+                Mua gói dịch vụ
+            </a>
+        </div>
+    </div>
+
+    <div class="card mb-4 shadow-sm">
+        <div class="card-body">
+            <form method="get" class="row g-3 align-items-end">
+                <div class="col-md-3">
+                    <label asp-for="StatusFilter" class="form-label fw-bold">Trạng thái:</label>
+                    <select asp-for="StatusFilter" class="form-select">
+                        <option value="">-- Tất cả --</option>
+                        <option value="@PaymentTransactionStatus.Pending">Đang chờ</option>
+                        <option value="@PaymentTransactionStatus.Paid">Đã thanh toán</option>
+                        <option value="@PaymentTransactionStatus.Cancelled">Đã hủy</option>
+                        <option value="@PaymentTransactionStatus.Expired">Hết hạn</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label asp-for="FromDate" class="form-label fw-bold">Từ ngày:</label>
+                    <input asp-for="FromDate" type="date" class="form-control" />
+                </div>
+                <div class="col-md-2">
+                    <label asp-for="ToDate" class="form-label fw-bold">Đến ngày:</label>
+                    <input asp-for="ToDate" type="date" class="form-control" />
+                </div>
+                <div class="col-md-3">
+                    <label asp-for="OrderBy" class="form-label fw-bold">Sắp xếp:</label>
+                    <select asp-for="OrderBy" class="form-select">
+                        <option value="CreatedAt_Desc">Ngày tạo (Mới nhất)</option>
+                        <option value="CreatedAt_Asc">Ngày tạo (Cũ nhất)</option>
+                        <option value="Amount_Desc">Số tiền (Cao đến thấp)</option>
+                        <option value="Amount_Asc">Số tiền (Thấp đến cao)</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary flex-fill">Lọc</button>
+                        <a asp-page="./Index" class="btn btn-outline-secondary">Xóa lọc</a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <p class="text-muted mb-0">
+            Tìm thấy <strong>@Model.TotalCount</strong> giao dịch (Trang @Model.PageNumber / @Model.TotalPages)
+        </p>
+    </div>
+
+    @if (Model.Transactions.Count == 0)
+    {
+        <div class="alert alert-light border text-center py-5" role="alert">
+            <p class="mb-0 text-muted">Không tìm thấy giao dịch nào phù hợp với điều kiện tìm kiếm.</p>
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-hover align-middle shadow-sm">
+                <thead class="table-light">
+                    <tr>
+                        <th style="width: 140px;">Mã GD</th>
+                        <th style="width: 130px;">Cổng thanh toán</th>
+                        <th style="width: 150px;">Số tiền</th>
+                        <th style="width: 140px;">Trạng thái</th>
+                        <th style="width: 170px;">Thời gian tạo</th>
+                        <th style="width: 170px;">Hạn thanh toán</th>
+                        <th style="width: 170px;">Thời gian trả</th>
+                        <th style="width: 170px;" class="text-end">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var tx in Model.Transactions)
+                    {
+                        var (statusLabel, statusCss) = Model.GetStatusDisplay(tx.Status);
+                        var shortId = tx.Id?.ToString()[..8];
+                        <tr>
+                            <td>
+                                <span class="badge bg-light text-dark border font-monospace" title="@tx.Id">#@shortId</span>
+                            </td>
+                            <td>
+                                <span class="fw-bold">@tx.Provider</span>
+                            </td>
+                            <td>
+                                <span class="text-primary fw-bold">@(tx.Amount?.ToString("N0") ?? "0") đ</span>
+                            </td>
+                            <td>
+                                @if (Model.IsTransactionExpired(tx))
+                                {
+                                    <span class="badge bg-danger">Hết hạn</span>
+                                }
+                                else
+                                {
+                                    <span class="badge @statusCss">@statusLabel</span>
+                                }
+                            </td>
+                            <td class="small">
+                                @(tx.CreatedAt?.ToLocalTime().ToString("dd/MM/yyyy HH:mm") ?? "-")
+                            </td>
+                            <td class="small">
+                                @(tx.ExpiredAt?.ToLocalTime().ToString("dd/MM/yyyy HH:mm") ?? "-")
+                            </td>
+                            <td class="small">
+                                @(tx.PaidAt?.ToLocalTime().ToString("dd/MM/yyyy HH:mm") ?? "-")
+                            </td>
+                            <td class="text-end text-nowrap">
+                                @if (Model.CanPayNow(tx))
+                                {
+                                    <a href="@tx.PaymentUrl" class="btn btn-sm btn-success me-1">
+                                        Thanh toán ngay
+                                    </a>
+                                }
+
+                                @if (tx.Status == PaymentTransactionStatus.Pending)
+                                {
+                                    <form method="post" asp-page-handler="Cancel" asp-route-id="@tx.Id" class="d-inline"
+                                          onsubmit="return confirm('Bạn có chắc chắn muốn hủy giao dịch thanh toán này?');">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger">
+                                            Hủy
+                                        </button>
+                                    </form>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        @if (Model.TotalPages > 1)
+        {
+            <div class="d-flex justify-content-between align-items-center mt-4">
+                <nav aria-label="Phân trang giao dịch">
+                    <ul class="pagination mb-0">
+                        <li class="page-item @(Model.PageNumber <= 1 ? "disabled" : "")">
+                            <a class="page-link" asp-page="./Index"
+                               asp-route-StatusFilter="@Model.StatusFilter"
+                               asp-route-FromDate="@Model.FromDate?.ToString("yyyy-MM-dd")"
+                               asp-route-ToDate="@Model.ToDate?.ToString("yyyy-MM-dd")"
+                               asp-route-OrderBy="@Model.OrderBy"
+                               asp-route-PageNumber="1"
+                               title="Về trang đầu">&laquo; Đầu</a>
+                        </li>
+                        <li class="page-item @(Model.PageNumber <= 1 ? "disabled" : "")">
+                            <a class="page-link" asp-page="./Index"
+                               asp-route-StatusFilter="@Model.StatusFilter"
+                               asp-route-FromDate="@Model.FromDate?.ToString("yyyy-MM-dd")"
+                               asp-route-ToDate="@Model.ToDate?.ToString("yyyy-MM-dd")"
+                               asp-route-OrderBy="@Model.OrderBy"
+                               asp-route-PageNumber="@(Model.PageNumber - 1)"
+                               title="Trang trước">&lsaquo; Trước</a>
+                        </li>
+
+                        @for (var i = 1; i <= Model.TotalPages; i++)
+                        {
+                            if (i == 1 || i == Model.TotalPages || (i >= Model.PageNumber - 2 && i <= Model.PageNumber + 2))
+                            {
+                                var pageIdx = i;
+                                <li class="page-item @(pageIdx == Model.PageNumber ? "active" : "")">
+                                    <a class="page-link" asp-page="./Index"
+                                       asp-route-StatusFilter="@Model.StatusFilter"
+                                       asp-route-FromDate="@Model.FromDate?.ToString("yyyy-MM-dd")"
+                                       asp-route-ToDate="@Model.ToDate?.ToString("yyyy-MM-dd")"
+                                       asp-route-OrderBy="@Model.OrderBy"
+                                       asp-route-PageNumber="@pageIdx">@pageIdx</a>
+                                </li>
+                            }
+                            else if (i == Model.PageNumber - 3 || i == Model.PageNumber + 3)
+                            {
+                                <li class="page-item disabled"><span class="page-link">...</span></li>
+                            }
+                        }
+
+                        <li class="page-item @(Model.PageNumber >= Model.TotalPages ? "disabled" : "")">
+                            <a class="page-link" asp-page="./Index"
+                               asp-route-StatusFilter="@Model.StatusFilter"
+                               asp-route-FromDate="@Model.FromDate?.ToString("yyyy-MM-dd")"
+                               asp-route-ToDate="@Model.ToDate?.ToString("yyyy-MM-dd")"
+                               asp-route-OrderBy="@Model.OrderBy"
+                               asp-route-PageNumber="@(Model.PageNumber + 1)"
+                               title="Trang sau">Sau &rsaquo;</a>
+                        </li>
+                        <li class="page-item @(Model.PageNumber >= Model.TotalPages ? "disabled" : "")">
+                            <a class="page-link" asp-page="./Index"
+                               asp-route-StatusFilter="@Model.StatusFilter"
+                               asp-route-FromDate="@Model.FromDate?.ToString("yyyy-MM-dd")"
+                               asp-route-ToDate="@Model.ToDate?.ToString("yyyy-MM-dd")"
+                               asp-route-OrderBy="@Model.OrderBy"
+                               asp-route-PageNumber="@Model.TotalPages"
+                               title="Xuống trang cuối">Cuối &raquo;</a>
+                        </li>
+                    </ul>
+                </nav>
+
+                <form method="get" class="d-flex align-items-center gap-2">
+                    <input type="hidden" name="StatusFilter" value="@Model.StatusFilter" />
+                    <input type="hidden" name="FromDate" value="@Model.FromDate?.ToString("yyyy-MM-dd")" />
+                    <input type="hidden" name="ToDate" value="@Model.ToDate?.ToString("yyyy-MM-dd")" />
+                    <input type="hidden" name="OrderBy" value="@Model.OrderBy" />
+                    <label for="jumpPageNumber" class="text-muted small text-nowrap mb-0">Nhảy đến trang:</label>
+                    <input type="number" id="jumpPageNumber" name="PageNumber"
+                           min="1" max="@Model.TotalPages" value="@Model.PageNumber"
+                           class="form-control form-control-sm text-center" style="width: 70px;" />
+                    <button type="submit" class="btn btn-sm btn-outline-primary">Đi</button>
+                </form>
+            </div>
+        }
+    }
+</div>

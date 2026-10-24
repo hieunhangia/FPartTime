@@ -36,21 +36,20 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
 
         options.Events = new CookieAuthenticationEvents
         {
-            OnValidatePrincipal = context =>
+            OnValidatePrincipal = async context =>
             {
                 var accessToken = context.Properties.GetTokenValue(HttpContextApiAuthExtensions.AccessTokenName);
                 if (string.IsNullOrEmpty(accessToken))
                 {
                     context.RejectPrincipal();
-                    return Task.CompletedTask;
+                    await context.HttpContext.SignOutApiTokenAsync();
                 }
 
                 if (new JsonWebTokenHandler().ReadJsonWebToken(accessToken).ValidTo < DateTime.UtcNow)
                 {
                     context.RejectPrincipal();
+                    await context.HttpContext.SignOutApiTokenAsync();
                 }
-
-                return Task.CompletedTask;
             }
         };
     });

@@ -30,8 +30,6 @@ public class PaymentTransactionService(ApplicationDbContext context) : IPaymentT
         }
 
         transaction.Status = PaymentTransactionStatus.Cancelled;
-        transaction.PaidAt = DateTime.UtcNow;
-
         await context.SaveChangesAsync();
         return transaction.MapToDto();
     }
