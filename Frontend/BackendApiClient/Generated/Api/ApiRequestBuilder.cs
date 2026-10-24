@@ -11,6 +11,7 @@ using ApiSdk.Api.EmployerRegistrations;
 using ApiSdk.Api.Identity;
 using ApiSdk.Api.Industries;
 using ApiSdk.Api.Ipn;
+using ApiSdk.Api.JobApplications;
 using ApiSdk.Api.Jobs;
 using ApiSdk.Api.Manager;
 using ApiSdk.Api.Notifications;
@@ -80,6 +81,11 @@ namespace ApiSdk.Api
         }
         /// <summary>The Ipn property</summary>
         public global::ApiSdk.Api.Ipn.IpnRequestBuilder Ipn
+        {
+            get => new global::ApiSdk.Api.Ipn.IpnRequestBuilder(PathParameters, RequestAdapter);
+        }
+        /// <summary>The JobApplications property</summary>
+        public global::ApiSdk.Api.JobApplications.JobApplicationsRequestBuilder JobApplications
         {
             get => new global::ApiSdk.Api.Ipn.IpnRequestBuilder(PathParameters, RequestAdapter);
         }
