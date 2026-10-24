@@ -234,11 +234,19 @@
                         </label>
                     </div>
 
-                    <div class="form-check p-3 border rounded">
+                    <div class="form-check p-3 border rounded mb-2">
                         <input class="form-check-input ms-0 me-3" type="radio" asp-for="Input.PaymentMethod" id="methodVNPAY" value="VNPAY" />
                         <label class="form-check-label w-100" for="methodVNPAY">
                             <div class="fw-bold">VNPAY</div>
                             <div class="text-muted small">Thanh toán qua cổng VNPAY (Thẻ ATM nội địa, QR VNPAY, Thẻ quốc tế)</div>
+                        </label>
+                    </div>
+
+                    <div class="form-check p-3 border rounded">
+                        <input class="form-check-input ms-0 me-3" type="radio" asp-for="Input.PaymentMethod" id="methodZaloPay" value="ZaloPay" />
+                        <label class="form-check-label w-100" for="methodZaloPay">
+                            <div class="fw-bold">ZaloPay</div>
+                            <div class="text-muted small">Thanh toán tiện lợi qua Ví điện tử ZaloPay, Thẻ ATM nội địa, Thẻ quốc tế, QR ZaloPay</div>
                         </label>
                     </div>
                 </div>

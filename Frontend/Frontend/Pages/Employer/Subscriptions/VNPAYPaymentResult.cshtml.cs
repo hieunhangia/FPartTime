@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 namespace Frontend.Pages.Employer.Subscriptions;
 
 [Authorize(Roles = Role.Employer)]
-public class PaymentResultModel : PageModel
+public class VNPAYPaymentResultModel : PageModel
 {
     [BindProperty(SupportsGet = true, Name = "vnp_ResponseCode")]
     public string? VnpResponseCode { get; set; }

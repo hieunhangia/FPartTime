@@ -46,6 +46,16 @@ public class SubscriptionsController(ISubscriptionService subscriptionService) :
         Ok(await subscriptionService.CreateVNPAYCheckoutAsync(User,
             HttpContext.Connection.RemoteIpAddress?.ToString() ?? "127.0.0.1", request));
 
+    [HttpPost("zalopay-checkout")]
+    [ProducesResponseType<CreateCheckoutResponseDto>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status409Conflict)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status500InternalServerError)]
+    public async Task<IActionResult> CreateZaloPayCheckout([FromBody] CreateZaloPayCheckoutRequestDto request) =>
+        Ok(await subscriptionService.CreateZaloPayCheckoutAsync(User, request));
+
     [HttpPost("cancel")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]

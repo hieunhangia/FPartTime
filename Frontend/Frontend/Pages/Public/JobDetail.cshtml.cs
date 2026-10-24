@@ -87,7 +87,7 @@ public class JobDetailModel(ApiClient apiClient) : PageModel
 
         try
         {
-            await apiClient.Api.Candidate.Jobs[id].Apply.PostAsync();
+            await apiClient.Jobs[id].Apply.PostAsync();
             TempData.SetSuccessMessage("Ứng tuyển thành công! Nhà tuyển dụng sẽ liên hệ với bạn sớm.");
         }
         catch (ApiException ex)

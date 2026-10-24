@@ -76,7 +76,7 @@ public class IndexModel(ApiClient apiClient, ILogger<IndexModel> logger) : PageM
                 {
                     Tier = Input.Tier,
                     Duration = Input.Duration,
-                    ReturnPath = "/Employer/Subscriptions/PaymentResult"
+                    ReturnPath = "/Employer/Subscriptions/VNPAYPaymentResult"
                 };
 
                 var response = await apiClient.Api.Employer.Subscriptions.VnpayCheckout.PostAsync(request);
@@ -86,6 +86,25 @@ public class IndexModel(ApiClient apiClient, ILogger<IndexModel> logger) : PageM
                 }
 
                 TempData.SetErrorMessage("Không lấy được đường dẫn thanh toán từ VNPAY.");
+                return RedirectToPage();
+            }
+
+            if (Input.PaymentMethod == "ZaloPay")
+            {
+                var request = new CreateZaloPayCheckoutRequestDto
+                {
+                    Tier = Input.Tier,
+                    Duration = Input.Duration,
+                    ReturnPath = "/Employer/Subscriptions/ZaloPayPaymentResult"
+                };
+
+                var response = await apiClient.Api.Employer.Subscriptions.ZalopayCheckout.PostAsync(request);
+                if (!string.IsNullOrEmpty(response?.PaymentUrl))
+                {
+                    return Redirect(response.PaymentUrl);
+                }
+
+                TempData.SetErrorMessage("Không lấy được đường dẫn thanh toán từ ZaloPay.");
                 return RedirectToPage();
             }
 

@@ -16,6 +16,9 @@ public interface ISubscriptionService
     Task<CreateCheckoutResponseDto> CreateVNPAYCheckoutAsync(ClaimsPrincipal user, string clientIpAddress,
         CreateVNPAYCheckoutRequestDto request);
 
+    Task<CreateCheckoutResponseDto> CreateZaloPayCheckoutAsync(ClaimsPrincipal user,
+        CreateZaloPayCheckoutRequestDto request);
+
     Task ProcessSubscriptionOrderAsync(Guid transactionId);
     Task<int> ProcessExpiredSubscriptionsAsync(CancellationToken cancellationToken = default);
 }
@@ -59,6 +62,8 @@ public class CreatePayOSCheckoutRequestDto : SubscriptionCheckoutRequestBase
 }
 
 public class CreateVNPAYCheckoutRequestDto : SubscriptionCheckoutRequestBase;
+
+public class CreateZaloPayCheckoutRequestDto : SubscriptionCheckoutRequestBase;
 
 public class CreateCheckoutResponseDto
 {

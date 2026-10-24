@@ -69,4 +69,40 @@ public class IpnController(IPaymentServiceFactory paymentServiceFactory, IIpnDis
             });
         }
     }
+
+    [HttpPost("zalopay")]
+    public async Task<IActionResult> ZaloPayCallback([FromBody] ZaloPayCallbackRequestDto request)
+    {
+        try
+        {
+            var result = await paymentServiceFactory.Get(PaymentProvider.ZaloPay).ProcessIpnAsync(request);
+            if (!result.IsValidSignature)
+            {
+                return Ok(new ZaloPayCallbackResponseDto
+                {
+                    ReturnCode = 99,
+                    ReturnMessage = "mac not equal"
+                });
+            }
+
+            if (result.IsPaymentSuccess && !string.IsNullOrEmpty(result.PaymentReferenceId))
+            {
+                await ipnDispatcher.DispatchAsync(result.PaymentReferenceId);
+            }
+
+            return Ok(new ZaloPayCallbackResponseDto
+            {
+                ReturnCode = 1,
+                ReturnMessage = "success"
+            });
+        }
+        catch (Exception ex)
+        {
+            return Ok(new ZaloPayCallbackResponseDto
+            {
+                ReturnCode = 99,
+                ReturnMessage = ex.Message
+            });
+        }
+    }
 }

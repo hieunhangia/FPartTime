@@ -33,6 +33,14 @@ public static class DependencyInjection
         builder.Services.AddScoped<IPaymentService, VNPAYPaymentService>();
         builder.Services.AddHealthChecks().AddCheck<VNPAYHealthCheck>(name: "VNPAY Service", tags: ["payment"]);
 
+        // ZaloPay
+        builder.Services.AddHttpClient(ZaloPayPaymentService.HttpClientName, client =>
+        {
+            client.Timeout = TimeSpan.FromSeconds(10);
+        });
+        builder.Services.AddScoped<IPaymentService, ZaloPayPaymentService>();
+        builder.Services.AddHealthChecks().AddCheck<ZaloPayHealthCheck>(name: "ZaloPay Service", tags: ["payment"]);
+
         // Sms Sender Service
         builder.Services.AddSingleton<ISmsSenderService, LoggerSmsSenderService>();
 

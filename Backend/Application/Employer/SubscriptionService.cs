@@ -112,6 +112,19 @@ public class SubscriptionService(
                 BusinessRuleConstants.Employers.Subscriptions.PaymentExpiresInMinutes)
         });
 
+    public async Task<CreateCheckoutResponseDto> CreateZaloPayCheckoutAsync(ClaimsPrincipal user,
+        CreateZaloPayCheckoutRequestDto request) =>
+        await CreateCheckoutBaseAsync(user, request, PaymentProvider.ZaloPay, plan => new CreateZaloPayPaymentRequest
+        {
+            Amount = plan.Price,
+            Description = $"Dang ki goi {plan.Tier} {plan.Duration}",
+            ReturnUrl = frontendUrlBuilder.BuildUrl(request.ReturnPath),
+            AppUser = user.GetUserId().ToString(),
+            ExpiredAt = DateTime.UtcNow.AddMinutes(
+                BusinessRuleConstants.Employers.Subscriptions.PaymentExpiresInMinutes),
+            Items = [new CreateZaloPayPaymentRequest.PaymentItem { Name = plan.Name, Price = plan.Price, Quantity = 1 }]
+        });
+
     public async Task ProcessSubscriptionOrderAsync(Guid transactionId)
     {
         var transaction = await context.PaymentTransactions

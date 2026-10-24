@@ -16,6 +16,8 @@ namespace ApiSdk.Models
         public IDictionary<string, object> AdditionalData { get; set; }
         /// <summary>The appliedAt property</summary>
         public DateTimeOffset? AppliedAt { get; set; }
+        /// <summary>The id property</summary>
+        public Guid? Id { get; set; }
         /// <summary>The jobId property</summary>
         public Guid? JobId { get; set; }
         /// <summary>The jobTitle property</summary>
@@ -54,6 +56,7 @@ namespace ApiSdk.Models
             return new Dictionary<string, Action<IParseNode>>
             {
                 { "appliedAt", n => { AppliedAt = n.GetDateTimeOffsetValue(); } },
+                { "id", n => { Id = n.GetGuidValue(); } },
                 { "jobId", n => { JobId = n.GetGuidValue(); } },
                 { "jobTitle", n => { JobTitle = n.GetStringValue(); } },
                 { "status", n => { Status = n.GetEnumValue<global::ApiSdk.Models.JobApplicationStatus>(); } },
@@ -67,6 +70,7 @@ namespace ApiSdk.Models
         {
             if(ReferenceEquals(writer, null)) throw new ArgumentNullException(nameof(writer));
             writer.WriteDateTimeOffsetValue("appliedAt", AppliedAt);
+            writer.WriteGuidValue("id", Id);
             writer.WriteGuidValue("jobId", JobId);
             writer.WriteStringValue("jobTitle", JobTitle);
             writer.WriteEnumValue<global::ApiSdk.Models.JobApplicationStatus>("status", Status);

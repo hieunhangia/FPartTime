@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 using Domain.Shared.Enums;
 
 namespace Contracts.External.Payments;
@@ -50,6 +51,19 @@ public class CreateVNPAYPaymentRequest : CreatePaymentRequestBase
 {
     public required string IpAddress { get; set; }
     public string? OrderType { get; set; }
+}
+
+public class CreateZaloPayPaymentRequest : CreatePaymentRequestBase
+{
+    public required string AppUser { get; set; }
+    public required List<PaymentItem> Items { get; set; }
+
+    public class PaymentItem
+    {
+        public required string Name { get; set; }
+        public required decimal Price { get; set; }
+        public required int Quantity { get; set; }
+    }
 }
 
 public class PayOSWebhookRequestDto : ProcessIpnRequestBase
@@ -126,4 +140,34 @@ public class VNPAYIpnResponseDto
 {
     public required string RspCode { get; set; }
     public required string Message { get; set; }
+}
+
+public class ZaloPayCallbackRequestDto : ProcessIpnRequestBase
+{
+    [Required] public string Data { get; set; } = string.Empty;
+    [Required] public string Mac { get; set; } = string.Empty;
+    public int Type { get; set; }
+
+    public class ZaloPayCallbackDataDto
+    {
+        [JsonPropertyName("app_id")] public int AppId { get; set; }
+        [JsonPropertyName("app_trans_id")] public string AppTransId { get; set; } = string.Empty;
+        [JsonPropertyName("app_time")] public long AppTime { get; set; }
+        [JsonPropertyName("app_user")] public string AppUser { get; set; } = string.Empty;
+        public long Amount { get; set; }
+        [JsonPropertyName("embed_data")] public string EmbedData { get; set; } = string.Empty;
+        public string Item { get; set; } = string.Empty;
+        [JsonPropertyName("zp_trans_id")] public long ZpTransId { get; set; }
+        [JsonPropertyName("server_time")] public long ServerTime { get; set; }
+        public int Channel { get; set; }
+        [JsonPropertyName("merchant_user_id")] public string? MerchantUserId { get; set; }
+        [JsonPropertyName("user_fee_amount")] public long UserFeeAmount { get; set; }
+        [JsonPropertyName("discount_amount")] public long DiscountAmount { get; set; }
+    }
+}
+
+public class ZaloPayCallbackResponseDto
+{
+    [JsonPropertyName("return_code")] public required int ReturnCode { get; set; }
+    [JsonPropertyName("return_message")] public required string ReturnMessage { get; set; }
 }
