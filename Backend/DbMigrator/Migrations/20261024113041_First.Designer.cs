@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DbMigrator.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20261023182805_First")]
+    [Migration("20261024113041_First")]
     partial class First
     {
         /// <inheritdoc />
@@ -412,6 +412,9 @@ namespace DbMigrator.Migrations
                         .IsRequired()
                         .HasMaxLength(34)
                         .HasColumnType("nvarchar(34)");
+
+                    b.Property<DateTime>("ExpiredAt")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("Status")
                         .IsRequired()

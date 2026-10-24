@@ -26,6 +26,7 @@ public class OrderDetailResponseDto
     public required string Description { get; set; }
     public required OrderStatus Status { get; set; }
     public required DateTime CreatedAt { get; set; }
+    public required DateTime ExpiredAt { get; set; }
     public required DateTime? CompletedAt { get; set; }
     public required List<PaymentTransactionResponseDto> PaymentTransactions { get; set; }
 

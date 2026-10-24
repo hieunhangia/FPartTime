@@ -11,6 +11,7 @@ public abstract class OrderBase
     public required string Description { get; set; }
     public OrderStatus Status { get; set; } = OrderStatus.PendingPayment;
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public required DateTime ExpiredAt { get; set; }
     public DateTime? CompletedAt { get; set; }
 
     public User? User { get; set; }

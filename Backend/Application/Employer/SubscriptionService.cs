@@ -157,7 +157,7 @@ public class SubscriptionService(
             return;
         }
 
-        if (order.Status != OrderStatus.PendingPayment)
+        if (order.Status != OrderStatus.PendingPayment && order.Status != OrderStatus.Expired)
         {
             logger.LogError("Đơn hàng {OrderId} đã được xử lý trước đó với trạng thái {Status}", order.Id,
                 order.Status);
@@ -361,7 +361,8 @@ public class SubscriptionService(
                 ExtraActivePosts = plan.ExtraActivePosts,
                 FreeBumps = plan.FreeBumps,
                 CanRecommendCandidates = plan.CanRecommendCandidates,
-                CanQueryCandidates = plan.CanQueryCandidates
+                CanQueryCandidates = plan.CanQueryCandidates,
+                ExpiredAt = paymentRequest.ExpiredAt
             },
             UserId = userId,
             Provider = provider,

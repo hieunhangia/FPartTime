@@ -16,6 +16,7 @@ public static class DependencyInjection
         builder.Services.AddHostedService<ExpiredJobCleanupService>();
         builder.Services.AddHostedService<ExpiredSubscriptionCleanupService>();
         builder.Services.AddHostedService<ExpiredPaymentTransactionCleanupService>();
+        builder.Services.AddHostedService<ExpiredOrderCleanupService>();
 
         // Payment Services
         builder.Services.AddScoped<IPaymentServiceFactory, PaymentServiceFactory>();

@@ -20,5 +20,9 @@ namespace ApiSdk.Models
         #pragma warning disable CS1591
         Cancelled,
         #pragma warning restore CS1591
+        [EnumMember(Value = "Expired")]
+        #pragma warning disable CS1591
+        Expired,
+        #pragma warning restore CS1591
     }
 }

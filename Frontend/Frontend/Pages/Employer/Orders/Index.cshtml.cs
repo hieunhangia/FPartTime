@@ -124,6 +124,7 @@ public class IndexModel(ApiClient apiClient) : PageModel
         OrderStatus.PendingPayment => ("Chờ thanh toán", "bg-warning text-dark"),
         OrderStatus.Completed => ("Hoàn thành", "bg-success"),
         OrderStatus.Cancelled => ("Đã hủy", "bg-secondary"),
+        OrderStatus.Expired => ("Hết hạn", "bg-danger"),
         _ => (status?.ToString() ?? "-", "bg-secondary")
     };
 }

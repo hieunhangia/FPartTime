@@ -26,6 +26,8 @@ namespace ApiSdk.Models
 #else
         public string Description { get; set; }
 #endif
+        /// <summary>The expiredAt property</summary>
+        public DateTimeOffset? ExpiredAt { get; set; }
         /// <summary>The id property</summary>
         public Guid? Id { get; set; }
         /// <summary>The paymentTransactions property</summary>
@@ -68,6 +70,7 @@ namespace ApiSdk.Models
                 { "completedAt", n => { CompletedAt = n.GetDateTimeOffsetValue(); } },
                 { "createdAt", n => { CreatedAt = n.GetDateTimeOffsetValue(); } },
                 { "description", n => { Description = n.GetStringValue(); } },
+                { "expiredAt", n => { ExpiredAt = n.GetDateTimeOffsetValue(); } },
                 { "id", n => { Id = n.GetGuidValue(); } },
                 { "paymentTransactions", n => { PaymentTransactions = n.GetCollectionOfObjectValues<global::ApiSdk.Models.PaymentTransactionResponseDto>(global::ApiSdk.Models.PaymentTransactionResponseDto.CreateFromDiscriminatorValue)?.AsList(); } },
                 { "status", n => { Status = n.GetEnumValue<global::ApiSdk.Models.OrderStatus>(); } },
@@ -84,6 +87,7 @@ namespace ApiSdk.Models
             writer.WriteDateTimeOffsetValue("completedAt", CompletedAt);
             writer.WriteDateTimeOffsetValue("createdAt", CreatedAt);
             writer.WriteStringValue("description", Description);
+            writer.WriteDateTimeOffsetValue("expiredAt", ExpiredAt);
             writer.WriteGuidValue("id", Id);
             writer.WriteCollectionOfObjectValues<global::ApiSdk.Models.PaymentTransactionResponseDto>("paymentTransactions", PaymentTransactions);
             writer.WriteEnumValue<global::ApiSdk.Models.OrderStatus>("status", Status);

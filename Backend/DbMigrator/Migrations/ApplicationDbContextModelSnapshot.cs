@@ -410,6 +410,9 @@ namespace DbMigrator.Migrations
                         .HasMaxLength(34)
                         .HasColumnType("nvarchar(34)");
 
+                    b.Property<DateTime>("ExpiredAt")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("Status")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");

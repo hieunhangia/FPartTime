@@ -13,6 +13,7 @@ public static class DependencyInjection
         builder.Services.AddScoped<Contracts.Application.IIdentityService, IdentityService>();
         builder.Services.AddScoped<Contracts.Application.INotificationsService, NotificationsService>();
         builder.Services.AddScoped<Contracts.Application.IPaymentTransactionService, PaymentTransactionService>();
+        builder.Services.AddScoped<Contracts.Application.IOrderService, OrderService>();
         builder.Services.AddScoped<Contracts.Application.IIpnDispatcher, IpnDispatcher>();
 
         // Public
