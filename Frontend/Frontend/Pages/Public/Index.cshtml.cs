@@ -12,9 +12,9 @@ namespace Frontend.Pages.Public;
 
 public class IndexModel(ApiClient apiClient) : PageModel
 {
-    public List<string> Provinces { get; private set; } = [];
-    public List<IndustrySummary> Industries { get; private set; } = [];
-    public List<IndustrySummary> PopularIndustries { get; private set; } = [];
+    public List<ProvinceDto> Provinces { get; private set; } = [];
+    public List<IndustryResponseDto> Industries { get; private set; } = [];
+    public List<PopularIndustryResponseDto> PopularIndustries { get; private set; } = [];
     public List<JobResponseDto> PopularJobs { get; private set; } = [];
     public OpenForJobBannerViewModel? OpenForJobStatus { get; private set; }
     public bool HasSearchFilters => !string.IsNullOrWhiteSpace(Keyword)
@@ -61,30 +61,17 @@ public class IndexModel(ApiClient apiClient) : PageModel
 
         try
         {
-            var response = await apiClient.Api.Jobs.GetAsync();
-            var allJobs = response?.Items ?? [];
+            var response = await apiClient.Api.Jobs
+                .GetPagedWithODataAsync<JobResponseDto, PagedResponseDtoOfJobResponseDto>(q => q.Top(6));
 
-            PopularJobs = allJobs.Take(6).ToList();
+            PopularJobs = response?.Items ?? [];
 
-            Provinces = allJobs
-                .Where(j => !string.IsNullOrWhiteSpace(j.ProvinceName))
-                .Select(j => j.ProvinceName!.Trim())
-                .Distinct()
-                .OrderBy(p => p)
-                .ToList();
+            Provinces = await apiClient.Api.Addresses.Provinces.GetAsync() ?? [];
 
-            Industries = allJobs
-                .Where(j => j.IndustryId.HasValue && !string.IsNullOrWhiteSpace(j.IndustryName))
-                .GroupBy(j => j.IndustryId!.Value)
-                .Select(group => new IndustrySummary(group.Key, group.First().IndustryName!.Trim(), group.Count()))
-                .OrderBy(industry => industry.Name)
-                .ToList();
+            Industries = await apiClient.Api.Industries.GetAsync() ?? [];
 
-            PopularIndustries = Industries
-                .OrderByDescending(industry => industry.JobCount)
-                .ThenBy(industry => industry.Name)
-                .Take(5)
-                .ToList();
+            PopularIndustries = await apiClient.Api.Industries.Popular.GetAsync(
+                config => config.QueryParameters.Limit = 5) ?? [];
         }
         catch (ApiException ex) when (ex.ResponseStatusCode == 401)
         {
@@ -139,6 +126,4 @@ public class IndexModel(ApiClient apiClient) : PageModel
 
         return RedirectToPage("/Public/Index");
     }
-
-    public sealed record IndustrySummary(Guid Id, string Name, int JobCount);
 }

@@ -160,6 +160,12 @@ public static class BusinessRuleConstants
         }
     }
 
+    public static class Industries
+    {
+        public const int DefaultPopularLimit = 5;
+        public const int MaxPopularLimit = 100;
+    }
+
     public static class Jobs
     {
         public const int MaxVacanciesPerJob = 1000;
