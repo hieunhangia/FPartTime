@@ -15,6 +15,15 @@ public class DetailModel(ApiClient apiClient) : PageModel
 {
     public OrderDetailResponseDto? Order { get; private set; }
 
+    [BindProperty]
+    public string PaymentMethod { get; set; } = "PayOS";
+
+    public bool CanCreatePaymentTransaction =>
+        Order != null &&
+        Order.Status != OrderStatus.Completed &&
+        Order.Status != OrderStatus.Cancelled &&
+        (!Order.PaymentTransactions?.Any(t => t.Status == PaymentTransactionStatus.Pending) ?? true);
+
     public async Task<IActionResult> OnGetAsync(Guid id)
     {
         try
@@ -76,6 +85,80 @@ public class DetailModel(ApiClient apiClient) : PageModel
         }
 
         return RedirectToPage(new { id });
+    }
+
+    public async Task<IActionResult> OnPostCreatePaymentAsync(Guid id)
+    {
+        try
+        {
+            if (PaymentMethod == "PayOS")
+            {
+                var request = new CreatePayOSCheckoutRequestDto
+                {
+                    OrderId = id,
+                    ReturnPath = "/Employer/Subscriptions/Success",
+                    CancelPath = "/Employer/Subscriptions/Cancel"
+                };
+
+                var response = await apiClient.Api.Employer.Subscriptions.PayosCheckout.PostAsync(request);
+                if (!string.IsNullOrEmpty(response?.PaymentUrl))
+                {
+                    return Redirect(response.PaymentUrl);
+                }
+
+                TempData.SetErrorMessage("Không lấy được đường dẫn thanh toán từ PayOS.");
+                return RedirectToPage(new { id });
+            }
+
+            if (PaymentMethod == "VNPAY")
+            {
+                var request = new CreateVNPAYCheckoutRequestDto
+                {
+                    OrderId = id,
+                    ReturnPath = "/Employer/Subscriptions/VNPAYPaymentResult"
+                };
+
+                var response = await apiClient.Api.Employer.Subscriptions.VnpayCheckout.PostAsync(request);
+                if (!string.IsNullOrEmpty(response?.PaymentUrl))
+                {
+                    return Redirect(response.PaymentUrl);
+                }
+
+                TempData.SetErrorMessage("Không lấy được đường dẫn thanh toán từ VNPAY.");
+                return RedirectToPage(new { id });
+            }
+
+            if (PaymentMethod == "ZaloPay")
+            {
+                var request = new CreateZaloPayCheckoutRequestDto
+                {
+                    OrderId = id,
+                    ReturnPath = "/Employer/Subscriptions/ZaloPayPaymentResult"
+                };
+
+                var response = await apiClient.Api.Employer.Subscriptions.ZalopayCheckout.PostAsync(request);
+                if (!string.IsNullOrEmpty(response?.PaymentUrl))
+                {
+                    return Redirect(response.PaymentUrl);
+                }
+
+                TempData.SetErrorMessage("Không lấy được đường dẫn thanh toán từ ZaloPay.");
+                return RedirectToPage(new { id });
+            }
+
+            TempData.SetErrorMessage("Phương thức thanh toán không được hỗ trợ.");
+            return RedirectToPage(new { id });
+        }
+        catch (ApiException ex)
+        {
+            TempData.SetErrorMessage(ex.ToFriendlyErrorMessage());
+            return RedirectToPage(new { id });
+        }
+        catch
+        {
+            TempData.SetErrorMessage("Đã xảy ra lỗi khi tạo yêu cầu thanh toán. Vui lòng thử lại sau.");
+            return RedirectToPage(new { id });
+        }
     }
 
     public (string Label, string CssClass) GetOrderStatusDisplay(OrderStatus? status) => status switch

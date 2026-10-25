@@ -40,6 +40,7 @@ namespace ApiSdk.Api.Employer.Subscriptions.ZalopayCheckout
         /// <exception cref="global::ApiSdk.Models.ProblemDetails">When receiving a 400 status code</exception>
         /// <exception cref="global::ApiSdk.Models.ProblemDetails">When receiving a 401 status code</exception>
         /// <exception cref="global::ApiSdk.Models.ProblemDetails">When receiving a 403 status code</exception>
+        /// <exception cref="global::ApiSdk.Models.ProblemDetails">When receiving a 404 status code</exception>
         /// <exception cref="global::ApiSdk.Models.ProblemDetails">When receiving a 409 status code</exception>
         /// <exception cref="global::ApiSdk.Models.ProblemDetails">When receiving a 500 status code</exception>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
@@ -58,6 +59,7 @@ namespace ApiSdk.Api.Employer.Subscriptions.ZalopayCheckout
                 { "400", global::ApiSdk.Models.ProblemDetails.CreateFromDiscriminatorValue },
                 { "401", global::ApiSdk.Models.ProblemDetails.CreateFromDiscriminatorValue },
                 { "403", global::ApiSdk.Models.ProblemDetails.CreateFromDiscriminatorValue },
+                { "404", global::ApiSdk.Models.ProblemDetails.CreateFromDiscriminatorValue },
                 { "409", global::ApiSdk.Models.ProblemDetails.CreateFromDiscriminatorValue },
                 { "500", global::ApiSdk.Models.ProblemDetails.CreateFromDiscriminatorValue },
             };

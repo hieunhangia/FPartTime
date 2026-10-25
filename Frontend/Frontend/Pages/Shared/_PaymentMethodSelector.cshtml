@@ -1,0 +1,34 @@
+@model Frontend.ViewModels.PaymentMethodSelectorViewModel
+@{
+    var fieldName = string.IsNullOrWhiteSpace(Model.FieldName) ? "PaymentMethod" : Model.FieldName;
+    var selectedMethod = string.IsNullOrWhiteSpace(Model.SelectedMethod) ? "PayOS" : Model.SelectedMethod;
+    var idPrefix = fieldName.Replace(".", "_");
+}
+
+<div class="mb-3">
+    <label class="form-label fw-bold mb-2">Chọn phương thức thanh toán:</label>
+
+    <div class="form-check p-3 border rounded mb-2">
+        <input class="form-check-input ms-0 me-3" type="radio" name="@fieldName" id="@($"{idPrefix}_PayOS")" value="PayOS" @(selectedMethod == "PayOS" ? "checked" : "") />
+        <label class="form-check-label w-100" for="@($"{idPrefix}_PayOS")">
+            <div class="fw-bold">PayOS (Quét mã VietQR)</div>
+            <div class="text-muted small">Thanh toán nhanh chóng bằng ứng dụng ngân hàng qua mã VietQR</div>
+        </label>
+    </div>
+
+    <div class="form-check p-3 border rounded mb-2">
+        <input class="form-check-input ms-0 me-3" type="radio" name="@fieldName" id="@($"{idPrefix}_VNPAY")" value="VNPAY" @(selectedMethod == "VNPAY" ? "checked" : "") />
+        <label class="form-check-label w-100" for="@($"{idPrefix}_VNPAY")">
+            <div class="fw-bold">VNPAY</div>
+            <div class="text-muted small">Thanh toán qua cổng VNPAY (Thẻ ATM nội địa, QR VNPAY, Thẻ quốc tế)</div>
+        </label>
+    </div>
+
+    <div class="form-check p-3 border rounded">
+        <input class="form-check-input ms-0 me-3" type="radio" name="@fieldName" id="@($"{idPrefix}_ZaloPay")" value="ZaloPay" @(selectedMethod == "ZaloPay" ? "checked" : "") />
+        <label class="form-check-label w-100" for="@($"{idPrefix}_ZaloPay")">
+            <div class="fw-bold">ZaloPay</div>
+            <div class="text-muted small">Thanh toán tiện lợi qua Ví điện tử ZaloPay, Thẻ ATM nội địa, Thẻ quốc tế, QR ZaloPay</div>
+        </label>
+    </div>
+</div>

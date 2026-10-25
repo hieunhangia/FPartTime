@@ -89,23 +89,23 @@ public class SubscriptionService(
 
     public async Task<CreateCheckoutResponseDto> CreatePayOSCheckoutAsync(ClaimsPrincipal user,
         CreatePayOSCheckoutRequestDto request) =>
-        await CreateCheckoutBaseAsync(user, request, PaymentProvider.PayOS, plan => new CreatePayOSPaymentRequest
+        await CreateCheckoutBaseAsync(user, request, PaymentProvider.PayOS, (planName, price, tier, duration) => new CreatePayOSPaymentRequest
         {
-            Amount = plan.Price,
-            Description = $"Dang ki goi {plan.Tier} {plan.Duration}",
+            Amount = price,
+            Description = $"Dang ki goi {tier} {duration}",
             CancelUrl = frontendUrlBuilder.BuildUrl(request.CancelPath),
             ReturnUrl = frontendUrlBuilder.BuildUrl(request.ReturnPath),
             ExpiredAt = DateTime.UtcNow.AddMinutes(
                 BusinessRuleConstants.Employers.Subscriptions.PaymentExpiresInMinutes),
-            Items = [new CreatePayOSPaymentRequest.PaymentItem { Name = plan.Name, Price = plan.Price, Quantity = 1 }]
+            Items = [new CreatePayOSPaymentRequest.PaymentItem { Name = planName, Price = price, Quantity = 1 }]
         });
 
     public async Task<CreateCheckoutResponseDto> CreateVNPAYCheckoutAsync(ClaimsPrincipal user, string clientIpAddress,
         CreateVNPAYCheckoutRequestDto request) =>
-        await CreateCheckoutBaseAsync(user, request, PaymentProvider.VNPAY, plan => new CreateVNPAYPaymentRequest
+        await CreateCheckoutBaseAsync(user, request, PaymentProvider.VNPAY, (_, price, tier, duration) => new CreateVNPAYPaymentRequest
         {
-            Amount = plan.Price,
-            Description = $"Dang ki goi {plan.Tier} {plan.Duration}",
+            Amount = price,
+            Description = $"Dang ki goi {tier} {duration}",
             ReturnUrl = frontendUrlBuilder.BuildUrl(request.ReturnPath),
             IpAddress = clientIpAddress,
             ExpiredAt = DateTime.UtcNow.AddMinutes(
@@ -114,15 +114,15 @@ public class SubscriptionService(
 
     public async Task<CreateCheckoutResponseDto> CreateZaloPayCheckoutAsync(ClaimsPrincipal user,
         CreateZaloPayCheckoutRequestDto request) =>
-        await CreateCheckoutBaseAsync(user, request, PaymentProvider.ZaloPay, plan => new CreateZaloPayPaymentRequest
+        await CreateCheckoutBaseAsync(user, request, PaymentProvider.ZaloPay, (planName, price, tier, duration) => new CreateZaloPayPaymentRequest
         {
-            Amount = plan.Price,
-            Description = $"Dang ki goi {plan.Tier} {plan.Duration}",
+            Amount = price,
+            Description = $"Dang ki goi {tier} {duration}",
             ReturnUrl = frontendUrlBuilder.BuildUrl(request.ReturnPath),
             AppUser = user.GetUserId().ToString(),
             ExpiredAt = DateTime.UtcNow.AddMinutes(
                 BusinessRuleConstants.Employers.Subscriptions.PaymentExpiresInMinutes),
-            Items = [new CreateZaloPayPaymentRequest.PaymentItem { Name = plan.Name, Price = plan.Price, Quantity = 1 }]
+            Items = [new CreateZaloPayPaymentRequest.PaymentItem { Name = planName, Price = price, Quantity = 1 }]
         });
 
     public async Task ProcessSubscriptionOrderAsync(Guid transactionId)
@@ -300,11 +300,9 @@ public class SubscriptionService(
         return expiredSubs.Count;
     }
 
-    private async Task<CreateCheckoutResponseDto> CreateCheckoutBaseAsync(ClaimsPrincipal user,
-        SubscriptionCheckoutRequestBase request, PaymentProvider provider,
-        Func<EmployerSubscriptionPlan, CreatePaymentRequestBase> buildPaymentRequest)
+    private async Task ValidateSubscriptionEligibilityAsync(Guid userId,
+        EmployerSubscriptionTier targetTier)
     {
-        var userId = user.GetUserId();
         var employer = await context.Employers.AsNoTracking()
             .FirstOrDefaultAsync(e => e.UserId == userId);
         if (employer == null)
@@ -320,6 +318,76 @@ public class SubscriptionService(
                 "Bạn đang có giao dịch Gói đăng ký chờ thanh toán. Vui lòng hoàn tất hoặc hủy các giao dịch đó trước khi tạo đơn mới.");
         }
 
+        var now = DateTime.UtcNow;
+        var activeSub = await context.EmployerSubscriptions.AsNoTracking()
+            .Where(s => s.EmployerId == userId && s.Status == EmployerSubscriptionStatus.Active && s.EndDate >= now)
+            .OrderByDescending(s => s.EndDate)
+            .FirstOrDefaultAsync();
+
+        if (activeSub != null && activeSub.Tier != targetTier)
+        {
+            throw new BadRequestException(
+                $"Bạn đang sử dụng gói {activeSub.Tier}. Bạn chỉ có thể gia hạn các gói cùng hạng {activeSub.Tier}, hoặc hủy gói cũ để đăng ký gói mới.");
+        }
+    }
+
+    private async Task<CreateCheckoutResponseDto> CreateCheckoutBaseAsync(ClaimsPrincipal user,
+        SubscriptionCheckoutRequestBase request, PaymentProvider provider,
+        Func<string, decimal, EmployerSubscriptionTier, EmployerSubscriptionDuration, CreatePaymentRequestBase> buildPaymentRequest)
+    {
+        var userId = user.GetUserId();
+
+        if (request.OrderId.HasValue)
+        {
+            var order = await context.Orders
+                .Include(o => o.PaymentTransactions)
+                .FirstOrDefaultAsync(o => o.Id == request.OrderId.Value && o.UserId == userId);
+
+            if (order == null)
+            {
+                throw new NotFoundException("Không tìm thấy đơn hàng.");
+            }
+
+            if (order is not EmployerSubscriptionOrder subOrder)
+            {
+                throw new BadRequestException("Đơn hàng không thuộc loại đăng ký gói dịch vụ.");
+            }
+
+            if (order.Status is OrderStatus.Completed or OrderStatus.Cancelled)
+            {
+                throw new BadRequestException("Đơn hàng đã hoàn tất hoặc đã bị hủy, không thể tạo giao dịch mới.");
+            }
+
+            await ValidateSubscriptionEligibilityAsync(userId, subOrder.Tier);
+
+            var paymentRequest = buildPaymentRequest(subOrder.PlanName, subOrder.TotalAmount, subOrder.Tier, subOrder.Duration);
+            var paymentResponse = await paymentServiceFactory.Get(provider).CreatePaymentAsync(paymentRequest);
+
+            context.PaymentTransactions.Add(new PaymentTransaction
+            {
+                OrderId = subOrder.Id,
+                UserId = userId,
+                Provider = provider,
+                PaymentReferenceId = paymentResponse.PaymentReferenceId,
+                PaymentUrl = paymentResponse.PaymentUrl,
+                Amount = subOrder.TotalAmount,
+                ExpiredAt = paymentRequest.ExpiredAt
+            });
+
+            if (subOrder.Status == OrderStatus.Expired)
+            {
+                subOrder.Status = OrderStatus.PendingPayment;
+            }
+            subOrder.ExpiredAt = paymentRequest.ExpiredAt;
+
+            await context.SaveChangesAsync();
+
+            return new CreateCheckoutResponseDto
+            {
+                PaymentUrl = paymentResponse.PaymentUrl
+            };
+        }
+
         if (!request.Tier.HasValue || !request.Duration.HasValue)
         {
             throw new BadRequestException("Thông tin đăng ký gói không đầy đủ.");
@@ -333,27 +401,17 @@ public class SubscriptionService(
             throw new BadRequestException("Gói đăng ký không tồn tại hoặc đã ngừng cung cấp.");
         }
 
-        var now = DateTime.UtcNow;
-        var activeSub = await context.EmployerSubscriptions.AsNoTracking()
-            .Where(s => s.EmployerId == userId && s.Status == EmployerSubscriptionStatus.Active && s.EndDate >= now)
-            .OrderByDescending(s => s.EndDate)
-            .FirstOrDefaultAsync();
+        await ValidateSubscriptionEligibilityAsync(userId, plan.Tier);
 
-        if (activeSub != null && activeSub.Tier != plan.Tier)
-        {
-            throw new BadRequestException(
-                $"Bạn đang sử dụng gói {activeSub.Tier}. Bạn chỉ có thể gia hạn các gói cùng hạng {activeSub.Tier}, hoặc hủy gói cũ để đăng ký gói mới.");
-        }
-
-        var paymentRequest = buildPaymentRequest(plan);
-        var paymentResponse = await paymentServiceFactory.Get(provider).CreatePaymentAsync(paymentRequest);
+        var newPaymentRequest = buildPaymentRequest(plan.Name, plan.Price, plan.Tier, plan.Duration);
+        var newPaymentResponse = await paymentServiceFactory.Get(provider).CreatePaymentAsync(newPaymentRequest);
         context.PaymentTransactions.Add(new PaymentTransaction
         {
             Order = new EmployerSubscriptionOrder
             {
                 UserId = userId,
                 TotalAmount = plan.Price,
-                Description = paymentRequest.Description,
+                Description = newPaymentRequest.Description,
                 Tier = plan.Tier,
                 Duration = plan.Duration,
                 PlanName = plan.Name,
@@ -362,19 +420,19 @@ public class SubscriptionService(
                 FreeBumps = plan.FreeBumps,
                 CanRecommendCandidates = plan.CanRecommendCandidates,
                 CanQueryCandidates = plan.CanQueryCandidates,
-                ExpiredAt = paymentRequest.ExpiredAt
+                ExpiredAt = newPaymentRequest.ExpiredAt
             },
             UserId = userId,
             Provider = provider,
-            PaymentReferenceId = paymentResponse.PaymentReferenceId,
-            PaymentUrl = paymentResponse.PaymentUrl,
+            PaymentReferenceId = newPaymentResponse.PaymentReferenceId,
+            PaymentUrl = newPaymentResponse.PaymentUrl,
             Amount = plan.Price,
-            ExpiredAt = paymentRequest.ExpiredAt
+            ExpiredAt = newPaymentRequest.ExpiredAt
         });
         await context.SaveChangesAsync();
         return new CreateCheckoutResponseDto
         {
-            PaymentUrl = paymentResponse.PaymentUrl
+            PaymentUrl = newPaymentResponse.PaymentUrl
         };
     }
 }

@@ -39,11 +39,11 @@ public class EmployerSubscriptionPlanResponseDto
 
 public abstract class SubscriptionCheckoutRequestBase
 {
-    [Required(ErrorMessage = "Gói dịch vụ là bắt buộc.")]
+    public Guid? OrderId { get; set; }
+
     [EnumDataType(typeof(EmployerSubscriptionTier), ErrorMessage = "Gói dịch vụ không hợp lệ.")]
     public EmployerSubscriptionTier? Tier { get; set; }
 
-    [Required(ErrorMessage = "Kỳ hạn gói là bắt buộc.")]
     [EnumDataType(typeof(EmployerSubscriptionDuration), ErrorMessage = "Kỳ hạn gói không hợp lệ.")]
     public EmployerSubscriptionDuration? Duration { get; set; }
 

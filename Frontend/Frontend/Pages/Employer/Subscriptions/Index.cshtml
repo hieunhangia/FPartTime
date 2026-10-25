@@ -224,31 +224,7 @@
                         </div>
                     </div>
 
-                    <label class="form-label fw-bold mb-2">Chọn phương thức thanh toán:</label>
-
-                    <div class="form-check p-3 border rounded mb-2">
-                        <input class="form-check-input ms-0 me-3" type="radio" asp-for="Input.PaymentMethod" id="methodPayOS" value="PayOS" checked />
-                        <label class="form-check-label w-100" for="methodPayOS">
-                            <div class="fw-bold">PayOS (Quét mã VietQR)</div>
-                            <div class="text-muted small">Thanh toán nhanh chóng bằng ứng dụng ngân hàng qua mã VietQR</div>
-                        </label>
-                    </div>
-
-                    <div class="form-check p-3 border rounded mb-2">
-                        <input class="form-check-input ms-0 me-3" type="radio" asp-for="Input.PaymentMethod" id="methodVNPAY" value="VNPAY" />
-                        <label class="form-check-label w-100" for="methodVNPAY">
-                            <div class="fw-bold">VNPAY</div>
-                            <div class="text-muted small">Thanh toán qua cổng VNPAY (Thẻ ATM nội địa, QR VNPAY, Thẻ quốc tế)</div>
-                        </label>
-                    </div>
-
-                    <div class="form-check p-3 border rounded">
-                        <input class="form-check-input ms-0 me-3" type="radio" asp-for="Input.PaymentMethod" id="methodZaloPay" value="ZaloPay" />
-                        <label class="form-check-label w-100" for="methodZaloPay">
-                            <div class="fw-bold">ZaloPay</div>
-                            <div class="text-muted small">Thanh toán tiện lợi qua Ví điện tử ZaloPay, Thẻ ATM nội địa, Thẻ quốc tế, QR ZaloPay</div>
-                        </label>
-                    </div>
+                    <partial name="_PaymentMethodSelector" model='new ViewModels.PaymentMethodSelectorViewModel { FieldName = "Input.PaymentMethod", SelectedMethod = Model.Input.PaymentMethod }' />
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Đóng</button>
