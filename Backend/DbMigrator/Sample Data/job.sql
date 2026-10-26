@@ -6,8 +6,8 @@
 --   '0000000030' (The IELTS Workshop)
 --   '0000000040' (Golden Gate Ba Đình)
 --   '0000000050' (Canifa Thanh Xuân)
---   '0967890123' (Ánh Dương Event)
---   '0978901234' (Cozy Book Cafe)
+--   '0000000060' (Ánh Dương Event)
+--   '0000000070' (Cozy Book Cafe)
 -- =====================================================================================
 
 DECLARE @EmpHighlands UNIQUEIDENTIFIER = (SELECT TOP 1 Id FROM AspNetUsers WHERE UserName = '0000000010');
@@ -15,8 +15,8 @@ DECLARE @EmpCircleK UNIQUEIDENTIFIER = (SELECT TOP 1 Id FROM AspNetUsers WHERE U
 DECLARE @EmpIelts UNIQUEIDENTIFIER = (SELECT TOP 1 Id FROM AspNetUsers WHERE UserName = '0000000030');
 DECLARE @EmpGoldenGate UNIQUEIDENTIFIER = (SELECT TOP 1 Id FROM AspNetUsers WHERE UserName = '0000000040');
 DECLARE @EmpCanifa UNIQUEIDENTIFIER = (SELECT TOP 1 Id FROM AspNetUsers WHERE UserName = '0000000050');
-DECLARE @EmpAnhDuong UNIQUEIDENTIFIER = (SELECT TOP 1 Id FROM AspNetUsers WHERE UserName = '0967890123');
-DECLARE @EmpCozyBook UNIQUEIDENTIFIER = (SELECT TOP 1 Id FROM AspNetUsers WHERE UserName = '0978901234');
+DECLARE @EmpAnhDuong UNIQUEIDENTIFIER = (SELECT TOP 1 Id FROM AspNetUsers WHERE UserName = '0000000060');
+DECLARE @EmpCozyBook UNIQUEIDENTIFIER = (SELECT TOP 1 Id FROM AspNetUsers WHERE UserName = '0000000070');
 
 DECLARE @CandNam UNIQUEIDENTIFIER = (SELECT TOP 1 Id FROM AspNetUsers WHERE UserName = '0000000001');
 DECLARE @CandTrang UNIQUEIDENTIFIER = (SELECT TOP 1 Id FROM AspNetUsers WHERE UserName = '0000000002');
@@ -56,6 +56,12 @@ END;
 -- 2. NẠP 36 VIỆC LÀM THỰC TẾ (JOBS) PHÂN BỔ ĐA DOANH NGHIỆP VÀ ĐA DẠNG MỌI TRẠNG THÁI
 -- =====================================================================================
 IF @EmpHighlands IS NOT NULL
+   AND @EmpCircleK IS NOT NULL
+   AND @EmpIelts IS NOT NULL
+   AND @EmpGoldenGate IS NOT NULL
+   AND @EmpCanifa IS NOT NULL
+   AND @EmpAnhDuong IS NOT NULL
+   AND @EmpCozyBook IS NOT NULL
 BEGIN
     INSERT INTO Jobs (Id, Title, Description, VacancyCount, GenderRequirement, MinAgeRequirement, MaxAgeRequirement,
                       CommuneCode, DetailAddress, ExpiryAt, Status, CreatedAt, UpdatedAt, LastBumpedAt, EmployerId, IndustryId)
@@ -433,7 +439,7 @@ BEGIN
     -- =====================================================================================
     -- 5. NẠP ĐƠN ỨNG TUYỂN THỰC TẾ (JOB APPLICATIONS: Pending, Accepted, Rejected)
     -- =====================================================================================
-    IF @CandNam IS NOT NULL AND @CandTrang IS NOT NULL
+    IF @CandNam IS NOT NULL AND @CandTrang IS NOT NULL AND @CandDuc IS NOT NULL AND @CandLinh IS NOT NULL AND @CandLong IS NOT NULL
     BEGIN
         INSERT INTO JobApplications (Id, Status, AppliedAt, JobId, CandidateId)
         VALUES
@@ -464,7 +470,7 @@ BEGIN
     -- =====================================================================================
     -- 6. NẠP BÁO CÁO VI PHẠM (JOB REPORTS: Pending, Resolved, Dismissed)
     -- =====================================================================================
-    IF @CandNam IS NOT NULL AND @CandTrang IS NOT NULL AND @CensorKien IS NOT NULL
+    IF @CandNam IS NOT NULL AND @CandTrang IS NOT NULL AND @CandDuc IS NOT NULL AND @CandLinh IS NOT NULL AND @CensorKien IS NOT NULL
     BEGIN
         INSERT INTO JobReports (Id, Reason, Status, CreatedAt, JobId, ReporterId, ResolverId)
         VALUES

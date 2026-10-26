@@ -443,6 +443,20 @@ public class DataSeeder(ApplicationDbContext db)
     {
         var user = await EnsureBaseUserExistsAsync(phoneNumber, password, Role.Employer);
 
+        if (!await db.Candidates.AnyAsync(c => c.UserId == user.Id))
+        {
+            db.Candidates.Add(new CandidateProfile
+            {
+                UserId = user.Id,
+                AvatarFilePath = BusinessRuleConstants.DefaultAvatarFilePath,
+                Bio = $"Đại diện doanh nghiệp {companyName}",
+                FullName = companyName,
+                DateOfBirth = new DateOnly(1990, 1, 1),
+                Gender = Gender.Male,
+                PreferredWorkCommuneCode = "00166"
+            });
+        }
+
         if (!await db.Employers.AnyAsync(e => e.UserId == user.Id))
         {
             db.Employers.Add(new EmployerProfile
