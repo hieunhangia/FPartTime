@@ -126,6 +126,7 @@
                         }
                         @if (User.IsInRole(Role.Admin))
                         {
+                            <li><a class="dropdown-item" asp-page="/Admin/Users/Index">Quản lý tài khoản</a></li>
                             <li><a class="dropdown-item" asp-page="/Admin/SystemHealth/Index">Sức khỏe hệ thống</a></li>
                         }
                         <li>

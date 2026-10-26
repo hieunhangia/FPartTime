@@ -38,5 +38,6 @@ public static class DependencyInjection
         builder.Services.AddScoped<Contracts.Application.Manager.IIndustryService, Manager.IndustryService>();
 
         // Admin
+        builder.Services.AddScoped<Contracts.Application.Admin.IUserService, Admin.UserService>();
     }
 }

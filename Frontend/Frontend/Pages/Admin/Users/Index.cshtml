@@ -1,0 +1,99 @@
+@page
+@using Frontend.Constants
+@model Frontend.Pages.Admin.Users.IndexModel
+@{
+    ViewData["Title"] = "Quản lý tài khoản";
+}
+
+<div class="container my-4">
+    <h2 class="mb-1">Quản lý tài khoản</h2>
+
+    <form method="get" class="card card-body mb-4">
+        <div class="row g-3 align-items-end">
+            <div class="col-12 col-md-5">
+                <label asp-for="PhoneNumberPrefix" class="form-label">Số điện thoại bắt đầu bằng</label>
+                <input asp-for="PhoneNumberPrefix" class="form-control" inputmode="numeric" maxlength="10" />
+                <span asp-validation-for="PhoneNumberPrefix" class="text-danger"></span>
+            </div>
+            <div class="col-12 col-md-4">
+                <label asp-for="RoleFilter" class="form-label">Quyền</label>
+                <select asp-for="RoleFilter" class="form-select">
+                    <option value="">Tất cả</option>
+                    <option value="@Role.Censor">@Role.GetDisplayName(Role.Censor)</option>
+                    <option value="@Role.Employer">@Role.GetDisplayName(Role.Employer)</option>
+                    <option value="@Role.Candidate">@Role.GetDisplayName(Role.Candidate)</option>
+                </select>
+                <span asp-validation-for="RoleFilter" class="text-danger"></span>
+            </div>
+            <div class="col-12 col-md-3 d-flex gap-2">
+                <button type="submit" class="btn btn-primary">Tìm kiếm</button>
+                <a asp-page="./Index" class="btn btn-outline-secondary">Xóa lọc</a>
+            </div>
+        </div>
+        <div asp-validation-summary="All" class="text-danger mt-2"></div>
+    </form>
+
+    <p class="text-muted">Tìm thấy <strong>@Model.TotalCount</strong> tài khoản.</p>
+    @if (Model.Accounts.Count == 0)
+    {
+        <div class="alert alert-light border" role="status">Không có tài khoản phù hợp.</div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>Số điện thoại</th>
+                        <th>Quyền</th>
+                        <th>Trạng thái</th>
+                        <th class="text-end">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var account in Model.Accounts)
+                    {
+                        <tr>
+                            <td>@account.PhoneNumber</td>
+                            <td>@string.Join(", ", (account.Roles ?? []).Select(Role.GetDisplayName))</td>
+                            <td>
+                                @if (account.IsLockedOut == true)
+                                {
+                                    <span class="badge bg-danger">Đang khóa</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-success">Hoạt động</span>
+                                }
+                            </td>
+                            <td class="text-end">
+                                <a asp-page="./Detail" asp-route-id="@account.Id" class="btn btn-sm btn-outline-primary">Quản lý</a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+
+    @if (Model.TotalPages > 1)
+    {
+        <nav aria-label="Phân trang tài khoản">
+            <ul class="pagination justify-content-end">
+                <li class="page-item @(Model.PageNumber == 1 ? "disabled" : "")">
+                    <a class="page-link" asp-page="./Index" asp-route-RoleFilter="@Model.RoleFilter"
+                       asp-route-PhoneNumberPrefix="@Model.PhoneNumberPrefix" asp-route-PageNumber="@(Model.PageNumber - 1)">Trước</a>
+                </li>
+                <li class="page-item disabled"><span class="page-link">@Model.PageNumber / @Model.TotalPages</span></li>
+                <li class="page-item @(Model.PageNumber == Model.TotalPages ? "disabled" : "")">
+                    <a class="page-link" asp-page="./Index" asp-route-RoleFilter="@Model.RoleFilter"
+                       asp-route-PhoneNumberPrefix="@Model.PhoneNumberPrefix" asp-route-PageNumber="@(Model.PageNumber + 1)">Sau</a>
+                </li>
+            </ul>
+        </nav>
+    }
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

@@ -1,0 +1,87 @@
+@page "{id:guid}"
+@using Frontend.Constants
+@model Frontend.Pages.Admin.Users.DetailModel
+@{
+    ViewData["Title"] = "Quản lý tài khoản";
+}
+
+<div class="container my-4">
+    <a asp-page="./Index" class="btn btn-link px-0 mb-3">&larr; Danh sách tài khoản</a>
+    @if (Model.Account is not null)
+    {
+        <h2 class="mb-3">Tài khoản @Model.Account.PhoneNumber</h2>
+        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+        <div class="card mb-4">
+            <div class="card-body">
+                <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
+                    <strong>Quyền hiện tại:</strong>
+                    @if (Model.Account.Roles is { Count: > 0 })
+                    {
+                        @foreach (var role in Model.Account.Roles)
+                        {
+                            <span class="badge bg-primary">@Role.GetDisplayName(role)</span>
+                        }
+                    }
+                    else
+                    {
+                        <span class="text-muted">Chưa có quyền</span>
+                    }
+                </div>
+                <p class="mb-2"><strong>Trạng thái:</strong>
+                    @(Model.Account.IsLockedOut == true ? "Đang khóa" : "Hoạt động")</p>
+                @if (Model.Account.IsLockedOut == true && Model.Account.LockoutEndUtc is { } lockoutEnd)
+                {
+                    <p class="mb-0"><strong>Khóa đến:</strong> @lockoutEnd.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</p>
+                }
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-12 col-lg-6">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h3 class="h5">Đổi quyền</h3>
+                        <p class="text-muted small">Chỉ cập nhật quyền kiểm duyệt viên và ứng viên. Quyền nhà tuyển dụng hiện có được giữ nguyên.</p>
+                        <form method="post" asp-page-handler="Roles" asp-route-id="@Model.Account.Id">
+                            @foreach (var role in new[] { Role.Censor, Role.Candidate })
+                            {
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" name="SelectedRoles" value="@role"
+                                           id="role-@role" checked="@Model.SelectedRoles.Contains(role)" />
+                                    <label class="form-check-label" for="role-@role">@Role.GetDisplayName(role)</label>
+                                </div>
+                            }
+                            <span asp-validation-for="SelectedRoles" class="text-danger d-block mb-2"></span>
+                            <button type="submit" class="btn btn-primary">Lưu quyền</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-lg-6">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h3 class="h5">Khóa tài khoản</h3>
+                        <form method="post" asp-page-handler="Lock" asp-route-id="@Model.Account.Id" class="mb-3">
+                            <label asp-for="LockDurationHours" class="form-label">Thời gian khóa (giờ)</label>
+                            <input asp-for="LockDurationHours" type="number" min="1" max="8760" class="form-control" />
+                            <span asp-validation-for="LockDurationHours" class="text-danger d-block mb-2"></span>
+                            <div class="form-text mb-3">Ví dụ: 24 giờ là 1 ngày. Thời gian tính từ lúc lưu.</div>
+                            <button type="submit" class="btn btn-danger">@(Model.Account.IsLockedOut == true ? "Đặt lại thời hạn khóa" : "Khóa tài khoản")</button>
+                        </form>
+                        @if (Model.Account.IsLockedOut == true)
+                        {
+                            <form method="post" asp-page-handler="Unlock" asp-route-id="@Model.Account.Id">
+                                <button type="submit" class="btn btn-outline-secondary">Mở khóa ngay</button>
+                            </form>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
