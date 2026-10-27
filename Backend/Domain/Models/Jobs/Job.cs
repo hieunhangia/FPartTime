@@ -1,4 +1,5 @@
 using Domain.Models.Address;
+using Domain.Models.CandidateViewJobStats;
 using Domain.Models.Users;
 using Domain.Shared.Enums;
 
@@ -30,4 +31,5 @@ public class Job
     public ICollection<JobSalary>? JobSalaries { get; set; }
     public ICollection<JobApplication>? JobApplications { get; set; }
     public ICollection<JobReport>? JobReports { get; set; }
+    public ICollection<CandidateViewJobStatsSnapshot>? CandidateViewJobStatsSnapshots { get; set; }
 }

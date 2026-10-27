@@ -65,6 +65,131 @@
                     </div>
                 </div>
 
+                <!-- Thống kê đơn ứng tuyển (Dành cho Candidate) -->
+                @if (User.IsLoggedIn && User.IsInRole(Frontend.Constants.Role.Candidate) && Model.CandidateJobStats != null)
+                {
+                    var stats = Model.CandidateJobStats;
+                    <div class="card mb-4 border">
+                        <div class="card-header bg-light d-flex justify-content-between align-items-center py-2">
+                            <span class="fw-bold">Thống kê đơn ứng tuyển</span>
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="badge bg-secondary">Số dư: @(stats.CurrentBalance ?? 0) lượt</span>
+                                <a asp-page="/Candidate/ViewJobStats/BuyCredits" asp-route-returnUrl="@(Url.Page("/Public/JobDetail", new { id = job.Id, returnUrl = Model.ReturnUrl }))" class="btn btn-outline-primary btn-sm py-0" style="font-size: 0.8rem;">
+                                    Mua thêm lượt
+                                </a>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            @if (stats.IsJobActiveAndOpen != true)
+                            {
+                                @if (stats.HasUnlocked == true && stats.Snapshot != null)
+                                {
+                                    <div class="alert alert-secondary py-2 small mb-3">
+                                        Số liệu ghi nhận lúc: <strong>@(stats.Snapshot.SnapshotAt?.ToLocalTime().ToString("dd/MM/yyyy HH:mm") ?? "-")</strong>. Bài đăng này đã đóng hoặc hết hạn nên không thể làm mới số liệu.
+                                    </div>
+                                    <div class="row g-2 text-center">
+                                        <div class="col-6 col-md-3">
+                                            <div class="p-2 border rounded bg-light">
+                                                <small class="text-muted d-block">Tổng số đơn</small>
+                                                <span class="fw-bold fs-5">@stats.Snapshot.TotalApplications</span>
+                                            </div>
+                                        </div>
+                                        <div class="col-6 col-md-3">
+                                            <div class="p-2 border rounded bg-light">
+                                                <small class="text-muted d-block">Chờ duyệt</small>
+                                                <span class="fw-bold fs-5 text-warning">@stats.Snapshot.PendingApplications</span>
+                                            </div>
+                                        </div>
+                                        <div class="col-6 col-md-3">
+                                            <div class="p-2 border rounded bg-light">
+                                                <small class="text-muted d-block">Được nhận</small>
+                                                <span class="fw-bold fs-5 text-success">@stats.Snapshot.AcceptedApplications</span>
+                                            </div>
+                                        </div>
+                                        <div class="col-6 col-md-3">
+                                            <div class="p-2 border rounded bg-light">
+                                                <small class="text-muted d-block">Từ chối</small>
+                                                <span class="fw-bold fs-5 text-danger">@stats.Snapshot.RejectedApplications</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div class="text-muted small">Bài đăng đã đóng hoặc hết hạn, không còn nhận đơn ứng tuyển.</div>
+                                }
+                            }
+                            else if ((stats.CurrentBalance ?? 0) == 0)
+                            {
+                                <div class="alert alert-info mb-3">
+                                    <div class="fw-bold mb-1">Nắm bắt số lượng hồ sơ đã ứng tuyển trước khi nộp đơn</div>
+                                    <div class="small text-muted mb-2">Xem ngay số đơn đang chờ, được nhận hoặc từ chối để đánh giá mức độ cạnh tranh của vị trí này.</div>
+                                    <div class="small">Bạn hiện chưa có lượt xem thống kê.</div>
+                                </div>
+                                <a asp-page="/Candidate/ViewJobStats/BuyCredits" asp-route-returnUrl="@(Url.Page("/Public/JobDetail", new { id = job.Id, returnUrl = Model.ReturnUrl }))" class="btn btn-primary btn-sm">
+                                    Mua lượt xem ngay
+                                </a>
+                            }
+                            else
+                            {
+                                @if (stats.HasUnlocked == true && stats.Snapshot != null)
+                                {
+                                    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+                                        <span class="text-muted small">
+                                            Số liệu ghi nhận lúc: <strong>@(stats.Snapshot.SnapshotAt?.ToLocalTime().ToString("dd/MM/yyyy HH:mm") ?? "-")</strong> (Dữ liệu không tự động cập nhật)
+                                        </span>
+                                        <form method="post" asp-page-handler="RefreshStats" asp-route-id="@job.Id" asp-route-returnUrl="@Model.ReturnUrl" onsubmit="return confirm('Sử dụng 1 lượt xem để cập nhật số liệu mới nhất?');">
+                                            <button type="submit" class="btn btn-outline-primary btn-sm">
+                                                Cập nhật số liệu mới nhất (Tốn 1 lượt)
+                                            </button>
+                                        </form>
+                                    </div>
+                                    <div class="row g-2 text-center">
+                                        <div class="col-6 col-md-3">
+                                            <div class="p-2 border rounded bg-light">
+                                                <small class="text-muted d-block">Tổng số đơn</small>
+                                                <span class="fw-bold fs-5">@stats.Snapshot.TotalApplications</span>
+                                            </div>
+                                        </div>
+                                        <div class="col-6 col-md-3">
+                                            <div class="p-2 border rounded bg-light">
+                                                <small class="text-muted d-block">Chờ duyệt</small>
+                                                <span class="fw-bold fs-5 text-warning">@stats.Snapshot.PendingApplications</span>
+                                            </div>
+                                        </div>
+                                        <div class="col-6 col-md-3">
+                                            <div class="p-2 border rounded bg-light">
+                                                <small class="text-muted d-block">Được nhận</small>
+                                                <span class="fw-bold fs-5 text-success">@stats.Snapshot.AcceptedApplications</span>
+                                            </div>
+                                        </div>
+                                        <div class="col-6 col-md-3">
+                                            <div class="p-2 border rounded bg-light">
+                                                <small class="text-muted d-block">Từ chối</small>
+                                                <span class="fw-bold fs-5 text-danger">@stats.Snapshot.RejectedApplications</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
+                                        <div>
+                                            <div class="fw-bold">Mở khóa số lượng đơn ứng tuyển</div>
+                                            <div class="small text-muted">Xem số lượng hồ sơ đã ứng tuyển. Bạn còn <strong>@(stats.CurrentBalance ?? 0)</strong> lượt xem.</div>
+                                        </div>
+                                        <form method="post" asp-page-handler="UnlockStats" asp-route-id="@job.Id" asp-route-returnUrl="@Model.ReturnUrl" onsubmit="return confirm('Sử dụng 1 lượt xem để mở khóa thống kê đơn cho tin tuyển dụng này?');">
+                                            <button type="submit" class="btn btn-success btn-sm">
+                                                Mở khóa ngay (1 lượt)
+                                            </button>
+                                        </form>
+                                    </div>
+                                }
+                            }
+                        </div>
+                    </div>
+                }
+
                 <!-- Mô tả công việc -->
                 <div class="mb-4">
                     <h5 class="fw-bold mb-2">Mô tả công việc</h5>

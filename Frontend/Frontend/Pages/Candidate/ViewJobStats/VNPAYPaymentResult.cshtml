@@ -1,0 +1,42 @@
+@page
+@model Frontend.Pages.Candidate.ViewJobStats.VNPAYPaymentResultModel
+@{
+    ViewData["Title"] = "Kết quả thanh toán VNPAY";
+}
+
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-md-7 col-lg-6">
+            <div class="card shadow-sm text-center border p-4">
+                <div class="card-body">
+                    <div class="mb-3">
+                        <span class="d-inline-flex align-items-center justify-content-center rounded-circle bg-danger bg-opacity-25 text-danger"
+                              style="width: 72px; height: 72px;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" fill="currentColor" viewBox="0 0 16 16">
+                                <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/>
+                                <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708"/>
+                            </svg>
+                        </span>
+                    </div>
+
+                    <h3 class="card-title fw-bold text-danger mb-2">Thanh toán không thành công</h3>
+                    <p class="text-muted mb-4">
+                        @Model.ErrorMessage
+                    </p>
+
+                    <div class="d-flex justify-content-center gap-2">
+                        <a asp-page="./BuyCredits" asp-route-returnUrl="@Model.ReturnUrl" class="btn btn-primary px-4">
+                            Chọn lại gói lượt xem
+                        </a>
+                        @if (!string.IsNullOrWhiteSpace(Model.ReturnUrl))
+                        {
+                            <a href="@Model.ReturnUrl" class="btn btn-outline-secondary px-3">
+                                Quay lại bài đăng
+                            </a>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -114,11 +114,22 @@ public static class BusinessRuleConstants
             public const int NameMaxLength = 100;
             public const int DescriptionMaxLength = 500;
         }
+
+        public static class CandidateViewJobStatsPackage
+        {
+            public const int NameMaxLength = 100;
+            public const int DescriptionMaxLength = 500;
+        }
     }
 
     public static class Candidates
     {
         public const int OpenForJobAvailabilityDays = 7;
+
+        public static class ViewJobStats
+        {
+            public const int PaymentExpiresInMinutes = 15;
+        }
     }
 
     public static class Employers

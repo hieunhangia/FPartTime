@@ -13,6 +13,7 @@ namespace Frontend.Pages.Public;
 public class JobDetailModel(ApiClient apiClient) : PageModel
 {
     public JobResponseDto? Job { get; private set; }
+    public CandidateJobStatsResponseDto? CandidateJobStats { get; private set; }
 
     [BindProperty(SupportsGet = true)]
     public string? ReturnUrl { get; set; }
@@ -102,6 +103,67 @@ public class JobDetailModel(ApiClient apiClient) : PageModel
         return RedirectToPage("/Public/JobDetail", new { id, ReturnUrl });
     }
 
+    public async Task<IActionResult> OnPostUnlockStatsAsync(Guid id)
+    {
+        if (!User.IsLoggedIn)
+        {
+            TempData.SetWarningMessage("Vui lòng đăng nhập để mở khóa thống kê.");
+            return RedirectToPage("/Public/JobDetail", new { id, ReturnUrl });
+        }
+
+        if (!User.IsInRole(Role.Candidate))
+        {
+            TempData.SetErrorMessage("Chỉ tài khoản ứng viên mới có quyền mở khóa thống kê.");
+            return RedirectToPage("/Public/JobDetail", new { id, ReturnUrl });
+        }
+
+        try
+        {
+            await apiClient.Api.Candidate.ViewJobStats.Jobs[id].Unlock.PostAsync();
+            TempData.SetSuccessMessage("Mở khóa số liệu thống kê thành công!");
+        }
+        catch (ApiException ex)
+        {
+            TempData.SetErrorMessage(ex.ToFriendlyErrorMessage());
+        }
+        catch
+        {
+            TempData.SetErrorMessage("Đã xảy ra lỗi khi mở khóa số liệu thống kê.");
+        }
+
+        return RedirectToPage("/Public/JobDetail", new { id, ReturnUrl });
+    }
+
+    public async Task<IActionResult> OnPostRefreshStatsAsync(Guid id)
+    {
+        if (!User.IsLoggedIn)
+        {
+            TempData.SetWarningMessage("Vui lòng đăng nhập để cập nhật thống kê.");
+            return RedirectToPage("/Public/JobDetail", new { id, ReturnUrl });
+        }
+
+        if (!User.IsInRole(Role.Candidate))
+        {
+            TempData.SetErrorMessage("Chỉ tài khoản ứng viên mới có quyền cập nhật thống kê.");
+            return RedirectToPage("/Public/JobDetail", new { id, ReturnUrl });
+        }
+
+        try
+        {
+            await apiClient.Api.Candidate.ViewJobStats.Jobs[id].Unlock.PostAsync();
+            TempData.SetSuccessMessage("Cập nhật số liệu thống kê mới nhất thành công!");
+        }
+        catch (ApiException ex)
+        {
+            TempData.SetErrorMessage(ex.ToFriendlyErrorMessage());
+        }
+        catch
+        {
+            TempData.SetErrorMessage("Đã xảy ra lỗi khi cập nhật số liệu thống kê.");
+        }
+
+        return RedirectToPage("/Public/JobDetail", new { id, ReturnUrl });
+    }
 
     public async Task<IActionResult> OnGetAsync(Guid id)
     {
@@ -112,6 +174,18 @@ public class JobDetailModel(ApiClient apiClient) : PageModel
             {
                 TempData.SetErrorMessage("Không tìm thấy thông tin công việc hoặc công việc không còn khả dụng.");
                 return RedirectToPage("/Public/Jobs");
+            }
+
+            if (User.IsLoggedIn && User.IsInRole(Role.Candidate))
+            {
+                try
+                {
+                    CandidateJobStats = await apiClient.Api.Candidate.ViewJobStats.Jobs[id].GetAsync();
+                }
+                catch
+                {
+                    // Non-blocking
+                }
             }
         }
         catch (ApiException ex)

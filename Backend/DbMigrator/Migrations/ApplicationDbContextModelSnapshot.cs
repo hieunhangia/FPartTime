@@ -60,6 +60,79 @@ namespace DbMigrator.Migrations
                     b.ToTable("Provinces");
                 });
 
+            modelBuilder.Entity("Domain.Models.CandidateViewJobStats.CandidateViewJobStatsPackage", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<decimal>("Price")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("ViewCredits")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("CandidateViewJobStatsPackages");
+                });
+
+            modelBuilder.Entity("Domain.Models.CandidateViewJobStats.CandidateViewJobStatsSnapshot", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("AcceptedApplications")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("CandidateId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("JobId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("PendingApplications")
+                        .HasColumnType("int");
+
+                    b.Property<int>("RejectedApplications")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("SnapshotAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("TotalApplications")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("JobId");
+
+                    b.HasIndex("CandidateId", "JobId")
+                        .IsUnique();
+
+                    b.ToTable("CandidateViewJobStatsSnapshots");
+                });
+
             modelBuilder.Entity("Domain.Models.EmployerSubscriptions.EmployerSubscription", b =>
                 {
                     b.Property<Guid>("Id")
@@ -405,11 +478,6 @@ namespace DbMigrator.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
 
-                    b.Property<string>("Discriminator")
-                        .IsRequired()
-                        .HasMaxLength(34)
-                        .HasColumnType("nvarchar(34)");
-
                     b.Property<DateTime>("ExpiredAt")
                         .HasColumnType("datetime2");
 
@@ -428,11 +496,9 @@ namespace DbMigrator.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Orders");
+                    b.ToTable("Orders", (string)null);
 
-                    b.HasDiscriminator<string>("Discriminator").HasValue("OrderBase");
-
-                    b.UseTphMappingStrategy();
+                    b.UseTptMappingStrategy();
                 });
 
             modelBuilder.Entity("Domain.Models.Orders.PaymentTransaction", b =>
@@ -517,6 +583,9 @@ namespace DbMigrator.Migrations
 
                     b.Property<string>("PreferredWorkCommuneCode")
                         .HasColumnType("nvarchar(10)");
+
+                    b.Property<int>("ViewJobStatsBalance")
+                        .HasColumnType("int");
 
                     b.HasKey("UserId");
 
@@ -881,6 +950,26 @@ namespace DbMigrator.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("Domain.Models.Orders.CandidateViewJobStatsOrder", b =>
+                {
+                    b.HasBaseType("Domain.Models.Orders.OrderBase");
+
+                    b.Property<Guid?>("PackageId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("PackageName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<int>("ViewCredits")
+                        .HasColumnType("int");
+
+                    b.HasIndex("PackageId");
+
+                    b.ToTable("CandidateViewJobStatsOrders", (string)null);
+                });
+
             modelBuilder.Entity("Domain.Models.Orders.EmployerSubscriptionOrder", b =>
                 {
                     b.HasBaseType("Domain.Models.Orders.OrderBase");
@@ -913,7 +1002,7 @@ namespace DbMigrator.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.HasDiscriminator().HasValue("EmployerSubscriptionOrder");
+                    b.ToTable("EmployerSubscriptionOrders", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Models.Address.Commune", b =>
@@ -925,6 +1014,25 @@ namespace DbMigrator.Migrations
                         .IsRequired();
 
                     b.Navigation("Province");
+                });
+
+            modelBuilder.Entity("Domain.Models.CandidateViewJobStats.CandidateViewJobStatsSnapshot", b =>
+                {
+                    b.HasOne("Domain.Models.Users.CandidateProfile", "Candidate")
+                        .WithMany("ViewJobStatsSnapshots")
+                        .HasForeignKey("CandidateId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Domain.Models.Jobs.Job", "Job")
+                        .WithMany("CandidateViewJobStatsSnapshots")
+                        .HasForeignKey("JobId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Candidate");
+
+                    b.Navigation("Job");
                 });
 
             modelBuilder.Entity("Domain.Models.EmployerSubscriptions.EmployerSubscription", b =>
@@ -1193,15 +1301,29 @@ namespace DbMigrator.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Domain.Models.Orders.EmployerSubscriptionOrder", b =>
+            modelBuilder.Entity("Domain.Models.Orders.CandidateViewJobStatsOrder", b =>
                 {
-                    b.HasOne("Domain.Models.Users.EmployerProfile", "Employer")
-                        .WithMany("SubscriptionOrders")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                    b.HasOne("Domain.Models.Orders.OrderBase", null)
+                        .WithOne()
+                        .HasForeignKey("Domain.Models.Orders.CandidateViewJobStatsOrder", "Id")
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Employer");
+                    b.HasOne("Domain.Models.CandidateViewJobStats.CandidateViewJobStatsPackage", "Package")
+                        .WithMany()
+                        .HasForeignKey("PackageId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("Package");
+                });
+
+            modelBuilder.Entity("Domain.Models.Orders.EmployerSubscriptionOrder", b =>
+                {
+                    b.HasOne("Domain.Models.Orders.OrderBase", null)
+                        .WithOne()
+                        .HasForeignKey("Domain.Models.Orders.EmployerSubscriptionOrder", "Id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Domain.Models.Address.Province", b =>
@@ -1216,6 +1338,8 @@ namespace DbMigrator.Migrations
 
             modelBuilder.Entity("Domain.Models.Jobs.Job", b =>
                 {
+                    b.Navigation("CandidateViewJobStatsSnapshots");
+
                     b.Navigation("JobApplications");
 
                     b.Navigation("JobReports");
@@ -1239,6 +1363,8 @@ namespace DbMigrator.Migrations
                     b.Navigation("JobReports");
 
                     b.Navigation("PreferredWorkSchedules");
+
+                    b.Navigation("ViewJobStatsSnapshots");
                 });
 
             modelBuilder.Entity("Domain.Models.Users.CensorProfile", b =>
@@ -1251,8 +1377,6 @@ namespace DbMigrator.Migrations
             modelBuilder.Entity("Domain.Models.Users.EmployerProfile", b =>
                 {
                     b.Navigation("Jobs");
-
-                    b.Navigation("SubscriptionOrders");
 
                     b.Navigation("Subscriptions");
                 });

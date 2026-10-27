@@ -1,4 +1,5 @@
 using Domain.Models.Address;
+using Domain.Models.CandidateViewJobStats;
 using Domain.Models.EmployerSubscriptions;
 using Domain.Models.Jobs;
 using Domain.Models.Notifications;
@@ -34,6 +35,9 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<PaymentTransaction> PaymentTransactions { get; set; }
     public DbSet<OrderBase> Orders { get; set; }
     public DbSet<EmployerSubscriptionOrder> EmployerSubscriptionOrders { get; set; }
+    public DbSet<CandidateViewJobStatsPackage> CandidateViewJobStatsPackages { get; set; }
+    public DbSet<CandidateViewJobStatsSnapshot> CandidateViewJobStatsSnapshots { get; set; }
+    public DbSet<CandidateViewJobStatsOrder> CandidateViewJobStatsOrders { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -290,6 +294,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 
         builder.Entity<OrderBase>(entity =>
         {
+            entity.ToTable("Orders");
             entity.Property(e => e.TotalAmount).HasPrecision(18, 2);
             entity.Property(e => e.Description)
                 .HasMaxLength(BusinessRuleConstants.Models.OrderBase.DescriptionMaxLength);
@@ -302,13 +307,46 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 
         builder.Entity<EmployerSubscriptionOrder>(entity =>
         {
+            entity.ToTable("EmployerSubscriptionOrders");
             entity.Property(e => e.PlanName)
                 .HasMaxLength(BusinessRuleConstants.Models.EmployerSubscriptionPlan.NameMaxLength);
+        });
 
-            entity.HasOne(e => e.Employer)
-                .WithMany(em => em.SubscriptionOrders)
-                .HasForeignKey(e => e.UserId)
+        builder.Entity<CandidateViewJobStatsPackage>(entity =>
+        {
+            entity.Property(e => e.Name)
+                .HasMaxLength(BusinessRuleConstants.Models.CandidateViewJobStatsPackage.NameMaxLength);
+            entity.Property(e => e.Description)
+                .HasMaxLength(BusinessRuleConstants.Models.CandidateViewJobStatsPackage.DescriptionMaxLength);
+            entity.Property(e => e.Price)
+                .HasPrecision(18, 2);
+        });
+
+        builder.Entity<CandidateViewJobStatsSnapshot>(entity =>
+        {
+            entity.HasIndex(e => new { e.CandidateId, e.JobId }).IsUnique();
+
+            entity.HasOne(e => e.Candidate)
+                .WithMany(c => c.ViewJobStatsSnapshots)
+                .HasForeignKey(e => e.CandidateId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(e => e.Job)
+                .WithMany(j => j.CandidateViewJobStatsSnapshots)
+                .HasForeignKey(e => e.JobId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        builder.Entity<CandidateViewJobStatsOrder>(entity =>
+        {
+            entity.ToTable("CandidateViewJobStatsOrders");
+            entity.Property(e => e.PackageName)
+                .HasMaxLength(BusinessRuleConstants.Models.CandidateViewJobStatsPackage.NameMaxLength);
+
+            entity.HasOne(e => e.Package)
+                .WithMany()
+                .HasForeignKey(e => e.PackageId)
+                .OnDelete(DeleteBehavior.SetNull);
         });
 
         foreach (var entityType in builder.Model.GetEntityTypes())

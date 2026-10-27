@@ -1,4 +1,5 @@
 using Domain.Models.Address;
+using Domain.Models.CandidateViewJobStats;
 using Domain.Models.Jobs;
 using Domain.Shared.Enums;
 
@@ -7,6 +8,7 @@ namespace Domain.Models.Users;
 public class CandidateProfile
 {
     public Guid UserId { get; set; }
+    public int ViewJobStatsBalance { get; set; } = 0;
     public string? AvatarFilePath { get; set; }
     public string? Bio { get; set; }
     public string? FullName { get; set; }
@@ -21,4 +23,5 @@ public class CandidateProfile
     public ICollection<EmployerRegistrationRequest>? EmployerRegistrationRequests { get; set; }
     public ICollection<JobApplication>? JobApplications { get; set; }
     public ICollection<JobReport>? JobReports { get; set; }
+    public ICollection<CandidateViewJobStatsSnapshot>? ViewJobStatsSnapshots { get; set; }
 }

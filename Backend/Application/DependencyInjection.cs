@@ -23,6 +23,8 @@ public static class DependencyInjection
         // Candidate
         builder.Services.AddScoped<Contracts.Application.Candidate.ICandidateProfileService,
             Candidate.CandidateProfileService>();
+        builder.Services.AddScoped<Contracts.Application.Candidate.ICandidateViewJobStatsService,
+            Candidate.CandidateViewJobStatsService>();
 
         // Employer
         builder.Services.AddScoped<Contracts.Application.Employer.IJobService, Employer.JobService>();

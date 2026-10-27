@@ -1,4 +1,5 @@
 using Domain;
+using Domain.Models.CandidateViewJobStats;
 using Domain.Models.Orders;
 using Domain.Models.Users;
 using Domain.Shared.Constants;
@@ -24,6 +25,7 @@ public class DataSeeder(ApplicationDbContext db)
         await SeedSqlFileIfEmptyAsync(() => db.Jobs.AnyAsync(), "job.sql");
         await SeedEmployerRegistrationRequestsAsync();
         await SeedEmployerSubscriptionOrdersAndTransactionsAsync();
+        await SeedCandidateViewJobStatsDataAsync();
 
         Console.WriteLine("✅ Nạp dữ liệu hoàn tất thành công!");
         Console.WriteLine(
@@ -196,7 +198,8 @@ public class DataSeeder(ApplicationDbContext db)
                 new CandidateSchedule { DayOfWeek = DayOfWeek.Saturday, Shift = Shift.Morning },
                 new CandidateSchedule { DayOfWeek = DayOfWeek.Saturday, Shift = Shift.Afternoon },
                 new CandidateSchedule { DayOfWeek = DayOfWeek.Sunday, Shift = Shift.Morning }
-            ]);
+            ],
+            viewJobStatsBalance: 5);
 
         await CreateCandidateUserAsync(
             phoneNumber: "0000000002",
@@ -486,7 +489,8 @@ public class DataSeeder(ApplicationDbContext db)
         string communeCode,
         string bio,
         DateTime? openForJobUntil,
-        List<CandidateSchedule> schedules)
+        List<CandidateSchedule> schedules,
+        int viewJobStatsBalance = 0)
     {
         var user = await EnsureBaseUserExistsAsync(phoneNumber, password, Role.Candidate);
 
@@ -495,6 +499,7 @@ public class DataSeeder(ApplicationDbContext db)
             var profile = new CandidateProfile
             {
                 UserId = user.Id,
+                ViewJobStatsBalance = viewJobStatsBalance,
                 AvatarFilePath = BusinessRuleConstants.DefaultAvatarFilePath,
                 Bio = bio,
                 FullName = fullName,
@@ -880,5 +885,192 @@ public class DataSeeder(ApplicationDbContext db)
         var sql = await File.ReadAllTextAsync(filePath);
         await db.Database.ExecuteSqlRawAsync(sql);
         Console.WriteLine($"  [+] Đã thực thi {fileName} thành công.");
+    }
+
+    private async Task SeedCandidateViewJobStatsDataAsync()
+    {
+        if (await db.CandidateViewJobStatsPackages.AnyAsync())
+        {
+            Console.WriteLine("ℹ️ Không cần nạp CandidateViewJobStats vì đã có dữ liệu.");
+            return;
+        }
+
+        Console.WriteLine("➡️ Đang nạp gói lượt xem và dữ liệu mẫu cho ứng viên (CandidateViewJobStats)...");
+
+        var pkg1 = new CandidateViewJobStatsPackage
+        {
+            Id = Guid.Parse("33333333-0000-0000-0000-000000000001"),
+            Name = "Gói Trải Nghiệm",
+            ViewCredits = 1,
+            Price = 5000m,
+            Description = "Xem nhanh độ cạnh tranh của 1 công việc.",
+            IsActive = true
+        };
+        var pkg2 = new CandidateViewJobStatsPackage
+        {
+            Id = Guid.Parse("33333333-0000-0000-0000-000000000002"),
+            Name = "Gói Tiêu Chuẩn",
+            ViewCredits = 5,
+            Price = 20000m,
+            Description = "Phù hợp cho ứng viên đang tìm việc trong tuần (Tiết kiệm 20%).",
+            IsActive = true
+        };
+        var pkg3 = new CandidateViewJobStatsPackage
+        {
+            Id = Guid.Parse("33333333-0000-0000-0000-000000000003"),
+            Name = "Gói Tiết Kiệm",
+            ViewCredits = 20,
+            Price = 50000m,
+            Description = "Tiết kiệm tối đa, tha hồ theo dõi các bài tuyển dụng yêu thích (Tiết kiệm 50%).",
+            IsActive = true
+        };
+
+        db.CandidateViewJobStatsPackages.AddRange(pkg1, pkg2, pkg3);
+        await db.SaveChangesAsync();
+
+        var candNam = await db.Users.FirstOrDefaultAsync(u => u.PhoneNumber == "0000000001");
+        var candTrang = await db.Users.FirstOrDefaultAsync(u => u.PhoneNumber == "0000000002");
+        var candDuc = await db.Users.FirstOrDefaultAsync(u => u.PhoneNumber == "0000000003");
+
+        var jobActive = await db.Jobs.FirstOrDefaultAsync(j => j.Id == Guid.Parse("20000001-0000-0000-0000-000000000001"));
+        var jobClosed = await db.Jobs.FirstOrDefaultAsync(j => j.Id == Guid.Parse("20000001-0000-0000-0000-000000000006"));
+
+        // Seed 1 order Paid cho candNam
+        if (candNam != null)
+        {
+            var orderPaid = new CandidateViewJobStatsOrder
+            {
+                Id = Guid.Parse("c1111111-0000-0000-0000-000000000001"),
+                UserId = candNam.Id,
+                PackageId = pkg2.Id,
+                PackageName = pkg2.Name,
+                ViewCredits = pkg2.ViewCredits,
+                TotalAmount = pkg2.Price,
+                Description = $"Mua {pkg2.Name} ({pkg2.ViewCredits} luot xem)",
+                Status = OrderStatus.Completed,
+                CreatedAt = DateTime.UtcNow.AddDays(-3),
+                ExpiredAt = DateTime.UtcNow.AddDays(-3).AddMinutes(15),
+                CompletedAt = DateTime.UtcNow.AddDays(-3).AddMinutes(5)
+            };
+            db.CandidateViewJobStatsOrders.Add(orderPaid);
+
+            db.PaymentTransactions.Add(new PaymentTransaction
+            {
+                Id = Guid.Parse("c2222222-0000-0000-0000-000000000001"),
+                UserId = candNam.Id,
+                OrderId = orderPaid.Id,
+                Provider = PaymentProvider.PayOS,
+                Amount = pkg2.Price,
+                Status = PaymentTransactionStatus.Paid,
+                PaymentReferenceId = "PAYOS-CAND-ORD-20261024-001",
+                PaymentUrl = "https://pay.payos.vn/web/demo-cand-order-001",
+                CreatedAt = DateTime.UtcNow.AddDays(-3),
+                ExpiredAt = DateTime.UtcNow.AddDays(-3).AddMinutes(15),
+                PaidAt = DateTime.UtcNow.AddDays(-3).AddMinutes(5)
+            });
+
+            // Seed snapshot trên jobActive
+            if (jobActive != null)
+            {
+                db.CandidateViewJobStatsSnapshots.Add(new CandidateViewJobStatsSnapshot
+                {
+                    Id = Guid.NewGuid(),
+                    CandidateId = candNam.Id,
+                    JobId = jobActive.Id,
+                    TotalApplications = 5,
+                    PendingApplications = 2,
+                    AcceptedApplications = 2,
+                    RejectedApplications = 1,
+                    SnapshotAt = DateTime.UtcNow.AddDays(-2),
+                    UpdatedAt = DateTime.UtcNow.AddDays(-2)
+                });
+            }
+
+            // Seed snapshot trên jobClosed
+            if (jobClosed != null)
+            {
+                db.CandidateViewJobStatsSnapshots.Add(new CandidateViewJobStatsSnapshot
+                {
+                    Id = Guid.NewGuid(),
+                    CandidateId = candNam.Id,
+                    JobId = jobClosed.Id,
+                    TotalApplications = 8,
+                    PendingApplications = 0,
+                    AcceptedApplications = 4,
+                    RejectedApplications = 4,
+                    SnapshotAt = DateTime.UtcNow.AddDays(-10),
+                    UpdatedAt = DateTime.UtcNow.AddDays(-10)
+                });
+            }
+        }
+
+        // Seed 1 order Pending cho candTrang
+        if (candTrang != null)
+        {
+            var orderPending = new CandidateViewJobStatsOrder
+            {
+                Id = Guid.Parse("c1111111-0000-0000-0000-000000000002"),
+                UserId = candTrang.Id,
+                PackageId = pkg1.Id,
+                PackageName = pkg1.Name,
+                ViewCredits = pkg1.ViewCredits,
+                TotalAmount = pkg1.Price,
+                Description = $"Mua {pkg1.Name} ({pkg1.ViewCredits} luot xem)",
+                Status = OrderStatus.PendingPayment,
+                CreatedAt = DateTime.UtcNow.AddMinutes(-5),
+                ExpiredAt = DateTime.UtcNow.AddMinutes(10)
+            };
+            db.CandidateViewJobStatsOrders.Add(orderPending);
+
+            db.PaymentTransactions.Add(new PaymentTransaction
+            {
+                Id = Guid.Parse("c2222222-0000-0000-0000-000000000002"),
+                UserId = candTrang.Id,
+                OrderId = orderPending.Id,
+                Provider = PaymentProvider.VNPAY,
+                Amount = pkg1.Price,
+                Status = PaymentTransactionStatus.Pending,
+                PaymentReferenceId = "VNPAY-CAND-ORD-20261027-002",
+                PaymentUrl = "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html?demo=002",
+                CreatedAt = DateTime.UtcNow.AddMinutes(-5),
+                ExpiredAt = DateTime.UtcNow.AddMinutes(10)
+            });
+        }
+
+        // Seed 1 order Expired cho candDuc
+        if (candDuc != null)
+        {
+            var orderExpired = new CandidateViewJobStatsOrder
+            {
+                Id = Guid.Parse("c1111111-0000-0000-0000-000000000003"),
+                UserId = candDuc.Id,
+                PackageId = pkg1.Id,
+                PackageName = pkg1.Name,
+                ViewCredits = pkg1.ViewCredits,
+                TotalAmount = pkg1.Price,
+                Description = $"Mua {pkg1.Name} ({pkg1.ViewCredits} luot xem)",
+                Status = OrderStatus.Expired,
+                CreatedAt = DateTime.UtcNow.AddDays(-1),
+                ExpiredAt = DateTime.UtcNow.AddDays(-1).AddMinutes(15)
+            };
+            db.CandidateViewJobStatsOrders.Add(orderExpired);
+
+            db.PaymentTransactions.Add(new PaymentTransaction
+            {
+                Id = Guid.Parse("c2222222-0000-0000-0000-000000000003"),
+                UserId = candDuc.Id,
+                OrderId = orderExpired.Id,
+                Provider = PaymentProvider.ZaloPay,
+                Amount = pkg1.Price,
+                Status = PaymentTransactionStatus.Expired,
+                PaymentReferenceId = "ZALOPAY-CAND-ORD-20261026-003",
+                PaymentUrl = "https://gateway.zalopay.vn/pay/demo-003",
+                CreatedAt = DateTime.UtcNow.AddDays(-1),
+                ExpiredAt = DateTime.UtcNow.AddDays(-1).AddMinutes(15)
+            });
+        }
+
+        await db.SaveChangesAsync();
+        Console.WriteLine("  [+] Đã tạo 3 gói lượt xem và dữ liệu đơn hàng, snapshot mẫu cho ứng viên thành công.");
     }
 }

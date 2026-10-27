@@ -51,6 +51,23 @@ namespace DbMigrator.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "CandidateViewJobStatsPackages",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    ViewCredits = table.Column<int>(type: "int", nullable: false),
+                    Price = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
+                    IsActive = table.Column<bool>(type: "bit", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_CandidateViewJobStatsPackages", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "EmployerSubscriptionPlans",
                 columns: table => new
                 {
@@ -267,6 +284,30 @@ namespace DbMigrator.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Orders",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    TotalAmount = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: false),
+                    Status = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    ExpiredAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CompletedAt = table.Column<DateTime>(type: "datetime2", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Orders", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Orders_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Communes",
                 columns: table => new
                 {
@@ -312,42 +353,87 @@ namespace DbMigrator.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Orders",
+                name: "CandidateViewJobStatsOrders",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    TotalAmount = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false),
-                    Description = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: false),
-                    Status = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    ExpiredAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    CompletedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    Discriminator = table.Column<string>(type: "nvarchar(34)", maxLength: 34, nullable: false),
-                    Tier = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Duration = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    PlanName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
-                    DurationDays = table.Column<int>(type: "int", nullable: true),
-                    ExtraActivePosts = table.Column<int>(type: "int", nullable: true),
-                    FreeBumps = table.Column<int>(type: "int", nullable: true),
-                    CanRecommendCandidates = table.Column<bool>(type: "bit", nullable: true),
-                    CanQueryCandidates = table.Column<bool>(type: "bit", nullable: true)
+                    PackageId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    PackageName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    ViewCredits = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Orders", x => x.Id);
+                    table.PrimaryKey("PK_CandidateViewJobStatsOrders", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Orders_AspNetUsers_UserId",
+                        name: "FK_CandidateViewJobStatsOrders_CandidateViewJobStatsPackages_PackageId",
+                        column: x => x.PackageId,
+                        principalTable: "CandidateViewJobStatsPackages",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.SetNull);
+                    table.ForeignKey(
+                        name: "FK_CandidateViewJobStatsOrders_Orders_Id",
+                        column: x => x.Id,
+                        principalTable: "Orders",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "EmployerSubscriptionOrders",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Tier = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Duration = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    PlanName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    DurationDays = table.Column<int>(type: "int", nullable: false),
+                    ExtraActivePosts = table.Column<int>(type: "int", nullable: false),
+                    FreeBumps = table.Column<int>(type: "int", nullable: false),
+                    CanRecommendCandidates = table.Column<bool>(type: "bit", nullable: false),
+                    CanQueryCandidates = table.Column<bool>(type: "bit", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_EmployerSubscriptionOrders", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_EmployerSubscriptionOrders_Orders_Id",
+                        column: x => x.Id,
+                        principalTable: "Orders",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "PaymentTransactions",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    OrderId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Provider = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    PaymentReferenceId = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    PaymentUrl = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Amount = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false),
+                    Status = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    ExpiredAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    PaidAt = table.Column<DateTime>(type: "datetime2", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_PaymentTransactions", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_PaymentTransactions_AspNetUsers_UserId",
                         column: x => x.UserId,
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "FK_Orders_Employers_UserId",
-                        column: x => x.UserId,
-                        principalTable: "Employers",
-                        principalColumn: "UserId",
-                        onDelete: ReferentialAction.Restrict);
+                        name: "FK_PaymentTransactions_Orders_OrderId",
+                        column: x => x.OrderId,
+                        principalTable: "Orders",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -355,6 +441,7 @@ namespace DbMigrator.Migrations
                 columns: table => new
                 {
                     UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    ViewJobStatsBalance = table.Column<int>(type: "int", nullable: false),
                     AvatarFilePath = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: true),
                     Bio = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
                     FullName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
@@ -425,39 +512,6 @@ namespace DbMigrator.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "PaymentTransactions",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    OrderId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Provider = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    PaymentReferenceId = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    PaymentUrl = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Amount = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false),
-                    Status = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    ExpiredAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    PaidAt = table.Column<DateTime>(type: "datetime2", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_PaymentTransactions", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_PaymentTransactions_AspNetUsers_UserId",
-                        column: x => x.UserId,
-                        principalTable: "AspNetUsers",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_PaymentTransactions_Orders_OrderId",
-                        column: x => x.OrderId,
-                        principalTable: "Orders",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "CandidateSchedules",
                 columns: table => new
                 {
@@ -512,6 +566,37 @@ namespace DbMigrator.Migrations
                         column: x => x.ProcessorId,
                         principalTable: "Censors",
                         principalColumn: "UserId",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "CandidateViewJobStatsSnapshots",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CandidateId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    JobId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    TotalApplications = table.Column<int>(type: "int", nullable: false),
+                    PendingApplications = table.Column<int>(type: "int", nullable: false),
+                    AcceptedApplications = table.Column<int>(type: "int", nullable: false),
+                    RejectedApplications = table.Column<int>(type: "int", nullable: false),
+                    SnapshotAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_CandidateViewJobStatsSnapshots", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_CandidateViewJobStatsSnapshots_Candidates_CandidateId",
+                        column: x => x.CandidateId,
+                        principalTable: "Candidates",
+                        principalColumn: "UserId",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_CandidateViewJobStatsSnapshots_Jobs_JobId",
+                        column: x => x.JobId,
+                        principalTable: "Jobs",
+                        principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                 });
 
@@ -674,6 +759,22 @@ namespace DbMigrator.Migrations
                 column: "CandidateId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_CandidateViewJobStatsOrders_PackageId",
+                table: "CandidateViewJobStatsOrders",
+                column: "PackageId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_CandidateViewJobStatsSnapshots_CandidateId_JobId",
+                table: "CandidateViewJobStatsSnapshots",
+                columns: new[] { "CandidateId", "JobId" },
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_CandidateViewJobStatsSnapshots_JobId",
+                table: "CandidateViewJobStatsSnapshots",
+                column: "JobId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Communes_ProvinceCode",
                 table: "Communes",
                 column: "ProvinceCode");
@@ -792,7 +893,16 @@ namespace DbMigrator.Migrations
                 name: "CandidateSchedules");
 
             migrationBuilder.DropTable(
+                name: "CandidateViewJobStatsOrders");
+
+            migrationBuilder.DropTable(
+                name: "CandidateViewJobStatsSnapshots");
+
+            migrationBuilder.DropTable(
                 name: "EmployerRegistrationRequests");
+
+            migrationBuilder.DropTable(
+                name: "EmployerSubscriptionOrders");
 
             migrationBuilder.DropTable(
                 name: "EmployerSubscriptionPlans");
@@ -822,6 +932,9 @@ namespace DbMigrator.Migrations
                 name: "AspNetRoles");
 
             migrationBuilder.DropTable(
+                name: "CandidateViewJobStatsPackages");
+
+            migrationBuilder.DropTable(
                 name: "Candidates");
 
             migrationBuilder.DropTable(
@@ -837,10 +950,10 @@ namespace DbMigrator.Migrations
                 name: "Communes");
 
             migrationBuilder.DropTable(
-                name: "Industries");
+                name: "Employers");
 
             migrationBuilder.DropTable(
-                name: "Employers");
+                name: "Industries");
 
             migrationBuilder.DropTable(
                 name: "Provinces");

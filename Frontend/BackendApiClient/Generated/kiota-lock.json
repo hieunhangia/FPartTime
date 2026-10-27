@@ -1,5 +1,5 @@
 {
-  "descriptionHash": "1EF3926C5D8E14C202B2848356D72EC1AAB88BFBDA92E5C3A90F57F682ADDD0229182FC5403AFA2058D1A99FFB7F0C4D5DFA1851C2E243BCF5BD43F472B2FEBB",
+  "descriptionHash": "A58BB298BD5EEA817909EA94BA986BBCB97260A69531DDF2904D774C1521CA0F524150EAEF90F5AEB24ED20C75D503239DD689B5B19278F34AE5F912BB298953",
   "descriptionLocation": "http://localhost:3636/openapi/v1.json",
   "lockFileVersion": "1.0.0",
   "kiotaVersion": "1.36.1",
@@ -29,7 +29,9 @@
     "multipart/form-data;q=0.1"
   ],
   "includePatterns": [],
-  "excludePatterns": [],
+  "excludePatterns": [
+    "/api/Ipn/**"
+  ],
   "disabledValidationRules": [],
   "allowedExternalOrigins": []
 }

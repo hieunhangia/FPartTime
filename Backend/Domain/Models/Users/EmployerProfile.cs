@@ -1,6 +1,5 @@
 using Domain.Models.EmployerSubscriptions;
 using Domain.Models.Jobs;
-using Domain.Models.Orders;
 
 namespace Domain.Models.Users;
 
@@ -19,5 +18,4 @@ public class EmployerProfile
     public User? User { get; set; }
     public ICollection<Job>? Jobs { get; set; }
     public ICollection<EmployerSubscription>? Subscriptions { get; set; }
-    public ICollection<EmployerSubscriptionOrder>? SubscriptionOrders { get; set; }
 }

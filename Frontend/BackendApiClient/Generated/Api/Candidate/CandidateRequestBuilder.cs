@@ -3,6 +3,7 @@
 using ApiSdk.Api.Candidate.JobApplications;
 using ApiSdk.Api.Candidate.JobReports;
 using ApiSdk.Api.Candidate.Jobs;
+using ApiSdk.Api.Candidate.ViewJobStats;
 using Microsoft.Kiota.Abstractions.Extensions;
 using Microsoft.Kiota.Abstractions;
 using System.Collections.Generic;
@@ -31,6 +32,11 @@ namespace ApiSdk.Api.Candidate
         public global::ApiSdk.Api.Candidate.Jobs.JobsRequestBuilder Jobs
         {
             get => new global::ApiSdk.Api.Candidate.Jobs.JobsRequestBuilder(PathParameters, RequestAdapter);
+        }
+        /// <summary>The viewJobStats property</summary>
+        public global::ApiSdk.Api.Candidate.ViewJobStats.ViewJobStatsRequestBuilder ViewJobStats
+        {
+            get => new global::ApiSdk.Api.Candidate.ViewJobStats.ViewJobStatsRequestBuilder(PathParameters, RequestAdapter);
         }
         /// <summary>
         /// Instantiates a new <see cref="global::ApiSdk.Api.Candidate.CandidateRequestBuilder"/> and sets the default values.

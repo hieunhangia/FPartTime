@@ -1,4 +1,5 @@
 using Contracts.Application;
+using Contracts.Application.Candidate;
 using Contracts.Application.Employer;
 using Domain;
 using Domain.Models.Orders;
@@ -10,6 +11,7 @@ namespace Application;
 public class IpnDispatcher(
     ApplicationDbContext context,
     ISubscriptionService subscriptionService,
+    ICandidateViewJobStatsService candidateViewJobStatsService,
     INotificationsService notificationsService,
     ILogger<IpnDispatcher> logger) : IIpnDispatcher
 {
@@ -28,6 +30,9 @@ public class IpnDispatcher(
         {
             case EmployerSubscriptionOrder:
                 await subscriptionService.ProcessSubscriptionOrderAsync(transaction.Id);
+                break;
+            case CandidateViewJobStatsOrder:
+                await candidateViewJobStatsService.ProcessOrderPaymentAsync(transaction.Id);
                 break;
             case null:
                 logger.LogError("Giao dịch {TransactionId} không có đơn hàng liên kết.", transaction.Id);
