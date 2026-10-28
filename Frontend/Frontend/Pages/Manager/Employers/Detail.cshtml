@@ -1,0 +1,203 @@
+@page "{id:guid}"
+@using ApiSdk.Models
+@model Frontend.Pages.Manager.Employers.DetailModel
+@{
+    ViewData["Title"] = "Gói nhà tuyển dụng";
+    var activeSubscription = Model.ActiveSubscription;
+}
+
+<div class="container my-4">
+    <a asp-page="./Index" class="btn btn-link px-0 mb-3">&larr; Danh sách nhà tuyển dụng</a>
+    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+    @if (Model.Employer is not null)
+    {
+        <div class="card mb-4">
+            <div class="card-body">
+                <div class="d-flex align-items-start gap-3">
+                    @if (!string.IsNullOrWhiteSpace(Model.Employer.LogoUrl))
+                    {
+                        <img src="@Model.Employer.LogoUrl" alt="Logo @Model.Employer.CompanyName"
+                             class="border rounded p-1" style="width: 72px; height: 72px; object-fit: contain;" />
+                    }
+                    <div>
+                        <h1 class="h3 mb-1">@Model.Employer.CompanyName</h1>
+                        <div class="text-muted small">Mã nhà tuyển dụng: @Model.Employer.EmployerId</div>
+                    </div>
+                </div>
+                <div class="row g-3 mt-1">
+                    <div class="col-12 col-md-6"><strong>Mã số thuế:</strong> @Model.Employer.TaxCode</div>
+                    <div class="col-12 col-md-6"><strong>Số điện thoại tài khoản:</strong> @(Model.Employer.PhoneNumber ?? "—")</div>
+                    <div class="col-12 col-md-6"><strong>Số điện thoại liên hệ:</strong> @(Model.Employer.ContactPhone ?? "—")</div>
+                    <div class="col-12 col-md-6"><strong>Hạn mức tin đang hoạt động:</strong> @Model.Employer.MaxActivePosts</div>
+                    <div class="col-12 col-md-6"><strong>Lượt đẩy tin còn lại:</strong> @Model.Employer.BumpBalance</div>
+                    @if (!string.IsNullOrWhiteSpace(Model.Employer.Description))
+                    {
+                        <div class="col-12"><strong>Mô tả:</strong> @Model.Employer.Description</div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        @if (Model.SubscriptionsLoaded)
+        {
+            @if (activeSubscription is null)
+            {
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h2 class="h5">Cấp gói mới</h2>
+                        <p class="text-muted small">Nhà tuyển dụng hiện chưa có gói còn hiệu lực.</p>
+                        <form method="post" asp-page-handler="Grant" asp-route-id="@Model.Employer.EmployerId">
+                            <div class="row g-3 align-items-end">
+                                <div class="col-12 col-md-4">
+                                    <label asp-for="Input.Tier" class="form-label">Hạng gói</label>
+                                    <select asp-for="Input.Tier" class="form-select" required>
+                                        <option value="">Chọn hạng gói</option>
+                                        <option value="@EmployerSubscriptionTier.Plus">Plus</option>
+                                        <option value="@EmployerSubscriptionTier.Pro">Pro</option>
+                                        <option value="@EmployerSubscriptionTier.Ultra">Ultra</option>
+                                    </select>
+                                    <span asp-validation-for="Input.Tier" class="text-danger"></span>
+                                </div>
+                                <div class="col-12 col-md-4">
+                                    <label asp-for="Input.Duration" class="form-label">Kỳ hạn</label>
+                                    <select asp-for="Input.Duration" class="form-select" required>
+                                        <option value="">Chọn kỳ hạn</option>
+                                        <option value="@EmployerSubscriptionDuration.Monthly">Hàng tháng</option>
+                                        <option value="@EmployerSubscriptionDuration.Yearly">Hàng năm</option>
+                                    </select>
+                                    <span asp-validation-for="Input.Duration" class="text-danger"></span>
+                                </div>
+                                <div class="col-12 col-md-4">
+                                    <button type="submit" class="btn btn-primary">Cấp gói</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="card border-success mb-4">
+                    <div class="card-body">
+                        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+                            <h2 class="h5 mb-0">Gói @activeSubscription.Tier đang hoạt động</h2>
+                            <span class="badge bg-success">Đang hoạt động</span>
+                        </div>
+                        <p class="text-muted small">Nhà tuyển dụng đã có gói. Hãy cập nhật gói hiện tại bằng các form bên dưới.</p>
+                        <div class="row g-2">
+                            <div class="col-12 col-md-6">Bắt đầu: <strong>@DetailModel.FormatDate(activeSubscription.StartDate)</strong></div>
+                            <div class="col-12 col-md-6">Hết hạn: <strong>@DetailModel.FormatDate(activeSubscription.EndDate)</strong></div>
+                            <div class="col-12 col-md-6">Tin đăng mở rộng: <strong>+@activeSubscription.ExtraActivePosts</strong></div>
+                            <div class="col-12 col-md-6">Gợi ý ứng viên: <strong>@(activeSubscription.CanRecommendCandidates == true ? "Có" : "Không")</strong></div>
+                            <div class="col-12 col-md-6">Tìm kiếm ứng viên: <strong>@(activeSubscription.CanQueryCandidates == true ? "Có" : "Không")</strong></div>
+                        </div>
+                        <p class="text-muted small mt-3 mb-0">Thời gian hiển thị theo giờ Việt Nam (UTC+7).</p>
+                    </div>
+                </div>
+
+                <div class="row g-4 mb-4">
+                    <div class="col-12 col-lg-6">
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <h3 class="h5">Đổi hạng gói</h3>
+                                <p class="text-muted small">Kỳ hạn được dùng để lấy quyền lợi gói mẫu. Ngày hết hạn hiện tại được giữ nguyên.</p>
+                                <form method="post" asp-page-handler="Tier" asp-route-id="@Model.Employer.EmployerId">
+                                    <input type="hidden" name="subscriptionId" value="@activeSubscription.Id" />
+                                    <div class="mb-3">
+                                        <label asp-for="Input.Tier" class="form-label">Hạng gói mới</label>
+                                        <select asp-for="Input.Tier" class="form-select" required>
+                                            <option value="">Chọn hạng gói</option>
+                                            <option value="@EmployerSubscriptionTier.Plus">Plus</option>
+                                            <option value="@EmployerSubscriptionTier.Pro">Pro</option>
+                                            <option value="@EmployerSubscriptionTier.Ultra">Ultra</option>
+                                        </select>
+                                        <span asp-validation-for="Input.Tier" class="text-danger"></span>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label asp-for="Input.Duration" class="form-label">Kỳ hạn gói mẫu</label>
+                                        <select asp-for="Input.Duration" class="form-select" required>
+                                            <option value="">Chọn kỳ hạn</option>
+                                            <option value="@EmployerSubscriptionDuration.Monthly">Hàng tháng</option>
+                                            <option value="@EmployerSubscriptionDuration.Yearly">Hàng năm</option>
+                                        </select>
+                                        <span asp-validation-for="Input.Duration" class="text-danger"></span>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary">Lưu hạng gói</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12 col-lg-6">
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <h3 class="h5">Đổi ngày hết hạn</h3>
+                                <form method="post" asp-page-handler="Period" asp-route-id="@Model.Employer.EmployerId">
+                                    <input type="hidden" name="subscriptionId" value="@activeSubscription.Id" />
+                                    <div class="mb-3">
+                                        <label asp-for="Input.EndDateLocal" class="form-label">Ngày hết hạn mới (giờ Việt Nam, UTC+7)</label>
+                                        <input asp-for="Input.EndDateLocal" asp-format="{0:yyyy-MM-ddTHH:mm}"
+                                               type="datetime-local" step="60" class="form-control" required />
+                                        <span asp-validation-for="Input.EndDateLocal" class="text-danger"></span>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary">Lưu thời hạn</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card border-danger mb-4">
+                    <div class="card-body d-flex flex-wrap justify-content-between align-items-center gap-3">
+                        <div>
+                            <h3 class="h5 mb-1">Thu hồi gói</h3>
+                            <p class="text-muted small mb-0">Gói sẽ ngừng hoạt động và hạn mức đăng tin được cập nhật ngay.</p>
+                        </div>
+                        <form method="post" asp-page-handler="Revoke" asp-route-id="@Model.Employer.EmployerId"
+                              onsubmit="return confirm('Bạn có chắc muốn thu hồi gói đang hoạt động?');">
+                            <input type="hidden" name="subscriptionId" value="@activeSubscription.Id" />
+                            <button type="submit" class="btn btn-outline-danger">Thu hồi gói</button>
+                        </form>
+                    </div>
+                </div>
+            }
+
+            <h2 class="h5 mb-3">Các gói đã ghi nhận</h2>
+            @if (Model.Subscriptions.Count == 0)
+            {
+                <div class="alert alert-light border" role="status">Nhà tuyển dụng chưa có gói nào.</div>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table table-striped align-middle">
+                        <thead>
+                            <tr>
+                                <th>Hạng gói</th>
+                                <th>Bắt đầu</th>
+                                <th>Hết hạn</th>
+                                <th>Trạng thái</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var subscription in Model.Subscriptions)
+                            {
+                                <tr>
+                                    <td>@subscription.Tier</td>
+                                    <td>@DetailModel.FormatDate(subscription.StartDate)</td>
+                                    <td>@DetailModel.FormatDate(subscription.EndDate)</td>
+                                    <td>@DetailModel.StatusLabel(subscription.Status, subscription.EndDate)</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+                <p class="text-muted small">Thời gian hiển thị theo giờ Việt Nam (UTC+7).</p>
+            }
+        }
+    }
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

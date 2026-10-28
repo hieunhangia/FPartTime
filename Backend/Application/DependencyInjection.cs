@@ -29,6 +29,7 @@ public static class DependencyInjection
         // Employer
         builder.Services.AddScoped<Contracts.Application.Employer.IJobService, Employer.JobService>();
         builder.Services.AddScoped<Contracts.Application.Employer.ISubscriptionService, Employer.SubscriptionService>();
+        builder.Services.AddScoped<Employer.SubscriptionQuotaService>();
         builder.Services.AddScoped<Contracts.Application.Employer.ICandidateService, Employer.CandidateService>();
         builder.Services.AddScoped<Contracts.Application.Employer.IOrderService, Employer.OrderService>();
         builder.Services.AddScoped<Contracts.Application.Employer.IPaymentTransactionService,
@@ -38,6 +39,10 @@ public static class DependencyInjection
 
         // Manager
         builder.Services.AddScoped<Contracts.Application.Manager.IIndustryService, Manager.IndustryService>();
+        builder.Services.AddScoped<Contracts.Application.Manager.IEmployerManagementService,
+            Manager.EmployerManagementService>();
+        builder.Services.AddScoped<Contracts.Application.Manager.IEmployerSubscriptionManagementService,
+            Manager.EmployerSubscriptionManagementService>();
 
         // Admin
         builder.Services.AddScoped<Contracts.Application.Admin.IUserService, Admin.UserService>();

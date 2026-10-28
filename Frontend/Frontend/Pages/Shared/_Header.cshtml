@@ -127,7 +127,7 @@
                         }
                         @if (User.IsInRole(Role.Manager))
                         {
-                            <li><a class="dropdown-item" href="#">Quản lý người dùng</a></li>
+                            <li><a class="dropdown-item" asp-page="/Manager/Employers/Index">Quản lý gói nhà tuyển dụng</a></li>
                         }
                         @if (User.IsInRole(Role.Admin))
                         {

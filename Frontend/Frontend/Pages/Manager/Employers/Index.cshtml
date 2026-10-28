@@ -1,0 +1,85 @@
+@page
+@model Frontend.Pages.Manager.Employers.IndexModel
+@{
+    ViewData["Title"] = "Quản lý gói nhà tuyển dụng";
+}
+
+<div class="container my-4">
+    <div class="mb-4">
+        <h1 class="h2 mb-1">Quản lý gói nhà tuyển dụng</h1>
+        <p class="text-muted mb-0">Tìm nhà tuyển dụng để xem và điều chỉnh gói dịch vụ.</p>
+    </div>
+
+    <form method="get" class="card card-body mb-4">
+        <div class="row g-3 align-items-end">
+            <div class="col-12 col-md-8">
+                <label asp-for="SearchTerm" class="form-label">Tên công ty, mã số thuế, số điện thoại hoặc mã nhà tuyển dụng</label>
+                <input asp-for="SearchTerm" class="form-control" maxlength="100" placeholder="Nhập thông tin cần tìm" />
+                <span asp-validation-for="SearchTerm" class="text-danger"></span>
+            </div>
+            <div class="col-12 col-md-4 d-flex gap-2">
+                <button type="submit" class="btn btn-primary">Tìm kiếm</button>
+                <a asp-page="./Index" class="btn btn-outline-secondary">Xóa lọc</a>
+            </div>
+        </div>
+        <div asp-validation-summary="ModelOnly" class="text-danger mt-2"></div>
+    </form>
+
+    <p class="text-muted">Tìm thấy <strong>@Model.TotalCount</strong> nhà tuyển dụng.</p>
+    @if (Model.Employers.Count == 0)
+    {
+        <div class="alert alert-light border" role="status">Không có nhà tuyển dụng phù hợp.</div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>Công ty</th>
+                        <th>Mã số thuế</th>
+                        <th>Số điện thoại</th>
+                        <th>Hạn mức tin</th>
+                        <th class="text-end">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var employer in Model.Employers)
+                    {
+                        <tr>
+                            <td class="fw-semibold">@employer.CompanyName</td>
+                            <td>@employer.TaxCode</td>
+                            <td>@(employer.ContactPhone ?? employer.PhoneNumber ?? "—")</td>
+                            <td>@employer.MaxActivePosts</td>
+                            <td class="text-end">
+                                <a asp-page="./Detail" asp-route-id="@employer.EmployerId"
+                                   class="btn btn-sm btn-outline-primary">Xem gói</a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+
+    @if (Model.TotalPages > 1)
+    {
+        <nav aria-label="Phân trang nhà tuyển dụng">
+            <ul class="pagination justify-content-end">
+                <li class="page-item @(Model.PageNumber == 1 ? "disabled" : "")">
+                    <a class="page-link" asp-page="./Index" asp-route-SearchTerm="@Model.SearchTerm"
+                       asp-route-PageNumber="@(Model.PageNumber - 1)">Trước</a>
+                </li>
+                <li class="page-item disabled"><span class="page-link">@Model.PageNumber / @Model.TotalPages</span></li>
+                <li class="page-item @(Model.PageNumber == Model.TotalPages ? "disabled" : "")">
+                    <a class="page-link" asp-page="./Index" asp-route-SearchTerm="@Model.SearchTerm"
+                       asp-route-PageNumber="@(Model.PageNumber + 1)">Sau</a>
+                </li>
+            </ul>
+        </nav>
+    }
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
