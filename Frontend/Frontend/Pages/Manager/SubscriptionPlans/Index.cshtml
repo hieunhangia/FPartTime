@@ -15,11 +15,6 @@
             <i class="bi bi-plus-lg me-1" aria-hidden="true"></i>Tạo gói
         </a>
     </div>
-
-    <div class="alert alert-info" role="note">
-        Thay đổi gói chỉ áp dụng cho lần mua hoặc cấp gói tiếp theo. Quyền lợi đã cấp cho nhà tuyển dụng được giữ nguyên.
-    </div>
-
     <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
 
     @if (Model.PlansLoaded && Model.Plans.Count == 0)
@@ -100,6 +95,4 @@
             </table>
         </div>
     }
-
-    <a asp-page="/Manager/Employers/Index" class="btn btn-outline-secondary mt-2">Quản lý gói của nhà tuyển dụng</a>
 </div>
