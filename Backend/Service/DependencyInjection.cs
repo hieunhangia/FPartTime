@@ -2,6 +2,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Service.Candidate;
 using Service.Employer;
+using Service.Manager;
 using Service.Public;
 
 namespace Service;
@@ -27,5 +28,8 @@ public static class DependencyInjection
         // Censor Services
         builder.Services.AddScoped<Censor.EmployerRegistrationService>();
         builder.Services.AddScoped<Censor.JobReportService>();
+
+        //Manager Services
+        builder.Services.AddScoped<StatisticService>();
     }
 }
