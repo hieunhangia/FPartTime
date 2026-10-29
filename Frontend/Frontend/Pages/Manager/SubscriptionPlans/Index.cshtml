@@ -1,0 +1,105 @@
+@page
+@using Frontend.ViewModels.Manager
+@model Frontend.Pages.Manager.SubscriptionPlans.IndexModel
+@{
+    ViewData["Title"] = "Quản lý danh mục gói đăng ký";
+}
+
+<div class="container my-4">
+    <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-start gap-3 mb-4">
+        <div>
+            <h1 class="h2 mb-1">Danh mục gói đăng ký</h1>
+            <p class="text-muted mb-0">Quản lý giá, thời hạn và quyền lợi của các gói dành cho nhà tuyển dụng.</p>
+        </div>
+        <a asp-page="./Create" class="btn btn-primary flex-shrink-0">
+            <i class="bi bi-plus-lg me-1" aria-hidden="true"></i>Tạo gói
+        </a>
+    </div>
+
+    <div class="alert alert-info" role="note">
+        Thay đổi gói chỉ áp dụng cho lần mua hoặc cấp gói tiếp theo. Quyền lợi đã cấp cho nhà tuyển dụng được giữ nguyên.
+    </div>
+
+    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+    @if (Model.PlansLoaded && Model.Plans.Count == 0)
+    {
+        <div class="alert alert-light border" role="status">Chưa có gói đăng ký nào.</div>
+    }
+    else if (Model.PlansLoaded)
+    {
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>Gói</th>
+                        <th>Giá</th>
+                        <th>Thời hạn</th>
+                        <th>Quyền lợi</th>
+                        <th>Trạng thái</th>
+                        <th class="plan-actions-cell text-end">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                @foreach (var plan in Model.Plans)
+                {
+                    <tr>
+                        <td>
+                            <div class="fw-semibold">@plan.Name</div>
+                            <div class="small text-muted">@SubscriptionPlanLabels.Tier(plan.Tier) · @SubscriptionPlanLabels.Duration(plan.Duration)</div>
+                            @if (!string.IsNullOrWhiteSpace(plan.Description))
+                            {
+                                <div class="small text-muted">@plan.Description</div>
+                            }
+                        </td>
+                        <td class="text-nowrap">@IndexModel.FormatPrice(plan.Price)</td>
+                        <td class="text-nowrap">@plan.DurationDays ngày</td>
+                        <td class="small">
+                            <div>Thêm @plan.ExtraActivePosts tin hoạt động</div>
+                            <div>Tặng @plan.FreeBumps lượt đẩy tin</div>
+                            @if (plan.CanRecommendCandidates == true)
+                            {
+                                <div>Gợi ý ứng viên</div>
+                            }
+                            @if (plan.CanQueryCandidates == true)
+                            {
+                                <div>Tìm ứng viên</div>
+                            }
+                        </td>
+                        <td>
+                            @if (plan.IsActive == true)
+                            {
+                                <span class="badge text-bg-success">Đang cung cấp</span>
+                            }
+                            else
+                            {
+                                <span class="badge text-bg-secondary">Đã ngừng</span>
+                            }
+                        </td>
+                        <td class="plan-actions-cell text-end">
+                            <div class="plan-actions">
+                                <a asp-page="./Edit" asp-route-tier="@plan.Tier" asp-route-duration="@plan.Duration"
+                                   class="btn btn-sm btn-outline-primary">@(plan.IsActive == true ? "Sửa gói" : "Sửa / bật lại")</a>
+                                @if (plan.IsActive == true)
+                                {
+                                    <form method="post" asp-page-handler="Deactivate" asp-route-tier="@plan.Tier"
+                                          asp-route-duration="@plan.Duration"
+                                          onsubmit="return confirm('Khoá gói này cho các lần đăng ký mới?');">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger">Khoá gói</button>
+                                    </form>
+                                }
+                                else
+                                {
+                                    <button type="button" class="btn btn-sm btn-outline-secondary" disabled>Đã khóa</button>
+                                }
+                            </div>
+                        </td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+    }
+
+    <a asp-page="/Manager/Employers/Index" class="btn btn-outline-secondary mt-2">Quản lý gói của nhà tuyển dụng</a>
+</div>

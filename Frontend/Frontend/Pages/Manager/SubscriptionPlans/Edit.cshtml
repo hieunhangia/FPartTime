@@ -1,0 +1,33 @@
+@page "{tier}/{duration}"
+@using Frontend.ViewModels.Manager
+@model Frontend.Pages.Manager.SubscriptionPlans.EditModel
+@{
+    ViewData["Title"] = "Sửa gói đăng ký";
+}
+
+<div class="container my-4">
+    <div class="mb-4">
+        <a asp-page="./Index" class="text-decoration-none">← Danh mục gói đăng ký</a>
+        <h1 class="h2 mt-2 mb-1">Sửa gói @SubscriptionPlanLabels.Tier(Model.Tier) · @SubscriptionPlanLabels.Duration(Model.Duration)</h1>
+        <p class="text-muted mb-0">Hạng và kỳ hạn là mã định danh của gói, không thể thay đổi sau khi tạo.</p>
+    </div>
+
+    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+    @if (Model.PlanLoaded)
+    {
+        <form method="post" class="card shadow-sm">
+            <div class="card-body">
+                <partial name="_PlanFields" for="Input" />
+            </div>
+            <div class="card-footer bg-white d-flex justify-content-end gap-2">
+                <a asp-page="./Index" class="btn btn-outline-secondary">Hủy</a>
+                <button type="submit" class="btn btn-primary">Lưu thay đổi</button>
+            </div>
+        </form>
+    }
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

@@ -1,0 +1,51 @@
+@page
+@using ApiSdk.Models
+@model Frontend.Pages.Manager.SubscriptionPlans.CreateModel
+@{
+    ViewData["Title"] = "Tạo gói đăng ký";
+}
+
+<div class="container my-4">
+    <div class="mb-4">
+        <a asp-page="./Index" class="text-decoration-none">← Danh mục gói đăng ký</a>
+        <h1 class="h2 mt-2 mb-1">Tạo gói đăng ký</h1>
+        <p class="text-muted mb-0">Chọn hạng và kỳ hạn, sau đó nhập giá cùng quyền lợi của gói.</p>
+        <p class="small text-muted mt-2 mb-0">Mỗi tổ hợp hạng và kỳ hạn chỉ có một gói. Nếu gói đã tồn tại, hãy sửa gói đó trong danh sách.</p>
+    </div>
+
+    <form method="post" class="card shadow-sm">
+        <div class="card-body">
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+            <div class="row g-3 mb-3">
+                <div class="col-12 col-md-6">
+                    <label asp-for="Tier" class="form-label">Hạng gói <span class="text-danger">*</span></label>
+                    <select asp-for="Tier" class="form-select">
+                        <option value="">Chọn hạng gói</option>
+                        <option value="@EmployerSubscriptionTier.Plus">Plus</option>
+                        <option value="@EmployerSubscriptionTier.Pro">Pro</option>
+                        <option value="@EmployerSubscriptionTier.Ultra">Ultra</option>
+                    </select>
+                    <span asp-validation-for="Tier" class="text-danger"></span>
+                </div>
+                <div class="col-12 col-md-6">
+                    <label asp-for="Duration" class="form-label">Kỳ hạn <span class="text-danger">*</span></label>
+                    <select asp-for="Duration" class="form-select">
+                        <option value="">Chọn kỳ hạn</option>
+                        <option value="@EmployerSubscriptionDuration.Monthly">Hàng tháng</option>
+                        <option value="@EmployerSubscriptionDuration.Yearly">Hàng năm</option>
+                    </select>
+                    <span asp-validation-for="Duration" class="text-danger"></span>
+                </div>
+            </div>
+            <partial name="_PlanFields" for="Input" />
+        </div>
+        <div class="card-footer bg-white d-flex justify-content-end gap-2">
+            <a asp-page="./Index" class="btn btn-outline-secondary">Hủy</a>
+            <button type="submit" class="btn btn-primary">Tạo gói</button>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

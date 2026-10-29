@@ -43,6 +43,8 @@ public static class DependencyInjection
             Manager.EmployerManagementService>();
         builder.Services.AddScoped<Contracts.Application.Manager.IEmployerSubscriptionManagementService,
             Manager.EmployerSubscriptionManagementService>();
+        builder.Services.AddScoped<Contracts.Application.Manager.ISubscriptionPlanManagementService,
+            Manager.SubscriptionPlanManagementService>();
 
         // Admin
         builder.Services.AddScoped<Contracts.Application.Admin.IUserService, Admin.UserService>();

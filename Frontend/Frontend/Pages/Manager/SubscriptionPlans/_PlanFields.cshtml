@@ -1,0 +1,52 @@
+@using Frontend.Constants
+@model Frontend.ViewModels.Manager.SubscriptionPlanFormInput
+
+<div class="row g-3">
+    <div class="col-12">
+        <label asp-for="Name" class="form-label">Tên gói <span class="text-danger">*</span></label>
+        <input asp-for="Name" class="form-control" maxlength="@BusinessRuleConstants.Models.EmployerSubscriptionPlan.NameMaxLength" />
+        <span asp-validation-for="Name" class="text-danger"></span>
+    </div>
+    <div class="col-12">
+        <label asp-for="Description" class="form-label">Mô tả</label>
+        <textarea asp-for="Description" class="form-control" rows="3"
+                  maxlength="@BusinessRuleConstants.Models.EmployerSubscriptionPlan.DescriptionMaxLength"></textarea>
+        <span asp-validation-for="Description" class="text-danger"></span>
+    </div>
+    <div class="col-12 col-md-6">
+        <label asp-for="Price" class="form-label">Giá (₫) <span class="text-danger">*</span></label>
+        <input asp-for="Price" type="number" class="form-control" min="0.01" step="0.01" inputmode="decimal" />
+        <span asp-validation-for="Price" class="text-danger"></span>
+    </div>
+    <div class="col-12 col-md-6">
+        <label asp-for="DurationDays" class="form-label">Thời hạn (ngày) <span class="text-danger">*</span></label>
+        <input asp-for="DurationDays" type="number" class="form-control" min="1"
+               max="@BusinessRuleConstants.Models.EmployerSubscriptionPlan.MaxDurationDays" />
+        <span asp-validation-for="DurationDays" class="text-danger"></span>
+    </div>
+    <div class="col-12 col-md-6">
+        <label asp-for="ExtraActivePosts" class="form-label">Tin đăng hoạt động được thêm <span class="text-danger">*</span></label>
+        <input asp-for="ExtraActivePosts" type="number" class="form-control" min="0"
+               max="@BusinessRuleConstants.Models.EmployerSubscriptionPlan.MaxExtraActivePosts" />
+        <span asp-validation-for="ExtraActivePosts" class="text-danger"></span>
+    </div>
+    <div class="col-12 col-md-6">
+        <label asp-for="FreeBumps" class="form-label">Lượt đẩy tin tặng kèm <span class="text-danger">*</span></label>
+        <input asp-for="FreeBumps" type="number" class="form-control" min="0" />
+        <span asp-validation-for="FreeBumps" class="text-danger"></span>
+    </div>
+    <div class="col-12">
+        <div class="form-check mb-2">
+            <input asp-for="CanRecommendCandidates" class="form-check-input" />
+            <label asp-for="CanRecommendCandidates" class="form-check-label">Cho phép gợi ý ứng viên</label>
+        </div>
+        <div class="form-check mb-2">
+            <input asp-for="CanQueryCandidates" class="form-check-input" />
+            <label asp-for="CanQueryCandidates" class="form-check-label">Cho phép chủ động tìm ứng viên</label>
+        </div>
+        <div class="form-check">
+            <input asp-for="IsActive" class="form-check-input" />
+            <label asp-for="IsActive" class="form-check-label">Đang cung cấp gói</label>
+        </div>
+    </div>
+</div>

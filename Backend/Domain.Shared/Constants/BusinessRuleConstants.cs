@@ -113,6 +113,7 @@ public static class BusinessRuleConstants
             public const int DurationMaxLength = 50;
             public const int NameMaxLength = 100;
             public const int DescriptionMaxLength = 500;
+            public const int MaxDurationDays = 3650;
         }
 
         public static class CandidateViewJobStatsPackage

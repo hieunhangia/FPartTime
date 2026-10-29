@@ -26,6 +26,14 @@ public static class BusinessRuleConstants
 
     public static class Models
     {
+        public static class EmployerSubscriptionPlan
+        {
+            public const int NameMaxLength = 100;
+            public const int DescriptionMaxLength = 500;
+            public const int MaxDurationDays = 3650;
+            public const int MaxExtraActivePosts = int.MaxValue - Employers.DefaultMaxActivePosts;
+        }
+
         public static class Commune
         {
             public const int CodeMaxLength = 10;
@@ -42,6 +50,11 @@ public static class BusinessRuleConstants
             public const int DescriptionMaxLength = 1000;
             public const int DetailAddressMaxLength = 200;
         }
+    }
+
+    public static class Employers
+    {
+        public const int DefaultMaxActivePosts = 5;
     }
 
     public static class Jobs
