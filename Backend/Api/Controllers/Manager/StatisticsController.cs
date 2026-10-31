@@ -7,12 +7,11 @@ using static Service.Manager.StatisticService;
 
 namespace Api.Controllers.Manager
 {
-    [Route("api/[controller]")]
+    [Route("api/manager/[controller]")]
     [ApiController]
     [Authorize(Roles = Role.Manager)]
     public class StatisticsController(StatisticService statisticService) : ControllerBase
     {
-        /// <summary>
         
         [HttpGet("overview")]
         [ProducesResponseType<OverviewKpiResponseDto>(StatusCodes.Status200OK)]

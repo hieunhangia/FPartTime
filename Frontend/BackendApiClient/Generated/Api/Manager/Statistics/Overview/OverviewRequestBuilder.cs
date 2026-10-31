@@ -9,31 +9,31 @@ using System.IO;
 using System.Threading.Tasks;
 using System.Threading;
 using System;
-namespace ApiSdk.Api.Statistics.Marketplace
+namespace ApiSdk.Api.Manager.Statistics.Overview
 {
     /// <summary>
-    /// Builds and executes requests for operations under \api\Statistics\marketplace
+    /// Builds and executes requests for operations under \api\manager\Statistics\overview
     /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("Kiota", "1.0.0")]
-    public partial class MarketplaceRequestBuilder : BaseRequestBuilder
+    public partial class OverviewRequestBuilder : BaseRequestBuilder
     {
         /// <summary>
-        /// Instantiates a new <see cref="global::ApiSdk.Api.Statistics.Marketplace.MarketplaceRequestBuilder"/> and sets the default values.
+        /// Instantiates a new <see cref="global::ApiSdk.Api.Manager.Statistics.Overview.OverviewRequestBuilder"/> and sets the default values.
         /// </summary>
         /// <param name="pathParameters">Path parameters for the request</param>
         /// <param name="requestAdapter">The request adapter to use to execute the requests.</param>
-        public MarketplaceRequestBuilder(Dictionary<string, object> pathParameters, IRequestAdapter requestAdapter) : base(requestAdapter, "{+baseurl}/api/Statistics/marketplace{?fromDate*,toDate*}", pathParameters)
+        public OverviewRequestBuilder(Dictionary<string, object> pathParameters, IRequestAdapter requestAdapter) : base(requestAdapter, "{+baseurl}/api/manager/Statistics/overview{?fromDate*,toDate*}", pathParameters)
         {
         }
         /// <summary>
-        /// Instantiates a new <see cref="global::ApiSdk.Api.Statistics.Marketplace.MarketplaceRequestBuilder"/> and sets the default values.
+        /// Instantiates a new <see cref="global::ApiSdk.Api.Manager.Statistics.Overview.OverviewRequestBuilder"/> and sets the default values.
         /// </summary>
         /// <param name="rawUrl">The raw URL to use for the request builder.</param>
         /// <param name="requestAdapter">The request adapter to use to execute the requests.</param>
-        public MarketplaceRequestBuilder(string rawUrl, IRequestAdapter requestAdapter) : base(requestAdapter, "{+baseurl}/api/Statistics/marketplace{?fromDate*,toDate*}", rawUrl)
+        public OverviewRequestBuilder(string rawUrl, IRequestAdapter requestAdapter) : base(requestAdapter, "{+baseurl}/api/manager/Statistics/overview{?fromDate*,toDate*}", rawUrl)
         {
         }
-        /// <returns>A <see cref="global::ApiSdk.Models.MarketplaceAnalyticsResponseDto"/></returns>
+        /// <returns>A <see cref="global::ApiSdk.Models.OverviewKpiResponseDto"/></returns>
         /// <param name="cancellationToken">Cancellation token to use when cancelling requests</param>
         /// <param name="requestConfiguration">Configuration for the request such as headers, query parameters, and middleware options.</param>
         /// <exception cref="global::ApiSdk.Models.ProblemDetails">When receiving a 401 status code</exception>
@@ -41,11 +41,11 @@ namespace ApiSdk.Api.Statistics.Marketplace
         /// <exception cref="global::ApiSdk.Models.ProblemDetails">When receiving a 500 status code</exception>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
-        public async Task<global::ApiSdk.Models.MarketplaceAnalyticsResponseDto?> GetAsync(Action<RequestConfiguration<global::ApiSdk.Api.Statistics.Marketplace.MarketplaceRequestBuilder.MarketplaceRequestBuilderGetQueryParameters>>? requestConfiguration = default, CancellationToken cancellationToken = default)
+        public async Task<global::ApiSdk.Models.OverviewKpiResponseDto?> GetAsync(Action<RequestConfiguration<global::ApiSdk.Api.Manager.Statistics.Overview.OverviewRequestBuilder.OverviewRequestBuilderGetQueryParameters>>? requestConfiguration = default, CancellationToken cancellationToken = default)
         {
 #nullable restore
 #else
-        public async Task<global::ApiSdk.Models.MarketplaceAnalyticsResponseDto> GetAsync(Action<RequestConfiguration<global::ApiSdk.Api.Statistics.Marketplace.MarketplaceRequestBuilder.MarketplaceRequestBuilderGetQueryParameters>> requestConfiguration = default, CancellationToken cancellationToken = default)
+        public async Task<global::ApiSdk.Models.OverviewKpiResponseDto> GetAsync(Action<RequestConfiguration<global::ApiSdk.Api.Manager.Statistics.Overview.OverviewRequestBuilder.OverviewRequestBuilderGetQueryParameters>> requestConfiguration = default, CancellationToken cancellationToken = default)
         {
 #endif
             var requestInfo = ToGetRequestInformation(requestConfiguration);
@@ -55,17 +55,17 @@ namespace ApiSdk.Api.Statistics.Marketplace
                 { "403", global::ApiSdk.Models.ProblemDetails.CreateFromDiscriminatorValue },
                 { "500", global::ApiSdk.Models.ProblemDetails.CreateFromDiscriminatorValue },
             };
-            return await RequestAdapter.SendAsync<global::ApiSdk.Models.MarketplaceAnalyticsResponseDto>(requestInfo, global::ApiSdk.Models.MarketplaceAnalyticsResponseDto.CreateFromDiscriminatorValue, errorMapping, cancellationToken).ConfigureAwait(false);
+            return await RequestAdapter.SendAsync<global::ApiSdk.Models.OverviewKpiResponseDto>(requestInfo, global::ApiSdk.Models.OverviewKpiResponseDto.CreateFromDiscriminatorValue, errorMapping, cancellationToken).ConfigureAwait(false);
         }
         /// <returns>A <see cref="RequestInformation"/></returns>
         /// <param name="requestConfiguration">Configuration for the request such as headers, query parameters, and middleware options.</param>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
-        public RequestInformation ToGetRequestInformation(Action<RequestConfiguration<global::ApiSdk.Api.Statistics.Marketplace.MarketplaceRequestBuilder.MarketplaceRequestBuilderGetQueryParameters>>? requestConfiguration = default)
+        public RequestInformation ToGetRequestInformation(Action<RequestConfiguration<global::ApiSdk.Api.Manager.Statistics.Overview.OverviewRequestBuilder.OverviewRequestBuilderGetQueryParameters>>? requestConfiguration = default)
         {
 #nullable restore
 #else
-        public RequestInformation ToGetRequestInformation(Action<RequestConfiguration<global::ApiSdk.Api.Statistics.Marketplace.MarketplaceRequestBuilder.MarketplaceRequestBuilderGetQueryParameters>> requestConfiguration = default)
+        public RequestInformation ToGetRequestInformation(Action<RequestConfiguration<global::ApiSdk.Api.Manager.Statistics.Overview.OverviewRequestBuilder.OverviewRequestBuilderGetQueryParameters>> requestConfiguration = default)
         {
 #endif
             var requestInfo = new RequestInformation(Method.GET, UrlTemplate, PathParameters);
@@ -76,15 +76,15 @@ namespace ApiSdk.Api.Statistics.Marketplace
         /// <summary>
         /// Returns a request builder with the provided arbitrary URL. Using this method means any other path or query parameters are ignored.
         /// </summary>
-        /// <returns>A <see cref="global::ApiSdk.Api.Statistics.Marketplace.MarketplaceRequestBuilder"/></returns>
+        /// <returns>A <see cref="global::ApiSdk.Api.Manager.Statistics.Overview.OverviewRequestBuilder"/></returns>
         /// <param name="rawUrl">The raw URL to use for the request builder.</param>
-        public global::ApiSdk.Api.Statistics.Marketplace.MarketplaceRequestBuilder WithUrl(string rawUrl)
+        public global::ApiSdk.Api.Manager.Statistics.Overview.OverviewRequestBuilder WithUrl(string rawUrl)
         {
-            return new global::ApiSdk.Api.Statistics.Marketplace.MarketplaceRequestBuilder(rawUrl, RequestAdapter);
+            return new global::ApiSdk.Api.Manager.Statistics.Overview.OverviewRequestBuilder(rawUrl, RequestAdapter);
         }
         [global::System.CodeDom.Compiler.GeneratedCode("Kiota", "1.0.0")]
         #pragma warning disable CS1591
-        public partial class MarketplaceRequestBuilderGetQueryParameters 
+        public partial class OverviewRequestBuilderGetQueryParameters 
         #pragma warning restore CS1591
         {
             #pragma warning disable CS1591

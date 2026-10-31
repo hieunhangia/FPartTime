@@ -9,31 +9,31 @@ using System.IO;
 using System.Threading.Tasks;
 using System.Threading;
 using System;
-namespace ApiSdk.Api.Statistics.Revenue
+namespace ApiSdk.Api.Manager.Statistics.QualityRetention
 {
     /// <summary>
-    /// Builds and executes requests for operations under \api\Statistics\revenue
+    /// Builds and executes requests for operations under \api\manager\Statistics\quality-retention
     /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("Kiota", "1.0.0")]
-    public partial class RevenueRequestBuilder : BaseRequestBuilder
+    public partial class QualityRetentionRequestBuilder : BaseRequestBuilder
     {
         /// <summary>
-        /// Instantiates a new <see cref="global::ApiSdk.Api.Statistics.Revenue.RevenueRequestBuilder"/> and sets the default values.
+        /// Instantiates a new <see cref="global::ApiSdk.Api.Manager.Statistics.QualityRetention.QualityRetentionRequestBuilder"/> and sets the default values.
         /// </summary>
         /// <param name="pathParameters">Path parameters for the request</param>
         /// <param name="requestAdapter">The request adapter to use to execute the requests.</param>
-        public RevenueRequestBuilder(Dictionary<string, object> pathParameters, IRequestAdapter requestAdapter) : base(requestAdapter, "{+baseurl}/api/Statistics/revenue{?fromDate*,toDate*}", pathParameters)
+        public QualityRetentionRequestBuilder(Dictionary<string, object> pathParameters, IRequestAdapter requestAdapter) : base(requestAdapter, "{+baseurl}/api/manager/Statistics/quality-retention", pathParameters)
         {
         }
         /// <summary>
-        /// Instantiates a new <see cref="global::ApiSdk.Api.Statistics.Revenue.RevenueRequestBuilder"/> and sets the default values.
+        /// Instantiates a new <see cref="global::ApiSdk.Api.Manager.Statistics.QualityRetention.QualityRetentionRequestBuilder"/> and sets the default values.
         /// </summary>
         /// <param name="rawUrl">The raw URL to use for the request builder.</param>
         /// <param name="requestAdapter">The request adapter to use to execute the requests.</param>
-        public RevenueRequestBuilder(string rawUrl, IRequestAdapter requestAdapter) : base(requestAdapter, "{+baseurl}/api/Statistics/revenue{?fromDate*,toDate*}", rawUrl)
+        public QualityRetentionRequestBuilder(string rawUrl, IRequestAdapter requestAdapter) : base(requestAdapter, "{+baseurl}/api/manager/Statistics/quality-retention", rawUrl)
         {
         }
-        /// <returns>A <see cref="global::ApiSdk.Models.RevenueAnalyticsResponseDto"/></returns>
+        /// <returns>A <see cref="global::ApiSdk.Models.QualityAndRetentionResponseDto"/></returns>
         /// <param name="cancellationToken">Cancellation token to use when cancelling requests</param>
         /// <param name="requestConfiguration">Configuration for the request such as headers, query parameters, and middleware options.</param>
         /// <exception cref="global::ApiSdk.Models.ProblemDetails">When receiving a 401 status code</exception>
@@ -41,11 +41,11 @@ namespace ApiSdk.Api.Statistics.Revenue
         /// <exception cref="global::ApiSdk.Models.ProblemDetails">When receiving a 500 status code</exception>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
-        public async Task<global::ApiSdk.Models.RevenueAnalyticsResponseDto?> GetAsync(Action<RequestConfiguration<global::ApiSdk.Api.Statistics.Revenue.RevenueRequestBuilder.RevenueRequestBuilderGetQueryParameters>>? requestConfiguration = default, CancellationToken cancellationToken = default)
+        public async Task<global::ApiSdk.Models.QualityAndRetentionResponseDto?> GetAsync(Action<RequestConfiguration<DefaultQueryParameters>>? requestConfiguration = default, CancellationToken cancellationToken = default)
         {
 #nullable restore
 #else
-        public async Task<global::ApiSdk.Models.RevenueAnalyticsResponseDto> GetAsync(Action<RequestConfiguration<global::ApiSdk.Api.Statistics.Revenue.RevenueRequestBuilder.RevenueRequestBuilderGetQueryParameters>> requestConfiguration = default, CancellationToken cancellationToken = default)
+        public async Task<global::ApiSdk.Models.QualityAndRetentionResponseDto> GetAsync(Action<RequestConfiguration<DefaultQueryParameters>> requestConfiguration = default, CancellationToken cancellationToken = default)
         {
 #endif
             var requestInfo = ToGetRequestInformation(requestConfiguration);
@@ -55,17 +55,17 @@ namespace ApiSdk.Api.Statistics.Revenue
                 { "403", global::ApiSdk.Models.ProblemDetails.CreateFromDiscriminatorValue },
                 { "500", global::ApiSdk.Models.ProblemDetails.CreateFromDiscriminatorValue },
             };
-            return await RequestAdapter.SendAsync<global::ApiSdk.Models.RevenueAnalyticsResponseDto>(requestInfo, global::ApiSdk.Models.RevenueAnalyticsResponseDto.CreateFromDiscriminatorValue, errorMapping, cancellationToken).ConfigureAwait(false);
+            return await RequestAdapter.SendAsync<global::ApiSdk.Models.QualityAndRetentionResponseDto>(requestInfo, global::ApiSdk.Models.QualityAndRetentionResponseDto.CreateFromDiscriminatorValue, errorMapping, cancellationToken).ConfigureAwait(false);
         }
         /// <returns>A <see cref="RequestInformation"/></returns>
         /// <param name="requestConfiguration">Configuration for the request such as headers, query parameters, and middleware options.</param>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
-        public RequestInformation ToGetRequestInformation(Action<RequestConfiguration<global::ApiSdk.Api.Statistics.Revenue.RevenueRequestBuilder.RevenueRequestBuilderGetQueryParameters>>? requestConfiguration = default)
+        public RequestInformation ToGetRequestInformation(Action<RequestConfiguration<DefaultQueryParameters>>? requestConfiguration = default)
         {
 #nullable restore
 #else
-        public RequestInformation ToGetRequestInformation(Action<RequestConfiguration<global::ApiSdk.Api.Statistics.Revenue.RevenueRequestBuilder.RevenueRequestBuilderGetQueryParameters>> requestConfiguration = default)
+        public RequestInformation ToGetRequestInformation(Action<RequestConfiguration<DefaultQueryParameters>> requestConfiguration = default)
         {
 #endif
             var requestInfo = new RequestInformation(Method.GET, UrlTemplate, PathParameters);
@@ -76,25 +76,11 @@ namespace ApiSdk.Api.Statistics.Revenue
         /// <summary>
         /// Returns a request builder with the provided arbitrary URL. Using this method means any other path or query parameters are ignored.
         /// </summary>
-        /// <returns>A <see cref="global::ApiSdk.Api.Statistics.Revenue.RevenueRequestBuilder"/></returns>
+        /// <returns>A <see cref="global::ApiSdk.Api.Manager.Statistics.QualityRetention.QualityRetentionRequestBuilder"/></returns>
         /// <param name="rawUrl">The raw URL to use for the request builder.</param>
-        public global::ApiSdk.Api.Statistics.Revenue.RevenueRequestBuilder WithUrl(string rawUrl)
+        public global::ApiSdk.Api.Manager.Statistics.QualityRetention.QualityRetentionRequestBuilder WithUrl(string rawUrl)
         {
-            return new global::ApiSdk.Api.Statistics.Revenue.RevenueRequestBuilder(rawUrl, RequestAdapter);
-        }
-        [global::System.CodeDom.Compiler.GeneratedCode("Kiota", "1.0.0")]
-        #pragma warning disable CS1591
-        public partial class RevenueRequestBuilderGetQueryParameters 
-        #pragma warning restore CS1591
-        {
-            #pragma warning disable CS1591
-            [QueryParameter("fromDate")]
-            public DateTimeOffset? FromDate { get; set; }
-            #pragma warning restore CS1591
-            #pragma warning disable CS1591
-            [QueryParameter("toDate")]
-            public DateTimeOffset? ToDate { get; set; }
-            #pragma warning restore CS1591
+            return new global::ApiSdk.Api.Manager.Statistics.QualityRetention.QualityRetentionRequestBuilder(rawUrl, RequestAdapter);
         }
     }
 }

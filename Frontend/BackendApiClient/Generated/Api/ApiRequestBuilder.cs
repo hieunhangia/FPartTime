@@ -11,10 +11,10 @@ using ApiSdk.Api.EmployerProfiles;
 using ApiSdk.Api.EmployerRegistrations;
 using ApiSdk.Api.Identity;
 using ApiSdk.Api.Industries;
+using ApiSdk.Api.Ipn;
 using ApiSdk.Api.Jobs;
 using ApiSdk.Api.Manager;
 using ApiSdk.Api.Notifications;
-using ApiSdk.Api.Statistics;
 using Microsoft.Kiota.Abstractions.Extensions;
 using Microsoft.Kiota.Abstractions;
 using System.Collections.Generic;
@@ -84,6 +84,11 @@ namespace ApiSdk.Api
         {
             get => new global::ApiSdk.Api.Industries.IndustriesRequestBuilder(PathParameters, RequestAdapter);
         }
+        /// <summary>The Ipn property</summary>
+        public global::ApiSdk.Api.Ipn.IpnRequestBuilder Ipn
+        {
+            get => new global::ApiSdk.Api.Ipn.IpnRequestBuilder(PathParameters, RequestAdapter);
+        }
         /// <summary>The jobs property</summary>
         public global::ApiSdk.Api.Jobs.JobsRequestBuilder Jobs
         {
@@ -98,11 +103,6 @@ namespace ApiSdk.Api
         public global::ApiSdk.Api.Notifications.NotificationsRequestBuilder Notifications
         {
             get => new global::ApiSdk.Api.Notifications.NotificationsRequestBuilder(PathParameters, RequestAdapter);
-        }
-        /// <summary>The Statistics property</summary>
-        public global::ApiSdk.Api.Statistics.StatisticsRequestBuilder Statistics
-        {
-            get => new global::ApiSdk.Api.Statistics.StatisticsRequestBuilder(PathParameters, RequestAdapter);
         }
         /// <summary>
         /// Instantiates a new <see cref="global::ApiSdk.Api.ApiRequestBuilder"/> and sets the default values.

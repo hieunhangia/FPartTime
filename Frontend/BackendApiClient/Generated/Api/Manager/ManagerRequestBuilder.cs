@@ -2,6 +2,7 @@
 #pragma warning disable CS0618
 using ApiSdk.Api.Manager.Employers;
 using ApiSdk.Api.Manager.Industries;
+using ApiSdk.Api.Manager.Statistics;
 using ApiSdk.Api.Manager.SubscriptionPlans;
 using Microsoft.Kiota.Abstractions.Extensions;
 using Microsoft.Kiota.Abstractions;
@@ -26,6 +27,11 @@ namespace ApiSdk.Api.Manager
         public global::ApiSdk.Api.Manager.Industries.IndustriesRequestBuilder Industries
         {
             get => new global::ApiSdk.Api.Manager.Industries.IndustriesRequestBuilder(PathParameters, RequestAdapter);
+        }
+        /// <summary>The Statistics property</summary>
+        public global::ApiSdk.Api.Manager.Statistics.StatisticsRequestBuilder Statistics
+        {
+            get => new global::ApiSdk.Api.Manager.Statistics.StatisticsRequestBuilder(PathParameters, RequestAdapter);
         }
         /// <summary>The subscriptionPlans property</summary>
         public global::ApiSdk.Api.Manager.SubscriptionPlans.SubscriptionPlansRequestBuilder SubscriptionPlans
