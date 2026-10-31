@@ -1,0 +1,348 @@
+﻿@page
+@model Frontend.Pages.Manager.Statistics.IndexModel
+@{
+    ViewData["Title"] = "Báo Cáo & Thống Kê Quản Lý";
+}
+
+<div class="container-fluid py-3">
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body">
+            <form method="get" class="row g-3 align-items-center">
+                <div class="col-md-4">
+                    <h4 class="mb-0 text-primary fw-bold">
+                        <i class="bi bi-bar-chart-line-fill me-2"></i>Thống Kê Hoạt Động Sàn
+                    </h4>
+                </div>
+                <div class="col-md-8 d-flex flex-wrap gap-2 justify-content-md-end align-items-center">
+                    <div class="btn-group" role="group">
+                        <a asp-page="./Index" asp-route-preset="today" class="btn btn-outline-secondary btn-sm @(Model.Preset == "today" ? "active" : "")">Hôm nay</a>
+                        <a asp-page="./Index" asp-route-preset="7days" class="btn btn-outline-secondary btn-sm @(Model.Preset == "7days" ? "active" : "")">7 ngày qua</a>
+                        <a asp-page="./Index" asp-route-preset="30days" class="btn btn-outline-secondary btn-sm @(Model.Preset == "30days" ? "active" : "")">30 ngày qua</a>
+                        <a asp-page="./Index" asp-route-preset="thismonth" class="btn btn-outline-secondary btn-sm @(Model.Preset == "thismonth" ? "active" : "")">Tháng này</a>
+                    </div>
+                    <div class="d-flex align-items-center gap-1">
+                        <input type="date" name="FromDate" class="form-control form-control-sm" value="@Model.FromDate?.ToString("yyyy-MM-dd")" />
+                        <span>-</span>
+                        <input type="date" name="ToDate" class="form-control form-control-sm" value="@Model.ToDate?.ToString("yyyy-MM-dd")" />
+                        <button type="submit" class="btn btn-primary btn-sm"><i class="bi bi-funnel-fill"></i> Lọc</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    @if (Model.Overview != null)
+    {
+        <div class="row g-3 mb-4">
+            <div class="col-xl-3 col-md-6">
+                <div class="card border-0 shadow-sm h-100 border-start border-4 border-success">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="text-muted small fw-bold">DOANH THU THỰC NHẬN</span>
+                            <span class="badge bg-success-subtle text-success p-2 rounded-circle"><i class="bi bi-cash-stack fs-5"></i></span>
+                        </div>
+                        <h3 class="fw-bold mb-1">@(Model.Overview.TotalRevenue?.Value?.ToString("N0") ?? "0") đ</h3>
+                        <small class="@(Model.Overview.TotalRevenue?.IsPositive == true ? "text-success" : "text-danger") fw-semibold">
+                            <i class="bi @(Model.Overview.TotalRevenue?.IsPositive == true ? "bi-arrow-up-right" : "bi-arrow-down-right")"></i>
+                            @Model.Overview.TotalRevenue?.GrowthRate% so với kỳ trước
+                        </small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-md-6">
+                <div class="card border-0 shadow-sm h-100 border-start border-4 border-primary">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="text-muted small fw-bold">DOANH NGHIỆP TRẢ PHÍ (ACTIVE)</span>
+                            <span class="badge bg-primary-subtle text-primary p-2 rounded-circle"><i class="bi bi-building-check fs-5"></i></span>
+                        </div>
+                        <h3 class="fw-bold mb-1">@Model.Overview.ActiveSubscriptions?.Value</h3>
+                        <small class="text-muted">Đang duy trì gói dịch vụ</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-md-6">
+                <div class="card border-0 shadow-sm h-100 border-start border-4 border-info">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="text-muted small fw-bold">VIỆC LÀM MỚI ĐĂNG</span>
+                            <span class="badge bg-info-subtle text-info p-2 rounded-circle"><i class="bi bi-briefcase fs-5"></i></span>
+                        </div>
+                        <h3 class="fw-bold mb-1">@Model.Overview.NewJobs?.Value</h3>
+                        <small class="@(Model.Overview.NewJobs?.IsPositive == true ? "text-success" : "text-danger") fw-semibold">
+                            <i class="bi @(Model.Overview.NewJobs?.IsPositive == true ? "bi-arrow-up-right" : "bi-arrow-down-right")"></i>
+                            @Model.Overview.NewJobs?.GrowthRate% so với kỳ trước
+                        </small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-md-6">
+                <div class="card border-0 shadow-sm h-100 border-start border-4 border-warning">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="text-muted small fw-bold">LƯỢT ỨNG TUYỂN (APPLICATIONS)</span>
+                            <span class="badge bg-warning-subtle text-warning p-2 rounded-circle"><i class="bi bi-file-earmark-person fs-5"></i></span>
+                        </div>
+                        <h3 class="fw-bold mb-1">@Model.Overview.TotalApplications?.Value</h3>
+                        <small class="@(Model.Overview.TotalApplications?.IsPositive == true ? "text-success" : "text-danger") fw-semibold">
+                            <i class="bi @(Model.Overview.TotalApplications?.IsPositive == true ? "bi-arrow-up-right" : "bi-arrow-down-right")"></i>
+                            @Model.Overview.TotalApplications?.GrowthRate% so với kỳ trước
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+    <div class="row g-3 mb-4">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white border-0 py-3">
+                    <h5 class="card-title mb-0 fw-bold"><i class="bi bi-graph-up text-primary me-2"></i>Xu Hướng Doanh Thu Theo Ngày</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="revenueTrendChart" style="max-height: 320px;"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white border-0 py-3 d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0 fw-bold"><i class="bi bi-pie-chart text-primary me-2"></i>Cơ Cấu Gói Hội Viên</h5>
+                    <span class="badge bg-light text-dark border">ARPPU: @(Model.Revenue?.Arppu?.ToString("N0") ?? "0") đ</span>
+                </div>
+                <div class="card-body d-flex flex-column justify-content-center">
+                    <canvas id="packagePieChart" style="max-height: 250px;"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white border-0 py-3">
+                    <h5 class="card-title mb-0 fw-bold"><i class="bi bi-funnel text-primary me-2"></i>Phễu Tuyển Dụng & Chuyển Đổi</h5>
+                </div>
+                <div class="card-body">
+                    @if (Model.Marketplace?.Funnel != null)
+                    {
+                        var funnel = Model.Marketplace.Funnel;
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between mb-1">
+                                <span>Tổng lượt nộp: <strong>@funnel.TotalApplied</strong></span>
+                                <span class="badge bg-secondary">100%</span>
+                            </div>
+                            <div class="progress" style="height: 12px;">
+                                <div class="progress-bar bg-primary" style="width: 100%"></div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between mb-1">
+                                <span>Được chấp nhận: <strong>@funnel.TotalAccepted</strong></span>
+                                <span class="badge bg-success">@funnel.FillRate%</span>
+                            </div>
+                            <div class="progress" style="height: 12px;">
+                                <div class="progress-bar bg-success" style="width: @funnel.FillRate%"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="d-flex justify-content-between mb-1">
+                                <span>Bị từ chối: <strong>@funnel.TotalRejected</strong></span>
+                                <span class="badge bg-danger">@(funnel.TotalApplied > 0 ? (funnel.TotalRejected * 100 / funnel.TotalApplied) : 0)%</span>
+                            </div>
+                            <div class="progress" style="height: 12px;">
+                                <div class="progress-bar bg-danger" style="width: @(funnel.TotalApplied > 0 ? (funnel.TotalRejected * 100 / funnel.TotalApplied) : 0)%"></div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white border-0 py-3">
+                    <h5 class="card-title mb-0 fw-bold"><i class="bi bi-trophy text-primary me-2"></i>Top 5 Ngành Nghề Hút Ứng Viên Nhất</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="topIndustriesChart" style="max-height: 250px;"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @if (Model.QualityRetention != null)
+    {
+        <div class="row g-3">
+            <div class="col-lg-6">
+                <div class="card border-0 shadow-sm mb-3">
+                    <div class="card-header bg-white border-0 py-3">
+                        <h5 class="card-title mb-0 fw-bold"><i class="bi bi-shield-exclamation text-danger me-2"></i>Chất Lượng Trải Nghiệm & Báo Cáo</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="alert alert-warning d-flex align-items-center mb-3">
+                            <i class="bi bi-exclamation-triangle-fill fs-3 me-3 text-warning"></i>
+                            <div>
+                                <h6 class="mb-1 fw-bold">@Model.QualityRetention.StaleApplicationsCount hồ sơ bị chậm duyệt (> 7 ngày)</h6>
+                                <small>Chiếm <strong>@Model.QualityRetention.StaleRate%</strong> tổng số hồ sơ đang chờ. Cần nhắc nhở NTD xử lý sớm!</small>
+                            </div>
+                        </div>
+                        <div class="d-flex justify-content-between p-3 bg-light rounded">
+                            <span><i class="bi bi-flag-fill text-danger me-2"></i>Tổng báo cáo vi phạm việc làm:</span>
+                            <span class="fw-bold">@Model.QualityRetention.TotalReports (Đã xử lý: @Model.QualityRetention.ResolvedReports)</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-white border-0 py-3">
+                        <h5 class="card-title mb-0 fw-bold"><i class="bi bi-award text-warning me-2"></i>Top 5 Doanh Nghiệp Chi Tiêu Cao Nhất</h5>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Doanh Nghiệp</th>
+                                    <th>Gói Gần Nhất</th>
+                                    <th>Số Job Đang Mở</th>
+                                    <th class="text-end">Tổng Chi Trả</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var spender in Model.QualityRetention.TopSpenders)
+                                {
+                                    <tr>
+                                        <td class="fw-semibold">@spender.EmployerName</td>
+                                        <td><span class="badge bg-primary-subtle text-primary">@spender.CurrentPlan</span></td>
+                                        <td>@spender.ActiveJobsCount tin</td>
+                                        <td class="text-end fw-bold text-success">@spender.TotalSpent?.ToString("N0") đ</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-header bg-white border-0 py-3">
+                        <h5 class="card-title mb-0 fw-bold"><i class="bi bi-alarm text-primary me-2"></i>Cảnh Báo Hết Hạn Gói (Trong 7 Ngày Tới)</h5>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Doanh Nghiệp</th>
+                                    <th>Gói</th>
+                                    <th>Ngày Hết Hạn</th>
+                                    <th class="text-end">Thời Gian Còn Lại</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (Model.QualityRetention.ExpiringEmployers.Count == 0)
+                                {
+                                    <tr>
+                                        <td colspan="4" class="text-center text-muted py-3">Không có gói nào sắp hết hạn trong 7 ngày tới.</td>
+                                    </tr>
+                                }
+                                else
+                                {
+                                    @foreach (var exp in Model.QualityRetention.ExpiringEmployers)
+                                    {
+                                        <tr>
+                                            <td class="fw-semibold">@exp.EmployerName</td>
+                                            <td><span class="badge bg-info-subtle text-info">@exp.Tier</span></td>
+                                            <td>@exp.EndDate?.ToString("dd/MM/yyyy")</td>
+                                            <td class="text-end">
+                                                <span class="badge bg-danger">Còn @exp.DaysRemaining ngày</span>
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+        const revenueTrendData = @Html.Raw(Model.RevenueTrendJson);
+        const packageData = @Html.Raw(Model.PackageBreakdownsJson);
+        const industryData = @Html.Raw(Model.TopIndustriesJson);
+
+        if (revenueTrendData && revenueTrendData.length > 0) {
+        new Chart(document.getElementById('revenueTrendChart'), {
+        type: 'line',
+        data: {
+        labels: revenueTrendData.map(x => x.Label),
+        datasets: [{
+        label: 'Doanh thu (VNĐ)',
+        data: revenueTrendData.map(x => x.Value),
+        borderColor: '#0d6efd',
+        backgroundColor: 'rgba(13, 110, 253, 0.1)',
+        fill: true,
+        tension: 0.3
+        }]
+        },
+        options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+        y: {
+        ticks: { callback: v => v.toLocaleString('vi-VN') + ' đ' }
+        }
+        }
+        }
+        });
+        }
+
+        if (packageData && packageData.length > 0) {
+        new Chart(document.getElementById('packagePieChart'), {
+        type: 'doughnut',
+        data: {
+        labels: packageData.map(x => `${x.Tier} (${x.Duration})`),
+        datasets: [{
+        data: packageData.map(x => x.Revenue),
+        backgroundColor: ['#0d6efd', '#198754', '#ffc107', '#0dcaf0', '#6f42c1', '#d63384']
+        }]
+        },
+        options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+        legend: { position: 'bottom' }
+        }
+        }
+        });
+        }
+
+        if (industryData && industryData.length > 0) {
+        new Chart(document.getElementById('topIndustriesChart'), {
+        type: 'bar',
+        data: {
+        labels: industryData.map(x => x.IndustryName),
+        datasets: [{
+        label: 'Số lượt ứng tuyển',
+        data: industryData.map(x => x.ApplicationCount),
+        backgroundColor: '#ffc107',
+        borderRadius: 4
+        }]
+        },
+        options: {
+        indexAxis: 'y',
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } }
+        }
+        });
+        }
+    </script>
+}
