@@ -9,61 +9,49 @@ namespace ApiSdk.Models
 {
     [global::System.CodeDom.Compiler.GeneratedCode("Kiota", "1.0.0")]
     #pragma warning disable CS1591
-    public partial class PayOSWebhookRequestDto : IAdditionalDataHolder, IParsable
+    public partial class CreateUpdateViewJobStatsPackageRequestDto : IAdditionalDataHolder, IParsable
     #pragma warning restore CS1591
     {
         /// <summary>Stores additional data not described in the OpenAPI description found when deserializing. Can be used for serialization as well.</summary>
         public IDictionary<string, object> AdditionalData { get; set; }
-        /// <summary>The code property</summary>
+        /// <summary>The description property</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
-        public string? Code { get; set; }
+        public string? Description { get; set; }
 #nullable restore
 #else
-        public string Code { get; set; }
+        public string Description { get; set; }
 #endif
-        /// <summary>The data property</summary>
+        /// <summary>The isActive property</summary>
+        public bool? IsActive { get; set; }
+        /// <summary>The name property</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
-        public global::ApiSdk.Models.RequestData? Data { get; set; }
+        public string? Name { get; set; }
 #nullable restore
 #else
-        public global::ApiSdk.Models.RequestData Data { get; set; }
+        public string Name { get; set; }
 #endif
-        /// <summary>The desc property</summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-        public string? Desc { get; set; }
-#nullable restore
-#else
-        public string Desc { get; set; }
-#endif
-        /// <summary>The signature property</summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-        public string? Signature { get; set; }
-#nullable restore
-#else
-        public string Signature { get; set; }
-#endif
-        /// <summary>The success property</summary>
-        public bool? Success { get; set; }
+        /// <summary>The price property</summary>
+        public double? Price { get; set; }
+        /// <summary>The viewCredits property</summary>
+        public int? ViewCredits { get; set; }
         /// <summary>
-        /// Instantiates a new <see cref="global::ApiSdk.Models.PayOSWebhookRequestDto"/> and sets the default values.
+        /// Instantiates a new <see cref="global::ApiSdk.Models.CreateUpdateViewJobStatsPackageRequestDto"/> and sets the default values.
         /// </summary>
-        public PayOSWebhookRequestDto()
+        public CreateUpdateViewJobStatsPackageRequestDto()
         {
             AdditionalData = new Dictionary<string, object>();
         }
         /// <summary>
         /// Creates a new instance of the appropriate class based on discriminator value
         /// </summary>
-        /// <returns>A <see cref="global::ApiSdk.Models.PayOSWebhookRequestDto"/></returns>
+        /// <returns>A <see cref="global::ApiSdk.Models.CreateUpdateViewJobStatsPackageRequestDto"/></returns>
         /// <param name="parseNode">The parse node to use to read the discriminator value and create the object</param>
-        public static global::ApiSdk.Models.PayOSWebhookRequestDto CreateFromDiscriminatorValue(IParseNode parseNode)
+        public static global::ApiSdk.Models.CreateUpdateViewJobStatsPackageRequestDto CreateFromDiscriminatorValue(IParseNode parseNode)
         {
             if(ReferenceEquals(parseNode, null)) throw new ArgumentNullException(nameof(parseNode));
-            return new global::ApiSdk.Models.PayOSWebhookRequestDto();
+            return new global::ApiSdk.Models.CreateUpdateViewJobStatsPackageRequestDto();
         }
         /// <summary>
         /// The deserialization information for the current model
@@ -73,11 +61,11 @@ namespace ApiSdk.Models
         {
             return new Dictionary<string, Action<IParseNode>>
             {
-                { "code", n => { Code = n.GetStringValue(); } },
-                { "data", n => { Data = n.GetObjectValue<global::ApiSdk.Models.RequestData>(global::ApiSdk.Models.RequestData.CreateFromDiscriminatorValue); } },
-                { "desc", n => { Desc = n.GetStringValue(); } },
-                { "signature", n => { Signature = n.GetStringValue(); } },
-                { "success", n => { Success = n.GetBoolValue(); } },
+                { "description", n => { Description = n.GetStringValue(); } },
+                { "isActive", n => { IsActive = n.GetBoolValue(); } },
+                { "name", n => { Name = n.GetStringValue(); } },
+                { "price", n => { Price = n.GetDoubleValue(); } },
+                { "viewCredits", n => { ViewCredits = n.GetIntValue(); } },
             };
         }
         /// <summary>
@@ -87,11 +75,11 @@ namespace ApiSdk.Models
         public virtual void Serialize(ISerializationWriter writer)
         {
             if(ReferenceEquals(writer, null)) throw new ArgumentNullException(nameof(writer));
-            writer.WriteStringValue("code", Code);
-            writer.WriteObjectValue<global::ApiSdk.Models.RequestData>("data", Data);
-            writer.WriteStringValue("desc", Desc);
-            writer.WriteStringValue("signature", Signature);
-            writer.WriteBoolValue("success", Success);
+            writer.WriteStringValue("description", Description);
+            writer.WriteBoolValue("isActive", IsActive);
+            writer.WriteStringValue("name", Name);
+            writer.WriteDoubleValue("price", Price);
+            writer.WriteIntValue("viewCredits", ViewCredits);
             writer.WriteAdditionalData(AdditionalData);
         }
     }

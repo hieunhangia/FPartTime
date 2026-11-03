@@ -34,6 +34,13 @@ public static class BusinessRuleConstants
             public const int MaxExtraActivePosts = int.MaxValue - Employers.DefaultMaxActivePosts;
         }
 
+        public static class CandidateViewJobStatsPackage
+        {
+            public const int NameMaxLength = 100;
+            public const int DescriptionMaxLength = 500;
+            public const long MaxPrice = 9999999999999999;
+        }
+
         public static class Commune
         {
             public const int CodeMaxLength = 10;

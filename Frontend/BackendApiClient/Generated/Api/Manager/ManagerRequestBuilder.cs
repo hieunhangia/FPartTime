@@ -4,6 +4,7 @@ using ApiSdk.Api.Manager.Employers;
 using ApiSdk.Api.Manager.Industries;
 using ApiSdk.Api.Manager.Statistics;
 using ApiSdk.Api.Manager.SubscriptionPlans;
+using ApiSdk.Api.Manager.ViewJobStatsPackages;
 using Microsoft.Kiota.Abstractions.Extensions;
 using Microsoft.Kiota.Abstractions;
 using System.Collections.Generic;
@@ -37,6 +38,11 @@ namespace ApiSdk.Api.Manager
         public global::ApiSdk.Api.Manager.SubscriptionPlans.SubscriptionPlansRequestBuilder SubscriptionPlans
         {
             get => new global::ApiSdk.Api.Manager.SubscriptionPlans.SubscriptionPlansRequestBuilder(PathParameters, RequestAdapter);
+        }
+        /// <summary>The viewJobStatsPackages property</summary>
+        public global::ApiSdk.Api.Manager.ViewJobStatsPackages.ViewJobStatsPackagesRequestBuilder ViewJobStatsPackages
+        {
+            get => new global::ApiSdk.Api.Manager.ViewJobStatsPackages.ViewJobStatsPackagesRequestBuilder(PathParameters, RequestAdapter);
         }
         /// <summary>
         /// Instantiates a new <see cref="global::ApiSdk.Api.Manager.ManagerRequestBuilder"/> and sets the default values.

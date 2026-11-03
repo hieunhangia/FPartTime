@@ -1,0 +1,34 @@
+@using Frontend.Constants
+@model Frontend.ViewModels.Manager.ViewJobStatsPackageFormInput
+
+<div class="row g-3">
+    <div class="col-12">
+        <label asp-for="Name" class="form-label">Tên gói <span class="text-danger">*</span></label>
+        <input asp-for="Name" class="form-control"
+               maxlength="@BusinessRuleConstants.Models.CandidateViewJobStatsPackage.NameMaxLength" />
+        <span asp-validation-for="Name" class="text-danger"></span>
+    </div>
+    <div class="col-12 col-md-6">
+        <label asp-for="ViewCredits" class="form-label">Số lượt xem <span class="text-danger">*</span></label>
+        <input asp-for="ViewCredits" type="number" class="form-control" min="1" step="1" />
+        <span asp-validation-for="ViewCredits" class="text-danger"></span>
+    </div>
+    <div class="col-12 col-md-6">
+        <label asp-for="Price" class="form-label">Giá (₫) <span class="text-danger">*</span></label>
+        <input asp-for="Price" type="number" class="form-control" min="1" step="1"
+               max="@BusinessRuleConstants.Models.CandidateViewJobStatsPackage.MaxPrice" />
+        <span asp-validation-for="Price" class="text-danger"></span>
+    </div>
+    <div class="col-12">
+        <label asp-for="Description" class="form-label">Mô tả</label>
+        <textarea asp-for="Description" class="form-control" rows="3"
+                  maxlength="@BusinessRuleConstants.Models.CandidateViewJobStatsPackage.DescriptionMaxLength"></textarea>
+        <span asp-validation-for="Description" class="text-danger"></span>
+    </div>
+    <div class="col-12">
+        <div class="form-check">
+            <input asp-for="IsActive" class="form-check-input" />
+            <label asp-for="IsActive" class="form-check-label">Đang cung cấp gói</label>
+        </div>
+    </div>
+</div>
