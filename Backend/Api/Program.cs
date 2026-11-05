@@ -98,11 +98,11 @@ app.UseForwardedHeaders(forwardedHeadersOptions);
 app.UseExceptionHandler();
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
+//if (app.Environment.IsDevelopment())
+//{
     app.MapOpenApi();
     app.MapScalarApiReference();
-}
+//}
 
 app.UseAuthentication();
 app.UseUserLockoutChecking();
