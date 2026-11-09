@@ -36,6 +36,7 @@ namespace ApiSdk.Api.Manager.Statistics.Marketplace
         /// <returns>A <see cref="global::ApiSdk.Models.MarketplaceAnalyticsResponseDto"/></returns>
         /// <param name="cancellationToken">Cancellation token to use when cancelling requests</param>
         /// <param name="requestConfiguration">Configuration for the request such as headers, query parameters, and middleware options.</param>
+        /// <exception cref="global::ApiSdk.Models.ProblemDetails">When receiving a 400 status code</exception>
         /// <exception cref="global::ApiSdk.Models.ProblemDetails">When receiving a 401 status code</exception>
         /// <exception cref="global::ApiSdk.Models.ProblemDetails">When receiving a 403 status code</exception>
         /// <exception cref="global::ApiSdk.Models.ProblemDetails">When receiving a 500 status code</exception>
@@ -51,6 +52,7 @@ namespace ApiSdk.Api.Manager.Statistics.Marketplace
             var requestInfo = ToGetRequestInformation(requestConfiguration);
             var errorMapping = new Dictionary<string, ParsableFactory<IParsable>>
             {
+                { "400", global::ApiSdk.Models.ProblemDetails.CreateFromDiscriminatorValue },
                 { "401", global::ApiSdk.Models.ProblemDetails.CreateFromDiscriminatorValue },
                 { "403", global::ApiSdk.Models.ProblemDetails.CreateFromDiscriminatorValue },
                 { "500", global::ApiSdk.Models.ProblemDetails.CreateFromDiscriminatorValue },

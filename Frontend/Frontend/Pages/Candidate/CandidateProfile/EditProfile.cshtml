@@ -44,6 +44,7 @@
                         <div class="mb-3">
                             <label asp-for="Input.Bio" class="form-label">Giới thiệu bản thân</label>
                             <textarea asp-for="Input.Bio" class="form-control" rows="3"></textarea>
+                            <span asp-validation-for="Input.Bio" class="text-danger"></span>
                         </div>
                         <div class="row">
                             <div class="col-md-6 mb-3">
@@ -61,13 +62,8 @@
                                 </select>
                             </div>
                         </div>
-                        <div class="mb-3">
-                            <label asp-for="Input.PreferredWorkCommuneCode" class="form-label">
-                                Mã xã/phường làm việc
-                            </label>
-                            <input asp-for="Input.PreferredWorkCommuneCode" class="form-control" />
-                        </div>
-                        @* <div>
+                       
+                        <div>
                         <select asp-for="Input.ProvinceCode" class="form-select" id="provinceSelect">
                             <option value="">-- Chọn Tỉnh/Thành phố --</option>
                             @foreach (var p in Model.Provinces)
@@ -84,7 +80,7 @@
                                 <option value="@c.Code">@c.Name</option>
                             }
                         </select>
-                        </div> *@
+                        </div>
                     
 
                     </div>
@@ -106,7 +102,7 @@
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
 
-    @* <script>
+    <script>
         document.getElementById('provinceSelect').addEventListener('change', async function () {
             const code = this.value;
             const select = document.getElementById('communeSelect');
@@ -117,5 +113,5 @@
             select.innerHTML = '<option value="">-- Chọn Xã/Phường --</option>' +
                 data.map(c => `<option value="${c.code}">${c.name}</option>`).join('');
         });
-    </script> *@
+    </script>
 }
