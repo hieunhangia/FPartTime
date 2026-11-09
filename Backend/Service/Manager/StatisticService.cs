@@ -1,8 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Text;
+using ClosedXML.Excel;
 using Domain;
 using Domain.Shared.Enums;
+using Domain.Shared.Exceptions.HttpErrorExceptions;
 using Microsoft.EntityFrameworkCore;
 
 namespace Service.Manager
@@ -51,11 +54,11 @@ namespace Service.Manager
 
             var ordersInPeriod = await dbContext.EmployerSubscriptionOrders
                 .Where(o => o.Status == OrderStatus.Completed && o.CompletedAt >= from && o.CompletedAt <= to)
-                .Select(o => new { CompletedDate = o.CompletedAt!.Value.Date, o.TotalAmount })
+                .Select(o => new { CompletedAt = o.CompletedAt!.Value, o.TotalAmount })
                 .ToListAsync();
             var trend = ordersInPeriod
-                .GroupBy(x => x.CompletedDate)
-                .OrderBy(g => g.Key)
+                .GroupBy(x => x.CompletedAt.AddHours(7).Date)
+                            .OrderBy(g => g.Key)
                 .Select(g => new ChartPointDto
                 {
                     Label = g.Key.ToString("dd/MM"),
@@ -98,12 +101,12 @@ namespace Service.Manager
         public async Task<MarketplaceAnalyticsResponseDto> GetMarketplaceAnalyticsAsync(DateTime? fromDate, DateTime? toDate)
         {
             var (from, to, _, _) = DateRangeHelper.ResolveDates(fromDate, toDate);
-            // Phễu tuyển dụng
+
             var appsQuery = dbContext.JobApplications.Where(a => a.AppliedAt >= from && a.AppliedAt <= to);
             var totalApplied = await appsQuery.CountAsync();
             var totalAccepted = await appsQuery.CountAsync(a => a.Status == JobApplicationStatus.Accepted);
             var totalRejected = await appsQuery.CountAsync(a => a.Status == JobApplicationStatus.Rejected);
-            // Top 5 ngành nghề thu hút sinh viên nhất
+
             var topIndustries = await dbContext.JobApplications
                 .Include(a => a.Job).ThenInclude(j => j!.Industry)
                 .Where(a => a.AppliedAt >= from && a.AppliedAt <= to && a.Job != null && a.Job.Industry != null)
@@ -133,15 +136,15 @@ namespace Service.Manager
         public async Task<QualityAndRetentionResponseDto> GetQualityAndRetentionAsync()
         {
             var now = DateTime.UtcNow;
-            // 1. Hồ sơ bị ngâm quá 7 ngày
+
             var sevenDaysAgo = now.AddDays(-7);
             var pendingQuery = dbContext.JobApplications.Where(a => a.Status == JobApplicationStatus.Pending);
             var totalPending = await pendingQuery.CountAsync();
             var staleCount = await pendingQuery.CountAsync(a => a.AppliedAt <= sevenDaysAgo);
-            // 2. Báo cáo vi phạm việc làm
+
             var totalReports = await dbContext.JobReports.CountAsync();
             var resolvedReports = await dbContext.JobReports.CountAsync(r => r.Status == JobReportStatus.Resolved);
-            // 3. Top 5 Doanh nghiệp chi tiêu nhiều nhất (Top Spenders)
+
             var topSpenders = await dbContext.Employers
                 .Select(e => new
                 {
@@ -169,7 +172,7 @@ namespace Service.Manager
                     ActiveJobsCount = x.ActiveJobsCount
                 })
                 .ToListAsync();
-            // 4. Doanh nghiệp sắp hết hạn trong 7 ngày tới
+
             var in7Days = now.AddDays(7);
             var expiringList = await dbContext.EmployerSubscriptions
                 .Include(s => s.Employer)
@@ -196,21 +199,125 @@ namespace Service.Manager
         }
 
 
+        public async Task<byte[]> ExportExcelAsync(DateTime? fromDate, DateTime? toDate)
+        {
+            var (from, to, _, _) = DateRangeHelper.ResolveDates(fromDate, toDate);
+
+            var overview = await GetOverviewKpisAsync(fromDate, toDate);
+            var revenue = await GetRevenueAnalyticsAsync(fromDate, toDate);
+            var quality = await GetQualityAndRetentionAsync();
+
+            var detailedOrders = await dbContext.EmployerSubscriptionOrders
+                .Include(o => o.User)!.ThenInclude(u => u!.EmployerProfile)
+                .Where(o => o.Status == OrderStatus.Completed && o.CompletedAt >= from && o.CompletedAt <= to)
+                .OrderByDescending(o => o.CompletedAt)
+                .ToListAsync();
+            using var workbook = new XLWorkbook();
+
+            var wsSummary = workbook.Worksheets.Add("Báo Cáo Tổng Hợp");
+
+            wsSummary.Cell("A1").Value = "BÁO CÁO QUẢN TRỊ & THỐNG KÊ DOANH THU FPARTTIME";
+            wsSummary.Cell("A1").Style.Font.Bold = true;
+            wsSummary.Cell("A1").Style.Font.FontSize = 16;
+            wsSummary.Cell("A2").Value = $"Kỳ báo cáo: {from.AddHours(7):dd/MM/yyyy} - {to.AddHours(7):dd/MM/yyyy} | Ngày xuất: {DateTime.UtcNow.AddHours(7):dd/MM/yyyy HH:mm}";
+            wsSummary.Cell("A2").Style.Font.Italic = true;
+
+            wsSummary.Cell("A4").Value = "I. CHỈ SỐ KPI TỔNG QUAN";
+            wsSummary.Cell("A4").Style.Font.Bold = true;
+            wsSummary.Cell("A5").Value = "Tổng doanh thu thực nhận:";
+            wsSummary.Cell("B5").Value = overview.TotalRevenue.Value;
+            wsSummary.Cell("B5").Style.NumberFormat.Format = "#,##0 \"đ\"";
+            wsSummary.Cell("A6").Value = "Doanh nghiệp trả phí (Active):";
+            wsSummary.Cell("B6").Value = overview.ActiveSubscriptions.Value;
+            wsSummary.Cell("A7").Value = "Tin tuyển dụng mới:";
+            wsSummary.Cell("B7").Value = overview.NewJobs.Value;
+            wsSummary.Cell("A8").Value = "Lượt ứng tuyển sinh viên:";
+            wsSummary.Cell("B8").Value = overview.TotalApplications.Value;
+            wsSummary.Cell("A9").Value = "Doanh thu TB / Khách hàng (ARPPU):";
+            wsSummary.Cell("B9").Value = revenue.Arppu;
+            wsSummary.Cell("B9").Style.NumberFormat.Format = "#,##0 \"đ\"";
+
+            wsSummary.Cell("A11").Value = "II. PHÂN BỔ DOANH THU THEO GÓI HỘI VIÊN";
+            wsSummary.Cell("A11").Style.Font.Bold = true;
+            string[] headersPkg = { "Hạng Gói", "Thời Hạn", "Số Lượt Mua", "Doanh Thu", "Tỷ Trọng (%)" };
+            for (int i = 0; i < headersPkg.Length; i++)
+            {
+                var cell = wsSummary.Cell(12, i + 1);
+                cell.Value = headersPkg[i];
+                cell.Style.Font.Bold = true;
+                cell.Style.Fill.BackgroundColor = XLColor.LightGray;
+            }
+            int row = 13;
+            foreach (var pkg in revenue.PackageBreakdowns)
+            {
+                wsSummary.Cell(row, 1).Value = pkg.Tier;
+                wsSummary.Cell(row, 2).Value = pkg.Duration;
+                wsSummary.Cell(row, 3).Value = pkg.TotalPurchases;
+                wsSummary.Cell(row, 4).Value = pkg.Revenue;
+                wsSummary.Cell(row, 4).Style.NumberFormat.Format = "#,##0 \"đ\"";
+                wsSummary.Cell(row, 5).Value = pkg.Percentage / 100;
+                wsSummary.Cell(row, 5).Style.NumberFormat.Format = "0.0%";
+                row++;
+            }
+            wsSummary.Columns().AdjustToContents();
+
+            var wsDetail = workbook.Worksheets.Add("Bảng Kê Đơn Hàng");
+            string[] headersDetail = { "Mã Đơn", "Tên Doanh Nghiệp", "Gói Dịch Vụ", "Hạng", "Thời Hạn", "Số Tiền", "Thời Điểm Thanh Toán" };
+            for (int i = 0; i < headersDetail.Length; i++)
+            {
+                var cell = wsDetail.Cell(1, i + 1);
+                cell.Value = headersDetail[i];
+                cell.Style.Font.Bold = true;
+                cell.Style.Fill.BackgroundColor = XLColor.BabyBlue;
+            }
+            int dRow = 2;
+            foreach (var order in detailedOrders)
+            {
+                wsDetail.Cell(dRow, 1).Value = order.Id.ToString();
+                wsDetail.Cell(dRow, 2).Value = order.User?.EmployerProfile?.CompanyName ?? "N/A";
+                wsDetail.Cell(dRow, 3).Value = order.PlanName;
+                wsDetail.Cell(dRow, 4).Value = order.Tier.ToString();
+                wsDetail.Cell(dRow, 5).Value = order.Duration.ToString();
+                wsDetail.Cell(dRow, 6).Value = order.TotalAmount;
+                wsDetail.Cell(dRow, 6).Style.NumberFormat.Format = "#,##0 \"đ\"";
+                wsDetail.Cell(dRow, 7).Value = order.CompletedAt?.AddHours(7).ToString("dd/MM/yyyy HH:mm") ?? "";
+                dRow++;
+            }
+            wsDetail.Columns().AdjustToContents();
+
+            using var stream = new MemoryStream();
+            workbook.SaveAs(stream);
+            return stream.ToArray();
+        }
+
 
         public static class DateRangeHelper
         {
-            public static (DateTime CurrentFrom, DateTime CurrentTo, DateTime PrevFrom, DateTime PrevTo)
+            private static readonly TimeSpan VnOffset = TimeSpan.FromHours(7);
+            public static (DateTime CurrentFromUtc, DateTime CurrentToUtc, DateTime PrevFromUtc, DateTime PrevToUtc)
                 ResolveDates(DateTime? from, DateTime? to)
             {
-                DateTime currentTo = to?.Date.AddDays(1).AddTicks(-1) ?? DateTime.UtcNow;
-                DateTime currentFrom = from?.Date ?? currentTo.AddDays(-30);
+                var vnNowDate = DateTime.UtcNow.Add(VnOffset).Date;
 
-                TimeSpan duration = currentTo - currentFrom;
+                static DateTime NormalizeDate(DateTime dt) =>
+                dt.Kind == DateTimeKind.Unspecified ? dt.Date : dt.ToUniversalTime().Date;
 
-                DateTime prevTo = currentFrom.AddTicks(-1);
-                DateTime prevFrom = prevTo - duration;
+                DateTime toLocalDate = to?.Date ?? vnNowDate;
+                DateTime fromLocalDate = from?.Date ?? toLocalDate.AddDays(-30);
 
-                return (currentFrom, currentTo, prevFrom, prevTo);
+                if (toLocalDate > vnNowDate.AddDays(1))
+                    throw new BadRequestException("Khoảng thời gian thống kê không hợp lệ.");
+                if (fromLocalDate > toLocalDate)
+                    throw new BadRequestException("Ngày bắt đầu không được lớn hơn ngày kết thúc.");
+                if ((toLocalDate - fromLocalDate).TotalDays > 365)
+                    throw new BadRequestException("Chỉ hỗ trợ thống kê tối đa trong khoảng 365 ngày.");
+
+                DateTime currentFromUtc = fromLocalDate.Subtract(VnOffset);
+                DateTime currentToUtc = toLocalDate.AddDays(1).AddTicks(-1).Subtract(VnOffset);
+                TimeSpan duration = currentToUtc - currentFromUtc;
+                DateTime prevToUtc = currentFromUtc.AddTicks(-1);
+                DateTime prevFromUtc = prevToUtc - duration;
+                return (currentFromUtc, currentToUtc, prevFromUtc, prevToUtc);
             }
 
             public static double CalculateGrowthRate(decimal current, decimal previous)

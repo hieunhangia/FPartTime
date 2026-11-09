@@ -43,6 +43,34 @@ public class CandidateProfileService(ApplicationDbContext dbContext, IObjectStor
     {
         var userId = user.GetUserId();
 
+
+        request.FullName = request.FullName?.Trim();
+        request.Bio = request.Bio?.Trim();
+        request.PreferredWorkCommuneCode = string.IsNullOrWhiteSpace(request.PreferredWorkCommuneCode)
+            ? null
+            : request.PreferredWorkCommuneCode.Trim();
+
+        if (request.FullName?.Length > BusinessRuleConstants.Models.Candidate.FullNameMaxLength)
+        {
+            throw new BadRequestException(
+                $"Họ và tên không được vượt quá {BusinessRuleConstants.Models.Candidate.FullNameMaxLength} ký tự.");
+        }
+
+        if (request.Bio?.Length > BusinessRuleConstants.Models.Candidate.BioMaxLength)
+        {
+            throw new BadRequestException(
+                $"Giới thiệu bản thân không được vượt quá {BusinessRuleConstants.Models.Candidate.BioMaxLength} ký tự.");
+        }
+
+        if (request.DateOfBirth.HasValue)
+        {
+            var today = DateOnly.FromDateTime(DateTime.UtcNow);
+            if (request.DateOfBirth.Value > today.AddYears(-18) || request.DateOfBirth.Value < today.AddYears(-100))
+            {
+                throw new BadRequestException("Ngày sinh không hợp lệ (ứng viên phải từ 18 đến 100 tuổi).");
+            }
+        }
+
         if (!string.IsNullOrWhiteSpace(request.PreferredWorkCommuneCode))
         {
             var communeExist = await dbContext.Communes
@@ -62,7 +90,7 @@ public class CandidateProfileService(ApplicationDbContext dbContext, IObjectStor
                 throw new BadRequestException("Chỉ chấp nhận file ảnh định dạng .png, .jpg hoặc .jpeg.");
             }
 
-            if (request.AvatarFilePath.Length > 5 * 1024 * 1024)
+            if (request.AvatarFilePath.Length > BusinessRuleConstants.ObjectStorage.MaxFileSizeInBytes)
             {
                 throw new BadRequestException("Dung lượng ảnh tối đa là 5MB.");
             }

@@ -15,6 +15,7 @@ namespace Api.Controllers.Manager
         
         [HttpGet("overview")]
         [ProducesResponseType<OverviewKpiResponseDto>(StatusCodes.Status200OK)]
+        [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
         [ProducesResponseType<ProblemDetails>(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType<ProblemDetails>(StatusCodes.Status403Forbidden)]
         [ProducesResponseType<ProblemDetails>(StatusCodes.Status500InternalServerError)]
@@ -26,6 +27,7 @@ namespace Api.Controllers.Manager
        
         [HttpGet("revenue")]
         [ProducesResponseType<RevenueAnalyticsResponseDto>(StatusCodes.Status200OK)]
+        [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
         [ProducesResponseType<ProblemDetails>(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType<ProblemDetails>(StatusCodes.Status403Forbidden)]
         [ProducesResponseType<ProblemDetails>(StatusCodes.Status500InternalServerError)]
@@ -37,6 +39,7 @@ namespace Api.Controllers.Manager
        
         [HttpGet("marketplace")]
         [ProducesResponseType<MarketplaceAnalyticsResponseDto>(StatusCodes.Status200OK)]
+        [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
         [ProducesResponseType<ProblemDetails>(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType<ProblemDetails>(StatusCodes.Status403Forbidden)]
         [ProducesResponseType<ProblemDetails>(StatusCodes.Status500InternalServerError)]
@@ -48,6 +51,7 @@ namespace Api.Controllers.Manager
        
         [HttpGet("quality-retention")]
         [ProducesResponseType<QualityAndRetentionResponseDto>(StatusCodes.Status200OK)]
+        [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
         [ProducesResponseType<ProblemDetails>(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType<ProblemDetails>(StatusCodes.Status403Forbidden)]
         [ProducesResponseType<ProblemDetails>(StatusCodes.Status500InternalServerError)]
@@ -55,6 +59,20 @@ namespace Api.Controllers.Manager
         {
             var result = await statisticService.GetQualityAndRetentionAsync();
             return Ok(result);
+        }
+
+        [HttpGet("export-excel")]
+        [ProducesResponseType(typeof(byte[]), StatusCodes.Status200OK, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")]
+        [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType<ProblemDetails>(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType<ProblemDetails>(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType<ProblemDetails>(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> ExportExcel([FromQuery] DateTime? fromDate, [FromQuery] DateTime? toDate)
+        {
+            var fileBytes = await statisticService.ExportExcelAsync(fromDate, toDate);
+            var fileName = $"BaoCao_FPartTime_{DateTime.UtcNow.AddHours(7):yyyyMMdd_HHmm}.xlsx";
+
+            return File(fileBytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileName);
         }
 
     }

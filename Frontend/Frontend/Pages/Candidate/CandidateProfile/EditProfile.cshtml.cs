@@ -24,12 +24,11 @@ namespace Frontend.Pages.Candidate.CandidateProfile
         public bool CanRefresh => OpenForJobStatus.CanRefresh;
         public DateTimeOffset? OpenForJobUntil => OpenForJobStatus.OpenForJobUntil;
         public HashSet<string> fileValidate = [".jpg", ".jpeg", ".png"];
-        //public List<ProvinceDto> Provinces { get; private set; } = [];
-        //public List<CommuneDto> Communes { get; private set; } = [];
+        public List<ProvinceDto> Provinces { get; private set; } = [];
+        public List<CommuneDto> Communes { get; private set; } = [];
 
         public async Task<IActionResult> OnGetAsync()
         {
-            //await LoadDropdownDataAsync();
             try
             {
                 var profile = await apiClient.Api.CandidateProfiles.GetAsync();
@@ -50,6 +49,7 @@ namespace Frontend.Pages.Candidate.CandidateProfile
             {
 
             }
+            await LoadDropdownDataAsync();
 
             try
             {
@@ -107,7 +107,7 @@ namespace Frontend.Pages.Candidate.CandidateProfile
         }
         public async Task<IActionResult> OnPostAsync()
         {
-            //await LoadDropdownDataAsync();
+            await LoadDropdownDataAsync();
             if (Input.AvatarFile != null && Input.AvatarFile.Length > 0)
             {
                 if (Input.AvatarFile != null && Input.AvatarFile.Length > 0)
@@ -115,11 +115,11 @@ namespace Frontend.Pages.Candidate.CandidateProfile
                     var ext = Path.GetExtension(Input.AvatarFile.FileName);
                     if (!fileValidate.Contains(ext, StringComparer.OrdinalIgnoreCase))
                     {
-                        ModelState.AddModelError(nameof(Input.AvatarFile), "Chỉ chấp nhận các định dạng .jpg, .jpeg, .png");
+                        ModelState.AddModelError("Input.AvatarFile", "Chỉ chấp nhận các định dạng .jpg, .jpeg, .png");
                     }
                     if (Input.AvatarFile.Length > 5 * 1024 * 1024)
                     {
-                        ModelState.AddModelError(nameof(Input.AvatarFile), "Ảnh không được vượt quá 5MB");
+                        ModelState.AddModelError("Input.AvatarFile", "Ảnh không được vượt quá 5MB");
                     }
                 }
             }
@@ -128,11 +128,11 @@ namespace Frontend.Pages.Candidate.CandidateProfile
                 var today = DateTime.Today;
                 if (Input.DateOfBirth.Value > today.AddYears(-18))
                 {
-                    ModelState.AddModelError(nameof(Input.DateOfBirth), "Bạn phải ít nhất 18 tuổi.");
+                    ModelState.AddModelError("Input.DateOfBirth", "Bạn phải ít nhất 18 tuổi.");
                 }
                 if (Input.DateOfBirth.Value < today.AddYears(-100))
                 {
-                    ModelState.AddModelError(nameof(Input.DateOfBirth), "Ngày sinh không hợp lệ.");
+                    ModelState.AddModelError("Input.DateOfBirth", "Ngày sinh không hợp lệ.");
                 }
             }
 
@@ -186,41 +186,61 @@ namespace Frontend.Pages.Candidate.CandidateProfile
             await stream.CopyToAsync(ms);
             return ms.ToArray();
         }
-        //public async Task LoadDropdownDataAsync()
-        //{
-        //    try
-        //    {
-        //        Provinces = await apiClient.Api.Addresses.Provinces.GetAsync();
+        public async Task LoadDropdownDataAsync()
+        {
+            try
+            {
+                Provinces = await apiClient.Api.Addresses.Provinces.GetAsync() ?? [];
+            }
+            catch
+            {
+                Provinces = [];
+            }
 
-        //    }
-        //    catch
-        //    {
-        //        Provinces = [];
-        //    }
-        //    if (!string.IsNullOrWhiteSpace(Input.ProvinceCode))
-        //    {
-        //        try
-        //        {
-        //            Communes = await apiClient.Api.Addresses.Provinces[Input.ProvinceCode].Communes.GetAsync() ?? [];
-        //        }
-        //        catch
-        //        {
-        //            Communes = [];
-        //        }
-        //    }
-        //}
 
-        //public async Task<IActionResult> OnGetCommunesAsync(string provinceCode)
-        //{
-        //    if (string.IsNullOrWhiteSpace(provinceCode))
-        //        return new JsonResult(new List<object>());
-        //    try
-        //    {
-        //        var communes = await apiClient.Api.Addresses.Provinces[provinceCode].Communes.GetAsync();
-        //        return new JsonResult(communes?.Select(c => new { code = c.Code, name = c.Name }) ?? []);
-        //    }
-        //    catch { return new JsonResult(new List<object>()); }
-        //}
+            if (string.IsNullOrWhiteSpace(Input.ProvinceCode) && !string.IsNullOrWhiteSpace(Input.PreferredWorkCommuneCode))
+            {
+                foreach (var province in Provinces)
+                {
+                    if (string.IsNullOrWhiteSpace(province.Code)) continue;
+                    try
+                    {
+                        var list = await apiClient.Api.Addresses.Provinces[province.Code].Communes.GetAsync() ?? [];
+                        if (list.Any(c => c.Code == Input.PreferredWorkCommuneCode))
+                        {
+                            Input.ProvinceCode = province.Code;
+                            Communes = list;
+                            return;
+                        }
+                    }
+                    catch { }
+                }
+            }
+
+            if (!string.IsNullOrWhiteSpace(Input.ProvinceCode))
+            {
+                try
+                {
+                    Communes = await apiClient.Api.Addresses.Provinces[Input.ProvinceCode].Communes.GetAsync() ?? [];
+                }
+                catch
+                {
+                    Communes = [];
+                }
+            }
+        }
+
+        public async Task<IActionResult> OnGetCommunesAsync(string provinceCode)
+        {
+            if (string.IsNullOrWhiteSpace(provinceCode))
+                return new JsonResult(new List<object>());
+            try
+            {
+                var communes = await apiClient.Api.Addresses.Provinces[provinceCode].Communes.GetAsync();
+                return new JsonResult(communes?.Select(c => new { code = c.Code, name = c.Name }) ?? []);
+            }
+            catch { return new JsonResult(new List<object>()); }
+        }
 
 
         public class EditProfileFormModel
@@ -230,7 +250,7 @@ namespace Frontend.Pages.Candidate.CandidateProfile
             public string? FullName { get; set; }
             [DataType(DataType.Date)] public DateTime? DateOfBirth { get; set; }
             public string? Gender { get; set; }
-            //public string? ProvinceCode { get; set; }
+            public string? ProvinceCode { get; set; }
             public string? PreferredWorkCommuneCode { get; set; }
         }
     }

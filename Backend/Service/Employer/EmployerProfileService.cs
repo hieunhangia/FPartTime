@@ -3,6 +3,7 @@ using System.Text.RegularExpressions;
 using Contracts.External;
 using Domain;
 using Domain.Models.Users;
+using Domain.Shared.Constants;
 using Domain.Shared.Extensions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
@@ -13,7 +14,6 @@ namespace Service.Employer
     public class EmployerProfileService(ApplicationDbContext dbContext, IObjectStorageService storage)
     {
         private static readonly HashSet<string> AllowedImageExtensions = [".png", ".jpg", ".jpeg"];
-        private const long MaxFileSizeInBytes = 5 * 1024 * 1024;
 
         public async Task<EmployerProfileResponseDto> GetProfileAsync(ClaimsPrincipal user)
         {
@@ -67,7 +67,7 @@ namespace Service.Employer
                     throw new Exception("Chỉ chấp nhận file ảnh định dạng .png, .jpg hoặc .jpeg.");
                 }
 
-                if (request.LogoFile.Length > MaxFileSizeInBytes)
+                if (request.LogoFile.Length > BusinessRuleConstants.ObjectStorage.MaxFileSizeInBytes)
                 {
                     throw new Exception("Dung lượng logo tối đa là 5MB.");
                 }
