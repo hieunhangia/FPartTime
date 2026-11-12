@@ -16,6 +16,44 @@ public class DetailModel(ApiClient apiClient) : PageModel
 {
     public JobDetailResponseDto? Job { get; private set; }
     public CanUpdateJobResponseDto? CanUpdateResult { get; private set; }
+    public PostsQuotaResponseDto? PostsQuota { get; private set; }
+
+    public bool IsJobExpired
+    {
+        get
+        {
+            if (Job?.ExpiryAt is not { } expiry) return false;
+            var today = DateOnly.FromDateTime(DateTime.UtcNow);
+            var expiryDate = new DateOnly(expiry.Year, expiry.Month, expiry.Day);
+            return expiryDate < today;
+        }
+    }
+
+    public (bool CanBump, string? Reason) CheckCanBump()
+    {
+        if (Job == null)
+        {
+            return (false, "Không tìm thấy công việc.");
+        }
+
+        if (Job.Status != JobStatus.Active)
+        {
+            return (false, "Chỉ có thể đẩy bài đối với các công việc đang hoạt động.");
+        }
+
+        if (IsJobExpired)
+        {
+            return (false, "Công việc đã hết hạn ứng tuyển, không thể đẩy bài.");
+        }
+
+        var balance = PostsQuota?.BumpBalance ?? 0;
+        if (balance <= 0)
+        {
+            return (false, "Bạn đã hết lượt đẩy bài (còn 0 lượt). Vui lòng mua thêm gói dịch vụ để nhận thêm lượt đẩy bài.");
+        }
+
+        return (true, null);
+    }
 
     public async Task<IActionResult> OnGetAsync(Guid id)
     {
@@ -40,6 +78,15 @@ public class DetailModel(ApiClient apiClient) : PageModel
                     Reason = "Không thể kiểm tra trạng thái cập nhật của công việc."
                 };
             }
+
+            try
+            {
+                PostsQuota = await apiClient.Api.Employer.Jobs.PostsQuota.GetAsync();
+            }
+            catch
+            {
+                PostsQuota = null;
+            }
         }
         catch (ApiException ex)
         {
@@ -53,6 +100,26 @@ public class DetailModel(ApiClient apiClient) : PageModel
         }
 
         return Page();
+    }
+
+    public async Task<IActionResult> OnPostBumpJobAsync(Guid id)
+    {
+        try
+        {
+            var result = await apiClient.Api.Employer.Jobs[id].Bump.PostAsync();
+            TempData.SetSuccessMessage(
+                $"Đã đẩy bài đăng thành công! Bạn còn {result?.RemainingBumpBalance ?? 0} lượt đẩy bài.");
+        }
+        catch (ApiException ex)
+        {
+            TempData.SetErrorMessage(ex.ToFriendlyErrorMessage());
+        }
+        catch
+        {
+            TempData.SetErrorMessage("Đã xảy ra lỗi khi đẩy bài đăng công việc.");
+        }
+
+        return RedirectToPage(new { id });
     }
 
     public async Task<IActionResult> OnPostCloseJobAsync(Guid id)
